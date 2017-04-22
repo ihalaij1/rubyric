@@ -35,14 +35,14 @@ APLUS_IP_WHITELIST = ['127.0.0.1', '130.233.195.107', '130.230.140.153']
 # SHIB_ROOT_PATH = "/Shibboleth.sso/"
 # SHIB_PATH = "/Shibboleth.sso/DS?target="
 # SHIB_ATTRIBUTES = {
-#   :logout => 'logouturl',
-#   :id => 'eppn',
-#   :studentnumber => 'schacPersonalUniqueCode',
-#   :firstname => 'displayName',
-#   :lastname => 'sn',
-#   :email => 'mail',
-#   :lang => 'preferredLanguage',
-#   :affiliation => 'unscoped-affiliation',
+#   logout: 'logouturl',
+#   id: 'eppn',
+#   studentnumber: 'schacPersonalUniqueCode',
+#   firstname: 'displayName',
+#   lastname: 'sn',
+#   email: 'mail',
+#   lang: 'preferredLanguage',
+#   affiliation: 'unscoped-affiliation',
 # }
 
 OAUTH_CREDS = {"test" => "secret", "testing" => "supersecret"}
