@@ -1,4 +1,4 @@
-class Invitation < ActiveRecord::Base
+class Invitation < ApplicationRecord
   before_create :generate_token
   
   # Generates a unique token
