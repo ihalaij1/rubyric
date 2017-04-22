@@ -2,7 +2,7 @@ require 'shellwords.rb'
 require 'rexml/document'
 include REXML
 
-class Exercise < ActiveRecord::Base
+class Exercise < ApplicationRecord
   belongs_to :course_instance
   has_many :groups
   has_many :submissions

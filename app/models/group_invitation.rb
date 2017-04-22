@@ -1,4 +1,4 @@
-class GroupInvitation < ActiveRecord::Base
+class GroupInvitation < ApplicationRecord
   # FIXME: class is obsolete
   
   belongs_to :group
