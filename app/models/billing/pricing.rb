@@ -1,2 +1,2 @@
-class Pricing < ActiveRecord::Base 
+class Pricing < ApplicationRecord
 end
