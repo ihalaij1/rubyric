@@ -14,13 +14,13 @@ gem 'pg'
 # Gems used only for assets and not required in production environments by default.
 
 gem 'sass' # Sass is locked for now because of this bug: https://github.com/sass/sass/issues/1028. Remove this line at some point.
-gem 'sass-rails', '~> 5.0.6'
+gem 'sass-rails', '~> 5.0'
 gem 'coffee-rails', '~> 4.2.1'
 
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
 gem 'therubyracer', '~> 0.12.3'
 
-gem 'uglifier', '~> 3.0.4'
+gem 'uglifier', '>= 3.0'
 gem 'jquery-ui-rails', '~> 4.2.0'
 
 
@@ -58,6 +58,7 @@ gem 'jquery-rails', '~> 4.2.2'
 gem 'json', '2.0.3' # For Ruby 2.3 compatibility
 
 gem 'authlogic'
+gem 'oauth'
 gem 'scrypt'
 gem 'cancan'
 
@@ -70,3 +71,7 @@ gem 'rest_client', '1.8.0'
 #gem 'paypal-sdk-core' # , :git => 'https://github.com/paypal/sdk-core-ruby.git'
 gem 'paypal-sdk-rest'
 gem 'ims-lti'
+
+source 'https://rails-assets.org' do
+  gem 'rails-assets-bootstrap-css'
+end
