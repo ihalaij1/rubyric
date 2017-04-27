@@ -1,4 +1,4 @@
-class Course < ActiveRecord::Base
+class Course < ApplicationRecord
   has_many :course_instances, dependent: :destroy
   has_many :active_instances, dependent: :destroy, class_name: 'CourseInstance'
   belongs_to :organization

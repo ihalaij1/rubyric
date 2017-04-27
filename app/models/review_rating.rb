@@ -1,4 +1,4 @@
-class ReviewRating < ActiveRecord::Base
+class ReviewRating < ApplicationRecord
   belongs_to :review
   belongs_to :user
 

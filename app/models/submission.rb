@@ -6,7 +6,7 @@ require 'rest_client'
 
 # page_width: in centimeters
 # page_height: in centimeters
-class Submission < ActiveRecord::Base
+class Submission < ApplicationRecord
   belongs_to :exercise
   belongs_to :group
   has_many :reviews, dependent: :destroy

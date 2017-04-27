@@ -72,8 +72,7 @@ class GroupsController < ApplicationController
 
     return access_denied unless group_membership_validated(@group) || (@course && @course.has_teacher(current_user))
 
-    @group_members = @group.group_members.all
-    @group_members.sort! { |a, b| b.user ? 1 : 0 }  # Authenticated users first
+    @group_members = @group.group_members.all.sort { |a, b| b.user ? 1 : 0 }  # Authenticated users first
 
     # Add empty slots
     (@group.max_size - @group_members.size).times do |i|
