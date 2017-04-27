@@ -1,4 +1,4 @@
-class Group < ActiveRecord::Base
+class Group < ApplicationRecord
   belongs_to :exercise
   belongs_to :course_instance
 
