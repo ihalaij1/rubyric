@@ -34,6 +34,7 @@ class ExercisesController < ApplicationController
       # Teacher's view
       @groups = @exercise.groups_with_submissions.order('groups.id, submissions.created_at DESC, reviews.id')
 
+      # TODO: should we remove this?
       # Koodiaapinen hack. Remove after 2016.
       sort_mode = if @exercise.id == 208 || @exercise.id == 289
                     :name
