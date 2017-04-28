@@ -7,7 +7,7 @@
 </div>
 
 <div class="row">
-  <div class="span4">
+  <div class="col-md-4">
     <h3>Instructors</h3>
 
     <table class="table">
@@ -23,7 +23,7 @@
           <tr id="user-<%= teacher.id %>">
             <td class="name"><%= teacher.name %></td>
             <td class="email"><%= teacher.email %></td>
-            <td><a href="<%= course_teacher_path(@course, teacher) %>" class="remove-user" data-id="<%= teacher.id %>"><i class="icon-trash"></i></a></td>
+            <td><a href="<%= course_teacher_path(@course, teacher) %>" class="remove-user" data-id="<%= teacher.id %>"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
           </tr>
         <% end %>
         
@@ -31,7 +31,7 @@
           <tr id="invitation-<%= invitation.id %>">
             <td class="name">(invited)</td>
             <td class="email"><%= invitation.email %></td>
-            <td><a href="<%= invitation_path(invitation.id) %>" class="remove-invitation" data-id="<%= invitation.id %>"><i class="icon-trash"></i></a></td>
+            <td><a href="<%= invitation_path(invitation.id) %>" class="remove-invitation" data-id="<%= invitation.id %>"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
           </tr>
         <% end %>
       </tbody>
@@ -42,7 +42,7 @@
 
 
 <div class="row">
-  <div class="span4">
+  <div class="col-md-4">
     <h3>Add instructor</h3>
 
     <p class="hint">Search users by name or email. Enter email address to invite.</p>

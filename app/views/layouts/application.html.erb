@@ -20,12 +20,12 @@
 
 <body>
 
-<%= render :template => 'layouts/top' %>
+<%= render template: 'layouts/top' %>
 
 <div class="container-fluid">
   <div class="row-fluid">
     <!-- Left navigation -->
-    <div class="span2 leftnavicolumn">
+    <div class="col-md-3 leftnavicolumn">
       <% if @course and !@course.new_record? %>
 
         <ul class="nav nav-list well">
@@ -33,8 +33,8 @@
           <li class="nav-header">Course</li>
           <li class="<%= active_nav('courses', 'show') %>"><%= link_to @course.name, course_path(@course) %></li>
           <% if can? :update, @course %>
-            <li class="<%= active_nav('courses', 'edit') %>"><%= link_to edit_course_path(@course) do %><i class="icon-wrench"></i> Settings<% end %></li>
-            <li class="<%= active_nav('teachers', 'index') %>"><%= link_to course_teachers_path(@course) do %><i class="icon-user"></i> Instructors<% end %></li>
+            <li class="<%= active_nav('courses', 'edit') %>"><%= link_to edit_course_path(@course) do %><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Settings<% end %></li>
+            <li class="<%= active_nav('teachers', 'index') %>"><%= link_to course_teachers_path(@course) do %><span class="glyphicon glyphicon-user" aria-hidden="true"></span> Instructors<% end %></li>
           <% end %>
 
           <% if @course_instance and !@course_instance.new_record? %>
@@ -42,12 +42,12 @@
             <li class="nav-header">Instance</li>
             <li class="<%= active_nav('course_instances', 'show') %>"><%= link_to @course_instance.name, course_instance_path(@course_instance) %></li>
             <% if can? :update, @course_instance %>
-              <li class="<%= active_nav('course_instances', 'edit') %>"><%= link_to edit_course_instance_path(@course_instance) do %><i class="icon-wrench"></i> Settings<% end %></li>
-              <li class="<%= active_nav('reviewers', 'index') %>"><%= link_to course_instance_reviewers_path(@course_instance) do %><i class="icon-user"></i> Reviewers<% end %></li>
-              <li class="<%= active_nav('students', 'show') %>"><%= link_to course_instance_students_path(@course_instance) do %><i class="icon-user"></i> Students<% end %></li>
-              <li class="<%= active_nav('groups', 'index') %>"><%= link_to course_instance_groups_path(@course_instance) do %><i class="icon-th"></i> Groups<% end %></li>
+              <li class="<%= active_nav('course_instances', 'edit') %>"><%= link_to edit_course_instance_path(@course_instance) do %><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Settings<% end %></li>
+              <li class="<%= active_nav('reviewers', 'index') %>"><%= link_to course_instance_reviewers_path(@course_instance) do %><span class="glyphicon glyphicon-user" aria-hidden="true"></span> Reviewers<% end %></li>
+              <li class="<%= active_nav('students', 'show') %>"><%= link_to course_instance_students_path(@course_instance) do %><span class="glyphicon glyphicon-user" aria-hidden="true"></span></i> Students<% end %></li>
+              <li class="<%= active_nav('groups', 'index') %>"><%= link_to course_instance_groups_path(@course_instance) do %><span class="glyphicon glyphicon-th" aria-hidden="true"></span> Groups<% end %></li>
               <% if (current_user.tester || '').include?('billing') %>
-                <li class="<%= active_nav('orders', 'index') %>"><%= link_to course_instance_orders_path(@course_instance) do %><i class="icon-shopping-cart"></i> Billing<% end %></li>
+                <li class="<%= active_nav('orders', 'index') %>"><%= link_to course_instance_orders_path(@course_instance) do %><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Billing<% end %></li>
               <% end %>
             <% end %>
 
@@ -57,10 +57,10 @@
               <% if exercise == @exercise && !@exercise.new_record? %>
                 <li class="<%= active_nav('exercises', 'show') %>"><%= link_to exercise.name, exercise_path(exercise) %></li>
                 <% if can? :update, @course_instance %>
-                  <li class="<%= active_nav('exercises', 'edit') %>"><%= link_to edit_exercise_path(@exercise) do %><i class="icon-wrench"></i> Settings<% end %></li>
-                  <li class="<%= active_nav('rubrics', 'edit') %>"><%= link_to edit_exercise_rubric_path(@exercise) do %><i class="icon-th-list"></i> Rubric<% end %></li>
-                  <li class="<%= active_nav('exercises', 'results') %>"><%= link_to exercise_results_path(@exercise) do %><i class="icon-list-alt"></i> Results<% end %></li>
-                  <!--li><%= link_to exercise_statistics_path(@exercise) do %><i class="icon-tasks"></i> Statistics<% end %></li-->
+                  <li class="<%= active_nav('exercises', 'edit') %>"><%= link_to edit_exercise_path(@exercise) do %><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Settings<% end %></li>
+                  <li class="<%= active_nav('rubrics', 'edit') %>"><%= link_to edit_exercise_rubric_path(@exercise) do %><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Rubric<% end %></li>
+                  <li class="<%= active_nav('exercises', 'results') %>"><%= link_to exercise_results_path(@exercise) do %><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Results<% end %></li>
+                  <!--li><%= link_to exercise_statistics_path(@exercise) do %><span class="glyphicon glyphicon-tasks" aria-hidden="true"></span> Statistics<% end %></li-->
                 <% end %>
               <% else %>
                 <li><%= link_to exercise.name, exercise_path(exercise) %></li>
@@ -79,7 +79,7 @@
     </div> <!-- / left column -->
 
     <!-- Content -->
-    <div class="span8">
+    <div class="col-md-9">
       <!-- Flash messages -->
       <% if flash[:warning] %>
         <div class="alert"><%= flash[:warning] %></div>
@@ -96,7 +96,7 @@
       <%= yield  %>
     </div>
 
-    <div class="span2 helpcolumn">
+    <div class="col-md-3 helpcolumn">
     </div>
   </div>
 </div>

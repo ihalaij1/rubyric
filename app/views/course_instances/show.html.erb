@@ -3,16 +3,14 @@
   <h1><%= "#{@course.full_name} - #{@course_instance.name}" %></h1>
 </div>
 
-
-  
 <!-- Exercises -->
 <% if @course_instance.exercises.empty? %>
   <div class="alert alert-info">
-    <%=t '.no_exercises' %>
+    <%= t '.no_exercises' %>
   </div>
 <% else %>
   <div class="row-fluid">
-    <div class="span4">
+    <div class="col-md-12">
       <!--h2><%=t :instance_exercises_heading %></h2-->
       <table class="table">
         <thead>
@@ -55,14 +53,14 @@
 <% if can? :update, @course %>
   <p>
     <%= link_to new_course_instance_exercise_path(@course_instance), :class => 'btn btn-default' do %>
-      <i class="icon icon-plus"></i> <%= t(:instance_create_exercise) %>
+      <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <%= t(:instance_create_exercise) %>
     <% end %>
   </p>
   
   <% if @course_instance.feedback_delivery_mode == 'bundle_mail' %>
     <%= form_tag course_instance_send_feedback_bundle_path(@course_instance.id) do %>
       <%= button_tag({:type => 'submit', :confirm => 'Send feedback mails?', :class => "btn btn-default", :title => 'Sends one email for each student containing feedback from all assignments'}) do %>
-        <i class="icon-envelope"></i> Send bundled feedback mails
+        <span class="glyphicon glyphicon-envelop" aria-hidden="true"></span> Send bundled feedback mails
       <% end %>
     <% end %>
   <% end %>
@@ -73,7 +71,7 @@
   <hr />
   <div class="row-fluid">
     <!-- Reviewers -->
-    <div class="span3 well">
+    <div class="col-md-4 well">
       <h2>Reviewers</h2>
       <p class="hint">Reviewers (e.g. teaching assistants) can access submissions assigned to them.</p>
       <ul id="reviewers">
@@ -90,13 +88,13 @@
     </div>
     
     <!-- Students -->
-    <div class="span3 well">
+    <div class="col-md-4 well">
       <h2>Students</h2>
       <p><%= link_to course_instance_students_path(@course_instance) do %><%= @course_instance.students.size %> students<% end %></p>
     </div>
     
     <!-- Groups -->
-    <div class="span3 well">
+    <div class="col-md-4 well">
       <h2>Groups</h2>
       <p><%= link_to course_instance_groups_path(@course_instance) do %><%= @course_instance.groups.size %> groups<% end %></p>
     </div>

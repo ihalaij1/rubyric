@@ -7,7 +7,7 @@
 </div>
 
 <div class="row">
-  <div class="span4">
+  <div class="col-md-4">
     <h3>Reviewers</h3>
 
     <table class="table">
@@ -23,7 +23,7 @@
           <tr id="user-<%= user.id %>">
             <td class="name"><%= user.name %></td>
             <td class="email"><%= user.email %></td>
-            <td><a href="<%= course_instance_reviewer_path(@course_instance, user) %>" class="remove-user" data-id="<%= user.id %>"><i class="icon-trash"></i></a></td>
+            <td><a href="<%= course_instance_reviewer_path(@course_instance, user) %>" class="remove-user" data-id="<%= user.id %>"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
           </tr>
         <% end %>
         
@@ -31,7 +31,7 @@
           <tr id="invitation-<%= invitation.id %>">
             <td class="name">(invited)</td>
             <td class="email"><%= invitation.email %></td>
-            <td><a href="<%= invitation_path(invitation.id) %>" class="remove-invitation" data-id="<%= invitation.id %>"><i class="icon-trash"></i></a></td>
+            <td><a href="<%= invitation_path(invitation.id) %>" class="remove-invitation" data-id="<%= invitation.id %>"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
           </tr>
         <% end %>
       </tbody>
