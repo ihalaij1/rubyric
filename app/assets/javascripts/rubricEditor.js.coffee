@@ -1,8 +1,4 @@
-#= require knockout-3.1.0
-#= require bootstrap
 #= require jquery.ui.sortable
-#= require knockout-sortable-0.11.0
-#= require knockout-validation-2.0.3
 #= require editable
 
 # TODO

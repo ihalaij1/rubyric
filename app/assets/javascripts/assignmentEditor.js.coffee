@@ -1,6 +1,3 @@
-#= require knockout-2.2.1
-#= require bootstrap
-
 class User
   constructor: (data) ->
     @id = data['id']

@@ -287,7 +287,7 @@ class Review < ApplicationRecord
       end
     end
   end
-  
+
   # Collects feedback from all sections and groups all positive feedback together, all neagtive feedback together, etc.
   # Section captions are not shown.
   # Returns a string.

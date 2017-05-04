@@ -74,4 +74,7 @@ gem 'ims-lti'
 
 source 'https://rails-assets.org' do
   gem 'rails-assets-bootstrap-css'
+  gem 'rails-assets-knockout'
+  gem 'rails-assets-knockout-sortable'
+  gem 'rails-assets-knockout-validation'
 end

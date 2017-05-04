@@ -1,5 +1,3 @@
-#= require bootstrap-3.1.1.min
-
 jQuery ->
   # Attach event listeners
   $('#reviews-select-finished').click(-> $('#submissions_table input.review_check_finished').prop('checked', true))

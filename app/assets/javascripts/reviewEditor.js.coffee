@@ -1,6 +1,3 @@
-#= require knockout-3.1.0
-#= require bootstrap
-
 class Page
   constructor: (@rubricEditor, @rubric) ->
     @nextPage = undefined

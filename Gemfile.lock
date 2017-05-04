@@ -144,6 +144,10 @@ GEM
       railties (= 5.0.2)
       sprockets-rails (>= 2.0.0)
     rails-assets-bootstrap-css (3.3.7)
+    rails-assets-knockout (3.4.2)
+    rails-assets-knockout-sortable (1.1.0)
+    rails-assets-knockout-validation (2.0.3)
+      rails-assets-knockout (>= 2.3.0)
     rails-dom-testing (2.0.2)
       activesupport (>= 4.2.0, < 6.0)
       nokogiri (~> 1.6)
@@ -253,6 +257,9 @@ DEPENDENCIES
   puma (~> 3.0)
   rails (= 5.0.2)
   rails-assets-bootstrap-css!
+  rails-assets-knockout!
+  rails-assets-knockout-sortable!
+  rails-assets-knockout-validation!
   rest_client (= 1.8.0)
   rspec-rails
   sass
