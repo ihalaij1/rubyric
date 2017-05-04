@@ -1,5 +1,5 @@
 class CourseInstancesController < ApplicationController
-  before_filter :login_required, :except => [:show]
+  before_filter :login_required, except: [:show]
 
   # GET /course_instances/1
   def show
@@ -35,7 +35,7 @@ class CourseInstancesController < ApplicationController
 
     @pricing = current_user.get_pricing
     @pricing.planned_students = 20
-    @course_instance = CourseInstance.new(:submission_policy => 'unauthenticated')
+    @course_instance = CourseInstance.new(submission_policy: 'unauthenticated')
     @course_instance.course = @course
     # :name => Time.now.year
 
@@ -53,7 +53,7 @@ class CourseInstancesController < ApplicationController
 
     @pricing = @course_instance.pricing
 
-    render :action => 'edit', :layout => 'narrow-new'
+    render action: 'edit', layout: 'narrow-new'
     log "edit_course_instance #{@course_instance.id}"
   end
 
@@ -71,7 +71,7 @@ class CourseInstancesController < ApplicationController
       return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
       course_valid = true
     else
-      @course = Course.new(:name => params[:course_name])
+      @course = Course.new(name: params[:course_name])
       course_valid = @course.valid?
     end
 
@@ -94,7 +94,7 @@ class CourseInstancesController < ApplicationController
       redirect_to @course_instance
       log "create_course_instance success #{@course_instance.id}"
     else
-      render :action => 'new', :layout => 'narrow-new'
+      render action: 'new', layout: 'narrow-new'
       log "create_course_instance invalid #{@course_instance.id} #{@course_instance.errors.full_messages.join('. ')}"
     end
   end
@@ -118,7 +118,7 @@ class CourseInstancesController < ApplicationController
       redirect_to @course_instance
       log "edit_course_instance success #{@course_instance.id}"
     else
-      render :action => "edit", :layout => 'narrow-new'
+      render action: "edit", layout: 'narrow-new'
       log "edit_course_instance fail #{@course_instance.id} #{@course_instance.errors.full_messages.join('. ')}"
     end
   end
@@ -149,7 +149,7 @@ class CourseInstancesController < ApplicationController
 #       @course_instance.add_students_csv(params[:paste])
 #     end
 #
-#     render :partial => 'user', :collection => @course_instance.students, :locals => { :iid => @course_instance.id }
+#     render partial: 'user', collection: @course_instance.students, locals: { iid: @course_instance.id }
 #   end
 #
 #
@@ -164,7 +164,7 @@ class CourseInstancesController < ApplicationController
 #       @course_instance.add_assistants_csv(params[:paste])
 #     end
 #
-#     render :partial => 'user', :collection => @course_instance.assistants, :locals => { :iid => @course_instance.id }
+#     render partial: 'user', collection: @course_instance.assistants, locals: { iid: @course_instance.id }
 #   end
 #
 

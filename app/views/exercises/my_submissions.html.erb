@@ -81,3 +81,11 @@
 <% if @is_assistant %>
   <%= render partial: 'my_submissions' %>
 <% end %>
+
+<script type="text/javascript">
+  $('.modal').on('shown.bs.modal', function(e) {
+    var reviewModal = $(e.target);
+    var url = reviewModal.data("url");
+    $(".modal").children().children().load(url);
+  });
+</script>

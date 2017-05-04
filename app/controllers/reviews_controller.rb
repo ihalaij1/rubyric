@@ -1,5 +1,4 @@
 class ReviewsController < ApplicationController
-
   # TODO: perform group member validation using callback
 
   # GET /reviews/1
@@ -26,7 +25,13 @@ class ReviewsController < ApplicationController
       log "view_annotation #{@review.id},#{@exercise.id}"
     else
       respond_to do |format|
-        format.html { render action: 'show', layout: 'narrow-new' }
+        format.html {
+          if params[:mode] and params[:mode] == 'modal'
+            render action: 'show', layout: false
+          else
+            render action: 'show', layout: 'narrow-new'
+          end
+        }
         format.json { render json: @review.payload }
       end
 

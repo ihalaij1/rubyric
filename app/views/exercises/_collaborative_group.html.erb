@@ -65,16 +65,16 @@
                         %>
                         <% if review.status %>
                           <h2>
-                            <%= review_path(id: review.id, ref: 'exercises') %>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-lg">Large modal</button>
+                            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#review-<%= review.id %>"><%= reviewer_name(review) %></button>
 
-                            <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                            <div class="modal fade bs-example-modal-lg" id="review-<%= review.id %>" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" data-url="<%= review_path(id: review.id, ref: 'exercises', mode: 'modal') %>">
                               <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
-                                  ...
+                                  Loading...
                                 </div>
                               </div>
                             </div>
+
                             <%= link_to reviewer_name(review), review_path(id: review.id, ref: 'exercises'),
                                 class: 'label label-default',
                                 'data-toggle' => 'popover',
