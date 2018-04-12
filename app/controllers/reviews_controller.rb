@@ -94,7 +94,7 @@ class ReviewsController < ApplicationController
 
     current_user.save
 
-    if @review.update_from_json(params[:id], params[:review])
+    if @review.update_from_json(params[:id], review_params)
       Review.delay.deliver_reviews([@review.id]) if @deliver_immediately
 
       respond_to do |format|
@@ -308,5 +308,11 @@ class ReviewsController < ApplicationController
       render nothing: true, status: :forbidden
     end
   end
+
+  private
+
+  def review_params
+    params.require(:review).permit(:payload, :status, :grade)
+  end  
 
 end
