@@ -28,7 +28,7 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'shoulda'
   gem 'capybara'
-  gem 'capybara-webkit'
+  #gem 'capybara-webkit'
 
   gem 'byebug', platform: :mri
   #gem 'sqlite3'
@@ -66,7 +66,7 @@ gem 'cancan'
 gem 'delayed_job_active_record', '~> 4.1.0'
 
 gem 'daemons'
-gem 'rest_client', '1.8.0'
+gem 'rest-client'
 
 #gem 'paypal-sdk-core' # , :git => 'https://github.com/paypal/sdk-core-ruby.git'
 gem 'paypal-sdk-rest'
