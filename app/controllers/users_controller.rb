@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
 
-  before_filter :login_required, :only => [:edit, :update]
+  before_action :login_required, :only => [:edit, :update]
   layout 'narrow'
 
   def new

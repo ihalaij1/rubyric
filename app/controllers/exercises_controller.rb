@@ -1,7 +1,7 @@
 require 'set.rb'
 
 class ExercisesController < ApplicationController
-  before_filter :login_required, except: [:lti]
+  before_action :login_required, except: [:lti]
 
   def lti
     # Temporarily disable signature checking

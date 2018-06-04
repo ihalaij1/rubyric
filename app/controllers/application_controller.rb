@@ -8,9 +8,9 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_session, :current_user, :logged_in?, :is_admin?
 
-  before_filter :redirect_to_ssl
-  before_filter :set_locale
-  before_filter :require_login?
+  before_action :redirect_to_ssl
+  before_action :set_locale
+  before_action :require_login?
 
   def log_client_event
     ClientEventLogger.info("#{params[:session]} #{params[:events]}")

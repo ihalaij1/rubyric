@@ -1,5 +1,5 @@
 class CoursesController < ApplicationController
-  before_filter :login_required #, :except => [:index, :show]
+  before_action :login_required #, :except => [:index, :show]
 
   # GET /courses
   def index
@@ -66,7 +66,7 @@ class CoursesController < ApplicationController
 
     return access_denied unless @is_teacher
 
-    if @course.update_attributes(params[:course])
+    if @course.update_attributes(course_params)
       flash[:success] = t(:course_updated_flash)
       redirect_to(@course)
       log "edit_course success #{@course.id}"
@@ -115,4 +115,10 @@ class CoursesController < ApplicationController
 # 
 #     render :partial => 'user', :collection => @course.teachers, :locals => { :cid => @course.id }
 #   end
+
+  private
+
+    def course_params
+      params.require(:course).permit(:code, :name, :email, :time_zone)
+    end
 end

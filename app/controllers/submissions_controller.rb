@@ -1,5 +1,5 @@
 class SubmissionsController < ApplicationController
-  before_filter :load_submission, except: [:new, :create, :aplus_get, :aplus_submit, :receive_email]
+  before_action :load_submission, except: [:new, :create, :aplus_get, :aplus_submit, :receive_email]
 
   layout 'narrow'
 

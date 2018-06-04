@@ -1,5 +1,5 @@
 class CourseInstancesController < ApplicationController
-  before_filter :login_required, except: [:show]
+  before_action :login_required, except: [:show]
 
   # GET /course_instances/1
   def show

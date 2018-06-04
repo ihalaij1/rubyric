@@ -1,5 +1,5 @@
 class CourseInstances::GroupsController < GroupsController
-  before_filter :login_required
+  before_action :login_required
 
   layout 'application'
   

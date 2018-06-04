@@ -1,6 +1,6 @@
 class OrdersController < ApplicationController
-  before_filter :load_course
-  before_filter :login_required
+  before_action :load_course
+  before_action :login_required
   
   # TODO: logging
   
