@@ -66,8 +66,8 @@ class CourseInstancesController < ApplicationController
     @course_instance = CourseInstance.new(course_instance_params)
     course_instance_valid = @course_instance.valid?
 
-    if @course_instance.course_id
-      @course = Course.find(@course_instance.course_id)
+    if params[:course_instance][:course_id]
+      @course = Course.find(params[:course_instance][:course_id])
       return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
       course_valid = true
     else
