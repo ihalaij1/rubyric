@@ -62,47 +62,59 @@
 </div>
 
 <!-- Confirm add user -->
-<div id="modal-add-user" class="modal hide">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>Add instructor</h3>
-  </div>
-  <div class="modal-body">
-    <p>Add <strong><span id="confirm-add-user-name"></span></strong> as an instructor to <strong><%= "#{@course.full_name}" %></strong>?<br />
-    Instructors have full access to all course instances (also previous years).</p>
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn" data-dismiss="modal">Cancel</a>
-    <a href="#" class="btn btn-primary" id="confirm-add-user">OK</a>
+<div id="modal-add-user" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Add instructor</h3>
+      </div>
+      <div class="modal-body">
+        <p>Add <strong><span id="confirm-add-user-name"></span></strong> as an instructor to <strong><%= "#{@course.full_name}" %></strong>?<br />
+        Instructors have full access to all course instances (also previous years).</p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+        <a href="#" class="btn btn-primary" id="confirm-add-user">OK</a>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- Confirm remove user -->
-<div id="modal-remove-user" class="modal hide">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>Remove instructor</h3>
-  </div>
-  <div class="modal-body">
-    <p>Remove <strong><span id="confirm-remove-user-name"></span></strong> from <strong><%= "#{@course.full_name}" %></strong>?</p>
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn" data-dismiss="modal">Cancel</a>
-    <a href="#" class="btn btn-primary" id="confirm-remove-user">OK</a>
+<div id="modal-remove-user" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Remove instructor</h3>
+      </div>
+      <div class="modal-body">
+        <p>Remove <strong><span id="confirm-remove-user-name"></span></strong> from <strong><%= "#{@course.full_name}" %></strong>?</p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+        <a href="#" class="btn btn-primary" id="confirm-remove-user">OK</a>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- Confirm remove invitation -->
-<div id="modal-remove-invitation" class="modal hide">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>Cancel invitation</h3>
-  </div>
-  <div class="modal-body">
-    <p>Cancel invitation <strong><span id="confirm-remove-invitation-email"></span></strong>?</p>
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn" data-dismiss="modal">Cancel</a>
-    <a href="#" class="btn btn-primary" id="confirm-remove-invitation">OK</a>
+<div id="modal-remove-invitation" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Cancel invitation</h3>
+      </div>
+      <div class="modal-body">
+        <p>Cancel invitation <strong><span id="confirm-remove-invitation-email"></span></strong>?</p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+        <a href="#" class="btn btn-primary" id="confirm-remove-invitation">OK</a>
+      </div>
+    </div>
   </div>
 </div>
