@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class SubmitTest < ActionController::IntegrationTest
+class SubmitTest < ActionDispatch::IntegrationTest
   fixtures :all
 
 #   test "Submit" do
