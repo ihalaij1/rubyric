@@ -194,7 +194,7 @@ class CourseInstancesController < ApplicationController
   private
 
   def course_instance_params
-    params.require(:course_instance).permit(:name, :locale, :submission_policy, :agree_terms)
+    params.require(:course_instance).permit(:name, :locale, :submission_policy, :agree_terms, :active)
   end
 
 end
