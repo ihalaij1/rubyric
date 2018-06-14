@@ -19,6 +19,9 @@ class CourseInstances::GroupsController < GroupsController
     user_ids << @course_instance.assistant_ids
     user_ids << @course_instance.student_ids
     users = User.find(user_ids)
+
+    submissions = Submission.all
+    exercises = Exercise.where(course_instance_id: @course_instance.id)
     
     @groups_json = {
       groups: groups.as_json(
@@ -33,7 +36,9 @@ class CourseInstances::GroupsController < GroupsController
       users: users.as_json(:only => [:id, :studentnumber, :email, :firstname, :lastname]),
       students: @course_instance.student_ids,
       assistants: @course_instance.assistant_ids,
-      teachers: @course.teacher_ids
+      teachers: @course.teacher_ids,
+      submissions: submissions.as_json(:only => [:id, :group_id, :exercise_id]),
+      exercises: exercises.as_json(:only => [:id, :name])
     }
     
 #     respond_to do |format|
@@ -48,6 +53,7 @@ class CourseInstances::GroupsController < GroupsController
     authorize! :update, @course_instance
     
     @course_instance.set_assignments(params[:assignments])
+    @groups = filter(params[:exercise_id])
     
     respond_to do |format|
       format.html { redirect_to @course_instance }
