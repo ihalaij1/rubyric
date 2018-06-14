@@ -451,7 +451,12 @@ class Exercise < ApplicationRecord
 
   # Creates example submissions for existing groups.
   def create_example_submissions
-    self.course_instance(true).groups.each do |group|
+    create_example_submissions_for(self.course_instance(true).groups)
+  end
+
+  # Creates example submissions for given groups.
+  def create_example_submissions_for(groups)
+    groups.each do |group|
       submission = ExampleSubmission.create(:exercise_id => self.id, :group_id => group.id, :extension => 'pdf', :filename => 'example.pdf')
     end
   end

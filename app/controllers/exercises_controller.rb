@@ -454,8 +454,18 @@ class ExercisesController < ApplicationController
     load_course
     authorize! :update, @course_instance
 
-    @course_instance.create_example_groups(10) if @course_instance.groups.empty?
-    @exercise.create_example_submissions
+    example_groups_count = 5
+    # Try to find existing example groups
+    groups = @course_instance.get_example_groups(example_groups_count)
+
+    if groups.count < example_groups_count
+      # Create new example groups
+      groups = @course_instance.create_example_groups(example_groups_count)
+      if groups.count == 0  # If no example group exists nor has been created
+        flash[:warning] = "Cannot generate example submissions."
+      end
+    end
+    @exercise.create_example_submissions_for(groups)
 
     redirect_to @exercise
 

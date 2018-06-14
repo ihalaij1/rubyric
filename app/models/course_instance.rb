@@ -143,31 +143,54 @@ class CourseInstance < ApplicationRecord
       return 0
   end
 
-  # Creates example groups for this course instance. Group members are users whose firstname is 'Student' and organization is 'Example'.
+  # Finds example groups this course instance has if any. In example group every member's firstname is 'Student' and organization is 'Example'
+  def get_example_groups(groups_count = 5)
+    # Checks if given user_id belongs to an example student
+    def is_example_student(user_id, organization_ids)
+      user = User.find_by(id: user_id)
+      return user && user.firstname == 'Student' && organization_ids.include?(user.organization_id)
+    end
+
+    # Checks if all members of the group can be classified as an example student
+    def is_example_group(group, organization_ids)
+      example_students = group.group_members.select { |member| is_example_student(member.user_id, organization_ids) }.count
+      return example_students > 0 && example_students == group.group_members.count
+    end
+
+    # Find organizations with name 'Example'
+    organizations = Organization.where(:name => 'Example')
+    # Select groups to return
+    return self.groups.select { |group| is_example_group(group, organizations.ids) }.first(groups_count)
+  end
+
+  # Creates and returns example groups for this course instance. Group members are users whose firstname is 'Student' and organization is 'Example'.
   def create_example_groups(groups_count = 100)
     # FIXME: What if Example organization is not found?
-    organization = Organization.where(:name => 'Example').first
+    organizations = Organization.where(:name => 'Example')
+    groups = Array.new
+    organizations.each do |organization|
+      # Get example students
+      users = User.where(:firstname => 'Student').where(:organization_id => organization.id)
+      user_counter = 0
 
-    # Get example students
-    users = User.where(:firstname => 'Student', :organization_id => organization.id).all
-    user_counter = 0
+      # Create groups and submissions
+      for i in (1..groups_count)
+        break if user_counter >= users.size || groups.count >= groups_count
+        # Create group
+        group = Group.new(:course_instance_id => self.id, :name => "Group #{i}", :max_size => 3)
+        group.save(:validate => false)
 
-    # Create groups and submissions
-    for i in (1..groups_count)
-      # Create group
-      group = Group.new(:course_instance_id => self.id, :name => "Group #{i}", :max_size => 3)
-      group.save(:validate => false)
-
-      # Add users to group
-      students_count = rand(3) # self.groupsizemin + rand(self.groupsizemax - self.groupsizemin + 1)
-      for j in (0..students_count)
-        user = users[user_counter]
-        group.add_member(user) if user
-        user_counter += 1
+        # Add users to group
+        students_count = rand(3) # self.groupsizemin + rand(self.groupsizemax - self.groupsizemin + 1)
+        for j in (0..students_count)
+          user = users[user_counter]
+          group.add_member(user) if user
+          user_counter += 1
+        end
+        groups << group
       end
-
-      break if user_counter >= users.size
     end
+    return groups
   end
 
   # assignments: {group_id => [user_id, user_id, ...], group_id => ...}
