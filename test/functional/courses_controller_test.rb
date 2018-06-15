@@ -44,13 +44,12 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
       assert_redirected_to new_session_path
     end
 
-    # Courses_controller does not have delete-method thus it cannot be tested
-    #should "not be able to delete course" do
-    #  assert_no_difference 'Course.count' do
-    #    delete course_path(@course)
-    #  end
-    #  assert_redirected_to new_session_path
-    #end
+    should "not be able to delete course" do
+      assert_no_difference 'Course.count' do
+        delete course_path(@course)
+      end
+      assert_redirected_to new_session_path
+    end
     
 #     should "not get teachers" do
 #       get :teachers, :id => courses(:course).id
@@ -110,13 +109,12 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
       assert @course.code, old_code
     end
     
-    # Courses_controller does not have delete-method thus it cannot be tested
-    #should "not be able to delete course" do
-    #  assert_no_difference 'Course.count' do
-    #    delete course_path(@course)
-    #  end
-    #  assert_forbidden
-    #end
+    should "not be able to delete course" do
+      assert_no_difference 'Course.count' do
+        delete course_path(@course)
+      end
+      assert_forbidden
+    end
 
   end
  
@@ -169,13 +167,12 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
       assert_redirected_to course_path(@course)
     end
     
-    # Courses_controller does not have delete-method thus it cannot be tested
-    #should "be able to delete course" do
-    #  assert_difference('Course.count', -1) do 
-    #    delete course_path(@course)
-    #  end
-    #  assert_redirected_to courses_path
-    #end
+    should "not be able to delete course" do
+      assert_no_difference 'Course.count' do 
+        delete course_path(@course)
+      end
+      assert_forbidden
+    end
     
 #     should "get teachers" do
 #       get :teachers, :id => courses(:course).id
@@ -184,5 +181,40 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
 #       assert_template :teachers
 #     end
   end
-  
+
+  context "When logged in as an admin" do
+    setup do
+      post session_path, params: { session: { email: 'admin@example.com', password: 'admin'} }
+    end
+
+    should "get index" do
+      get courses_path
+      assert_not_nil :courses
+      assert_response :success
+    end
+
+    should "get course" do
+      get course_path(@course)
+      assert_not_nil :course
+      assert_response :success
+    end
+
+    should "get edit" do
+      get edit_course_path(@course)
+      assert_response :success
+    end
+
+    should "be able to update course" do
+      patch course_path(@course), params: { course: { code: '93777', name: 'New name' } }
+      assert_redirected_to course_path(@course)
+    end
+    
+    should "be able to delete course" do
+      assert_difference 'Course.count', -1 do 
+        delete course_path(@course)
+      end
+      assert_redirected_to courses_path
+    end
+
+  end
 end

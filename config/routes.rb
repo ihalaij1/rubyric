@@ -17,7 +17,7 @@ Rails.application.routes.draw do
 
   get 'preferences' => 'users#edit'
 
-  resources :courses, only: [:index, :show, :edit, :update] do
+  resources :courses, only: [:index, :show, :edit, :update, :destroy] do
     resources :course_instances, only: [:new]
     resources :teachers, only: [:index, :create, :destroy], controller: 'courses/teachers'
   end

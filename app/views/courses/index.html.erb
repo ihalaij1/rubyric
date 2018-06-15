@@ -7,8 +7,8 @@
     <tr>
       <td><%= link_to course.full_name, course %></td>
       <td class="trash">
-        <% if course.has_teacher(current_user) || is_admin?(current_user) %>
-          <%= link_to course, :confirm => 'Are you sure?', :method => :delete do image_tag('trash.png', :alt => 'Destroy') end %>
+        <% if is_admin?(current_user) %>
+          <%= link_to image_tag('trash.png', :alt => 'Destroy'), course, method: :delete, data: { confirm: "Are you sure?" } %>
         <% end %>
       </td>
     </tr>

@@ -40,7 +40,7 @@
                 <% end %>
               </td>
               <% if can? :update, @course %>
-                <td><%= link_to exercise, :confirm => "Delete #{exercise.name}?", :method => :delete do image_tag('trash.png', :alt => 'Delete', :title => 'Delete') end %></td>
+                <td><%= link_to image_tag('trash.png', :alt => 'Destroy'), exercise, method: :delete, data: { confirm: "Delete #{exercise.name}?" } %></td>
               <% end %>
             </tr>
           <% end %>

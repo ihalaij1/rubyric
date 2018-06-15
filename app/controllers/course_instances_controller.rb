@@ -1,5 +1,7 @@
 class CourseInstancesController < ApplicationController
   before_action :login_required, except: [:show]
+  before_action :correct_user, only: [:edit, :update]
+  before_action :admin_user, only: [:destroy]
 
   # GET /course_instances/1
   def show
@@ -47,9 +49,6 @@ class CourseInstancesController < ApplicationController
   def edit
     @course_instance = CourseInstance.find(params[:id])
     load_course
-
-    # Authorize
-    return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
 
     @pricing = @course_instance.pricing
 
@@ -104,8 +103,6 @@ class CourseInstancesController < ApplicationController
     @course_instance = CourseInstance.find(params[:id])
     load_course
 
-    return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
-
     @pricing = @course_instance.pricing
     @course_instance.agree_terms = '1'
     if @course_instance.update_attributes(course_instance_params)
@@ -128,8 +125,6 @@ class CourseInstancesController < ApplicationController
     @course_instance = CourseInstance.find(params[:id])
     load_course
 
-    # Authorize
-    return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
     log "delete_course_instance #{@course_instance.id}"
 
     #Destroy
@@ -193,8 +188,20 @@ class CourseInstancesController < ApplicationController
 
   private
 
-  def course_instance_params
-    params.require(:course_instance).permit(:name, :locale, :submission_policy, :agree_terms, :active)
-  end
+    def course_instance_params
+      params.require(:course_instance).permit(:name, :locale, :submission_policy, :agree_terms, :active)
+    end
+
+    # Confirm that user is either teacher of the course or admin
+    def correct_user
+      @course_instance = CourseInstance.find(params[:id])
+      load_course
+      return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
+    end
+
+    # Confirm that user is admin
+    def admin_user
+      return access_denied unless is_admin?(current_user)
+    end
 
 end
