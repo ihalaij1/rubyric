@@ -24,7 +24,7 @@ class CourseInstanceTest < ActiveSupport::TestCase
     
     # Format: studentnumber, firstname, lastname, email, password
     # existing student, new student, existing student with only studentnumber, new student with only studentnumber
-    csv = "00001, New, Name, new@example.com, newpass\n 82735, Newbie, Student, newstudent@example.com, qwerty\n 00002 \n 28462"
+    csv = "00001, New, Name, new@example.com, newpassword\n 82735, Newbie, Student, newstudent@example.com, qwertyuip\n 00002 \n 28462"
     instance.add_students_csv(csv)
     
     # Existing student should not be altered

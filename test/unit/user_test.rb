@@ -3,31 +3,34 @@ require File.dirname(__FILE__) + '/../test_helper'
 class UserTest < ActiveSupport::TestCase
   fixtures :users, :courses
 
-  should "create user with only studentnumber" do
+  should "not create user with only studentnumber" do
     user = User.new
     user.studentnumber = '973582'
     
-    assert_difference('User.count', 1) do
-      user.save
-      assert !user.new_record?, "#{user.errors.full_messages.to_sentence}"
-    end
-  end
-  
-  should "not create user if studentnumber exists" do
-    user = User.new
-    user.studentnumber = '00001'
-    
-    assert_difference('User.count', 0) do
+    assert_no_difference 'User.count' do
       user.save
     end
   end
+
+   # Outdated test, one cannot create a new student with only studentnumber
+   # and two students can share the same studentnumber
+#  should "not create user if studentnumber exists" do
+#    user = User.new
+#    user.studentnumber = '00001'
+#    
+#    assert_difference('User.count', 0) do
+#      user.save
+#    end
+#  end
   
   should "not create user if login exists" do
     user = User.new
     user.login = '00001'
     user.studentnumber = '892648'
+    user.email = "doesnotexist@example.com"
+    user.password = "foobar123"
     
-    assert_difference('User.count', 0) do
+    assert_no_difference 'User.count' do
       user.save
     end
   end
