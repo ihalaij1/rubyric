@@ -52,6 +52,7 @@ class SessionsController < ApplicationController
 
 
   def shibboleth
+    @session = Session.new
     if defined?(SHIB_ATTRIBUTES)
       shibinfo = {
         :login => request.env[SHIB_ATTRIBUTES[:id]],
@@ -98,7 +99,8 @@ class SessionsController < ApplicationController
     if !user && !shibinfo[:studentnumber].blank?
       logger.debug "Trying to find by studentnumber #{shibinfo[:studentnumber]}"
       # TODO: user organization ID
-      user = User.find_by_studentnumber(shibinfo[:studentnumber], :conditions => "login IS NULL")
+      #user = User.find_by_studentnumber(shibinfo[:studentnumber], :conditions => "login IS NULL")
+      user = User.find_by(studentnumber: shibinfo[:studentnumber], login: nil)
     end
 
     if !user && !shibinfo[:email].blank?
