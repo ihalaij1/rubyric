@@ -341,6 +341,7 @@ class @ReviewEditor extends @Rubric
     @finalGrade = ko.observable()
     @finishedText = ko.observable('')
     @finalizing = ko.observable(false)
+    @busySaving = ko.observable(false)
     
     element = $('#review-editor')
     @role = $('#role').val()
@@ -439,6 +440,8 @@ class @ReviewEditor extends @Rubric
   save: (options) ->
     options ||= {}
     
+    @busySaving(true)  
+    $('#save-message').css('opacity', 0).removeClass('success').removeClass('error')
     # Encode review as JSON
     $('#review_payload').val(this.encodeJSON())
     
@@ -472,7 +475,7 @@ class @ReviewEditor extends @Rubric
     $('#send_review').val('true') if status == 'finished' && options['send']?
     
     @saved = true
-    
+    @busySaving(false) 
     return true
     
     # AJAX call

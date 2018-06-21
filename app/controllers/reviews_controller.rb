@@ -74,12 +74,14 @@ class ReviewsController < ApplicationController
 
     # Check that the review has not been mailed
     if @review.status == 'mailed' || @review.status == 'invalidated'
+      flash[:warning] = 'This review cannot be edited any more'
       respond_to do |format|
-        format.json { head :no_content } # TODO: error message
+        format.json { 
+          render json: {status: "fail", message: "This review cannot be edited any more"} } # TODO: error message
         format.html {
-          flash[:error] = 'This review cannot be edited any more'
           redirect_to @exercise
         }
+        format.js { render js: "window.location='/exercises/#{@exercise.id}'" }
       end
 
       return
@@ -102,24 +104,34 @@ class ReviewsController < ApplicationController
     if @review.update_from_json(params[:id], review_params)
       Review.delay.deliver_reviews([@review.id]) if @deliver_immediately
 
-      respond_to do |format|
-        format.json { head :no_content } # TODO: ok
-        format.html {
-          if params[:save] == 'next'
-            next_review_id = @exercise.next_review(current_user, @review)
-            if next_review_id
-              redirect_to edit_review_path(:id => next_review_id)
+      # If review has been invalidated or mailed, redirect back to exercise
+      if params[:review][:status] == 'mailed' || params[:review][:status] == 'invalidated' 
+        respond_to do |format|
+          format.html {
+            redirect_to @exercise
+          }
+          format.js { render js: "window.location='/exercises/#{@exercise.id}'" }
+        end
+      else
+        respond_to do |format|
+          format.json { render json: {status: "ok", message: "Changes saved"} } # TODO: ok
+          format.html {
+            if params[:save] == 'next'
+              next_review_id = @exercise.next_review(current_user, @review)
+              if next_review_id
+                redirect_to edit_review_path(:id => next_review_id)
+              else
+                redirect_to @exercise
+              end
             else
               redirect_to @exercise
             end
-          else
-            redirect_to @exercise
-          end
-        }
+          }
+        end
       end
     else
       respond_to do |format|
-        format.json { head :no_content } # TODO: error message
+        format.json { render json: {status: "fail", message: "Failed to update review" } } # TODO: error message
         format.html {
           flash[:error] = 'Failed to update review'
           redirect_to @exercise
@@ -317,7 +329,7 @@ class ReviewsController < ApplicationController
   private
 
   def review_params
-    params.require(:review).permit(:payload, :status, :grade)
+    params.require(:review).permit(:payload, :status, :grade, :feedback)
   end  
 
 end

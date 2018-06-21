@@ -4,7 +4,7 @@
 <% end %>
 
 <div class="container-fluid">
-  <%= form_for @review do |f| %>
+  <%= form_for @review, remote: true, html: { id: "review-form" } do |f| %>
     <%= f.hidden_field :payload %>
     <%= f.hidden_field :status %>
     <%= f.hidden_field :grade %>

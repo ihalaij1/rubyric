@@ -17,8 +17,19 @@
     <!-- /ko -->
 
     <% unless @exercise.new_record? %>
-      <li><input type="submit" value="Save" class="btn btn-success" data-bind="click: save" /></li>
+      <li><button class="btn btn-success" data-bind="click: save, enable: !busySaving()">
+      <!-- ko if: busySaving() -->
+        <%= image_tag('ajax-loader-small.gif', :alt => 'Saving') %>
+      <!-- /ko -->
+      <!-- ko if: !busySaving() -->
+        Save
+      <!-- /ko -->
+    </button>
+    </li>
     <% end %>
+    <li>
+      <p id="save-message" class="transient-message"></p>
+    </li>
   </ul>
 </div>
 
@@ -273,10 +284,10 @@
 
     <% unless @exercise.new_record? %>
       <p>
-        <button class="btn btn-success" data-bind="click: save">Save</button>
+        <button class="btn btn-success" data-bind="click: save, enable: !busySaving()">Save</button>
 
         <% if @exercise.grader_can_email %>
-          <button class="btn btn-primary" data-bind="click: saveAndSend">Save + Mail</button>
+          <button class="btn btn-primary" data-bind="click: saveAndSend, enable: !busySaving()">Save + Mail</button>
         <% end %>
 
         <% if defined?(@course) && @course.has_teacher(current_user) %>
