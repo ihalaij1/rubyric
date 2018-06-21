@@ -182,7 +182,7 @@
         <!-- ko if: nextPage || $root.finishable() -->
         <button class="btn" data-bind="click: $root.showNextPage">
           Next page
-          <i class="icon icon-arrow-right"></i>
+          <i class="glyphicon glyphicon-arrow-right"></i>
         </button>
         <!-- /ko -->
       </div>
@@ -297,7 +297,7 @@
 
       <!-- ko foreach: annotations -->
       <div class="annotation" data-bind="position: screenPosition, droppable: {drop: $root.dropPhraseToAnnotation}, css: {editorActive: gradeEditorActive() || contentEditorActive(), minimized: minimized() && !gradeEditorActive() && !contentEditorActive() }, click: clickAnnotation, clickBubble: false">
-        <i class="icon icon-align-left minimized-phrase"></i>
+        <i class="glyphicon glyphicon-align-left minimized-phrase"></i>
         <!-- ko if: phrase -->
         <div class="grade" data-bind="editable: {value: grade, editorActive: gradeEditorActive, placeholder: '&bull;'}">
         </div>
@@ -308,13 +308,13 @@
 
         <div class="statusbar">
           <button class="btn btn-mini pull-right" title="Delete annotation" data-bind="click: $parent.deleteAnnotation, clickBubble: false">
-            <i class="icon icon-remove"></i>
+            <i class="glyphicon glyphicon-remove"></i>
           </button>
           <button class="btn btn-mini pull-right minimize-button" title="Minimize" data-bind="click: $parent.minimizeAnnotation, clickBubble: false">
-            <i class="icon icon-chevron-down"></i>
+            <i class="glyphicon glyphicon-chevron-down"></i>
           </button>
           <button class="btn btn-mini pull-right maximize-button" title="Maximize" data-bind="click: $parent.maximizeAnnotation, clickBubble: false">
-            <i class="icon icon-chevron-up"></i>
+            <i class="glyphicon glyphicon-chevron-up"></i>
           </button>
           <!-- ko if: phrase -->
           <span data-bind="text: phrase.criterion.page.name"></span> /
