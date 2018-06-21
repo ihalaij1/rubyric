@@ -29,9 +29,11 @@
       <%= result_table_heading('last name', sort: 'last-name') %>
       <%= result_table_heading('email', sort: 'email') %>
       <%= result_table_heading('grade', sort: 'grade') %>
-      <%= result_table_heading('grade disagreement', sort: 'grade-range') %>
+      <% if params[:include] != 'all' %>
+        <%= result_table_heading('grade disagreement', sort: 'grade-range') %>
+      <% end %>
       <% if params[:include] == 'all' %>
-        <%= result_table_heading('submitted_at', sort: 'submitted-at') %>
+        <%= result_table_heading('submitted at', sort: 'submitted-at') %>
         <%= result_table_heading('reviewer', sort: 'reviewer') %>
       <% end %>
       <% if @exercise.peer_review? && params[:include] != 'all' %>
