@@ -40,23 +40,45 @@ class Page
     @minSum = if data['minSum']? then parseFloat(data['minSum']) else undefined
     @maxSum = if data['maxSum']? then parseFloat(data['maxSum']) else undefined
     @instructions = data['instructions']
-    
-    # Prepare feedback containers
-    for category in @rubric.feedbackCategories
-      feedbackHeight = Math.floor(100.0 / @rubric.feedbackCategories.length) + "%"
-      feedback = {
-        id: category.id
-        title: category.name
-        value: ko.observable('')
-        height: feedbackHeight
-      }
-      @feedback.push(feedback)
-      @feedbackByCategory[category.id] = feedback
 
     for criterion_data in data['criteria']
       criterion = new Criterion(@rubricEditor, this, criterion_data)
       @criteria.push(criterion)
       @criteriaById[criterion.id] = criterion
+
+    # Prepare feedback containers
+    included_categories = []                      # ids of categories present in the page
+    # Gather ids of categories present in the page
+    for category in @rubric.feedbackCategories
+      for criterion in @criteria()
+        for phrase in criterion.phrases
+          if category.id == phrase.categoryId && category.id not in included_categories
+            included_categories.push(category.id)
+
+    # Add categories to @feedback
+    if included_categories.length == 0           # if there is no categories present, include all
+      for category in @rubric.feedbackCategories
+        feedbackHeight = Math.floor(100.0 / @rubric.feedbackCategories.length) + "%"
+        feedback = {
+          id: category.id
+          title: category.name
+          value: ko.observable('')
+          height: feedbackHeight
+        }
+        @feedback.push(feedback)
+        @feedbackByCategory[category.id] = feedback
+    else
+      for category in @rubric.feedbackCategories
+        if category.id in included_categories
+          feedbackHeight = Math.floor(100.0 / included_categories.length) + "%"
+          feedback = {
+            id: category.id
+            title: category.name
+            value: ko.observable('')
+            height: feedbackHeight
+          }
+          @feedback.push(feedback)
+          @feedbackByCategory[category.id] = feedback
       
     for grade in @rubricEditor.grades || []
       numeric_grade = parseFloat(grade)
