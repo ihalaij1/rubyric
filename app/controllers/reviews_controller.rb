@@ -105,7 +105,7 @@ class ReviewsController < ApplicationController
       Review.delay.deliver_reviews([@review.id]) if @deliver_immediately
 
       # If review has been invalidated or mailed, redirect back to exercise
-      if params[:review][:status] == 'mailed' || params[:review][:status] == 'invalidated' 
+      if params[:review][:status] == 'mailed' || params[:review][:status] == 'mailing' || params[:review][:status] == 'invalidated' 
         respond_to do |format|
           format.html {
             redirect_to @exercise

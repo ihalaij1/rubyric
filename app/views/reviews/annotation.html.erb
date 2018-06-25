@@ -9,7 +9,7 @@
   data-initial-rubric-page="<%= params['rubric_page'] || current_user.submission_sort_preference %>"
   data-initial-zoom="<%= params['zoom'] || current_user.zoom_preference %>"
   >
-  <%= form_for @review, as: :review, url: review_path(@review) do |f| %>
+  <%= form_for @review, as: :review, url: review_path(@review), remote: true, html: {id: 'review-form'} do |f| %>
     <%= f.hidden_field :payload %>
     <%= f.hidden_field :status %>
     <%= f.hidden_field :grade %>
