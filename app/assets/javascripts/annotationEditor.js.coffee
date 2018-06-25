@@ -433,6 +433,11 @@ class @AnnotationEditor extends Rubric
 
     @submission_pages = ko.observableArray()
     @phrasesById = {}
+    # Put phrases to phrasesById
+    for page in @pages
+      for criterion in page.criteria()
+        for phrase in criterion.phrases
+          @phrasesById[phrase.id] = phrase
 
     @commandBuffer = new CommandBuffer()
 
