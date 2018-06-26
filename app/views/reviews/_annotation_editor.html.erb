@@ -118,6 +118,13 @@
         </div>
         <!-- /ko -->
 
+        <!-- View group -->
+        <% if @submission && @submission.group && !@exercise.anonymous_submissions %>
+          <h3>
+            Group: <%= @submission.group.names_with_studentnumbers %>
+          </h3>
+        <% end %>
+
         <!-- Grading instructions (page) -->
         <p class="grading-instructions" data-bind="text: instructions"></p>
 
@@ -194,6 +201,13 @@
       <!-- Finish tab -->
       <div class="tab-pane" id="tab-finish">
         <h2>Finalize Feedback</h2>
+
+        <!-- View group -->
+        <% if @submission && @submission.group && !@exercise.anonymous_submissions %>
+          <p>
+            Group: <%= @submission.group.names_with_studentnumbers %>
+          </p>
+        <% end %>
 
         <p class="hint">Here you can type additional comments that appear in the feedback email.</p>
 

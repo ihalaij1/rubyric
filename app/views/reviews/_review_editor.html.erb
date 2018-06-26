@@ -1,7 +1,7 @@
 <div class="row-fluid">
   <% unless @exercise.new_record? %>
     <%= link_to exercise_path(@exercise.id, :anchor => "group#{@review.submission.group.id}"), :class => 'back-button pull-left', :title => 'Return to menu' do %>
-      <i class='icon icon-arrow-left'></i>
+      <i class="glyphicon glyphicon-arrow-left"></i>
     <% end %>
   <% end %>
 
@@ -126,6 +126,13 @@
         </div>
       <!-- /ko -->
 
+      <!-- View group -->
+      <% if @submission && @submission.group && !@exercise.anonymous_submissions %>
+        <h3>
+          Group: <%= @submission.group.names_with_studentnumbers %>
+        </h3>
+      <% end %>
+
       <!-- View submission -->
       <% unless @exercise.new_record? %>
         <% unless @submission.filename.blank? %>
@@ -210,7 +217,7 @@
     <div data-bind="visible: nextPage || $root.role != 'collaborator'">
       <button class="btn" data-bind="enable: nextPage || $root.finishable(), click: $root.showNextPage">
         Next page
-        <i class="icon icon-arrow-right"></i>
+        <i class="glyphicon glyphicon-arrow-right"></i>
       </button>
 
       <div class="alert alert-warning" role="alert" data-bind="visible: !(nextPage || $root.finishable())">
@@ -235,6 +242,12 @@
   <!-- Finish tab -->
   <div class="tab-pane" id="tab-finish">
     <h2>Finalize Feedback</h2>
+
+    <% if @submission && @submission.group && !@exercise.anonymous_submissions %>
+      <p>
+        Group: <%= @submission.group.names_with_studentnumbers %>
+      </p>
+    <% end %>
 
     <p class="hint"><%= t('reviews.edit.final_feedback_hint') %></p>
 
