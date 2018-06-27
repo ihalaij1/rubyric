@@ -1,0 +1,18 @@
+group1_member1:
+  group: group1
+  user: student1
+
+group2_member1:
+  group: group2
+  user: student2
+
+group2_member2:
+  group: group2
+  user: student3
+
+group3_member1:
+  group: group3
+  user: student3
+
+unauthenticated_user:
+  group: unauthenticated_group

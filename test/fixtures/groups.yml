@@ -1,7 +1,13 @@
 group1:
   exercise: active_exercise
-  users: student1
+  reviewers: [assistant1]
 
 group2:
   exercise: active_exercise
-  users: [student2, student3]
+
+group3:
+  exercise: inactive_exercise
+
+unauthenticated_group:
+  reviewers: [teacher1]
+  access_token: njfsljfe7u8204hjktngw
