@@ -11,7 +11,7 @@ class ReviewsController < ApplicationController
     load_course
     I18n.locale = @course_instance.locale || I18n.locale
 
-    return access_denied unless group_membership_validated(@group) || @review.user == current_user || @course.has_teacher(current_user) || @course_instance.has_assistant(current_user) || (@exercise.collaborative_mode != '' && @course_instance.has_student(current_user))
+    return access_denied unless group_membership_validated(@group) || @review.user == current_user || @course.has_teacher(current_user) || (@exercise.collaborative_mode != '' && @course_instance.has_student(current_user))
 
     @can_view_review_raters = (@group.has_member? current_user) or (@review.user == current_user) or (@course.has_teacher current_user)
     @can_rate_review = @group.has_member? current_user
@@ -243,7 +243,7 @@ class ReviewsController < ApplicationController
     load_course
 
     # Authorization
-    return access_denied unless @course.has_teacher(current_user)
+    return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user) || @review.user == current_user
 
 
     @review.status = 'invalidated'

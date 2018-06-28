@@ -1,7 +1,5 @@
 class CoursesController < ApplicationController
   before_action :login_required #, :except => [:index, :show]
-  before_action :correct_user, only: [:edit, :update]
-  before_action :admin_user, only: [:destroy]
 
   # GET /courses
   def index
@@ -37,6 +35,9 @@ class CoursesController < ApplicationController
   # GET /courses/1/edit
   def edit
     @course = Course.find(params[:id])
+    @is_teacher = @course.has_teacher(current_user) || is_admin?(current_user)
+
+    return access_denied unless @is_teacher
     
     log "edit_course #{@course.id}"
   end
@@ -61,6 +62,9 @@ class CoursesController < ApplicationController
   # PUT /courses/1
   def update
     @course = Course.find(params[:id])
+    @is_teacher = @course.has_teacher(current_user) || is_admin?(current_user)
+
+    return access_denied unless @is_teacher
 
     if @course.update_attributes(course_params)
       flash[:success] = t(:course_updated_flash)
@@ -75,6 +79,7 @@ class CoursesController < ApplicationController
   # DELETE /courses/1
   def destroy
     @course = Course.find(params[:id])
+    return access_denied unless is_admin?(current_user)
 
     log "delete_course #{@course.id}"
     name = @course.name
@@ -122,8 +127,4 @@ class CoursesController < ApplicationController
       return access_denied unless @is_teacher
     end
 
-    def admin_user
-      @course = Course.find(params[:id])
-      return access_denied unless is_admin?(current_user)
-    end
 end

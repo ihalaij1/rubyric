@@ -451,7 +451,7 @@ class Exercise < ApplicationRecord
 
   # Creates example submissions for existing groups.
   def create_example_submissions
-    create_example_submissions_for(self.course_instance(true).groups)
+    create_example_submissions_for(self.course_instance.reload.groups)
   end
 
   # Creates example submissions for given groups.
