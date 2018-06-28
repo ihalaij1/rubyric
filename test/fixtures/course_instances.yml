@@ -24,3 +24,9 @@ no_login_needed:
   name: No need for login
   active: true
   submission_policy: unauthenticated
+
+with_many_assistants:
+  course: course_with_many_teachers
+  name: Many assistants
+  active: true
+  assistants: [assistant1, assistant2]

@@ -65,16 +65,16 @@ class ReviewsControlllerTest < ActionDispatch::IntegrationTest
       post session_path, params: { session: { email: 'assistant1@example.com', password: 'assistant1'} }
     end
 
-    should "be able to view review in own course instance" do
+    should "be able to view own  review" do
       get review_path(@review1)
-      assert_response :success
-      get review_path(@review2)
-      assert_response :success
-      get review_path(@review3)
       assert_response :success
     end
 
-    should "not be able to view review in another course instance" do
+    should "not be able to view someone else's review" do
+      get review_path(@review2)
+      assert_forbidden
+      get review_path(@review3)
+      assert_forbidden
       get review_path(@review4)
       assert_forbidden
     end
@@ -108,16 +108,19 @@ class ReviewsControlllerTest < ActionDispatch::IntegrationTest
       assert_equal_attributes Review.find(@review2.id), { grade: review_grade, feedback: review_feedback }
     end
 
-#    should "not be able to invalidate review through update" do
-#      # Invalidate own review
-#      patch review_path(@review1), params: { review: { status: "invalidated" } }
-#      assert_not_equal Review.find(@review1.id).status, "invalidated"
-#    end
+    should "be able to invalidate review through update" do
+      # Invalidate own review
+      patch review_path(@review1), params: { review: { status: "invalidated" } }
+      assert_equal Review.find(@review1.id).status, "invalidated"
+    end
 
-    should "not be able to invalidate review" do
+    should "be able to invalidate own review" do
       # Invalidate own review
       get invalidate_review_path(@review1)
-      assert_not_equal Review.find(@review1.id).status, "invalidated"
+      assert_equal Review.find(@review1.id).status, "invalidated"
+    end
+
+    should "not be able to invalidate someone else's review" do
       # Invalidate someone else's review
       get invalidate_review_path(@review2)
       assert_not_equal Review.find(@review2.id).status, "invalidated"

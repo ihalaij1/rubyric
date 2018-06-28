@@ -24,3 +24,8 @@ somebody_elses_course:
   code: T-123.4567
   name: Somebody elses course
   teachers: teacher2
+
+course_with_many_teachers:
+  code: T-111.6782
+  name: A lot of teachers
+  teachers: [teacher1, teacher2]
