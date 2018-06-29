@@ -15,6 +15,9 @@
     <!-- ko if: finishable() -->
       <li><a href="#tab-finish" id="tab-finish-link" data-toggle="tab" data-bind="click: finish">Finalize</a></li>
     <!-- /ko -->
+    <!-- ko if: !finishable() -->
+      <li class="disabled"><a title="<%= t('reviews.edit.finalize_hint') %>">Finalize</a></li>
+    <!-- /ko -->
 
     <% unless @exercise.new_record? %>
       <li><button class="btn btn-success" data-bind="click: save, enable: !busySaving()">
