@@ -852,3 +852,16 @@ tr:hover div.hover-buttons {
     color: #777;
   }
 }
+
+
+/******************
+ * Modal backdrop
+ ******************/
+
+.modal-backdrop {
+  display: none;
+}
+
+.modal {
+  background: rgba(0,0,0,0.5);
+}

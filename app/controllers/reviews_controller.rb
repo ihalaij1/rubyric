@@ -21,7 +21,15 @@ class ReviewsController < ApplicationController
       @submission = @review.submission
       @page_count = @submission.page_count
 
-      render action: 'show-annotation', layout: 'plain-new'
+      respond_to do |format|
+        format.html {
+          if params[:mode] and params[:mode] == 'modal'
+            render action: 'show-annotation', layout: 'annotation'
+          else
+            render action: 'show-annotation', layout: 'narrow-new'
+          end
+        }
+      end
       log "view_annotation #{@review.id},#{@exercise.id}"
     else
       respond_to do |format|
