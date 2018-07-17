@@ -5,6 +5,7 @@
   <%= stylesheet_link_tag 'frontpage', :media => "all" %>
 <% end %>
 
+
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
@@ -39,13 +40,13 @@
   </div>
 </nav>
 
+
 <% if defined? SHIB_PATH %>
   <div class="frontpage-shib-login pull-right">
-    <%= link_to SHIB_PATH + shibboleth_session_url(:protocol => 'https') do
-      image_tag('haka_portrait_large.gif', {:alt => '[Haka Login]'})
-    end %>
+    <%= link_to image_tag('haka_portrait_large.gif', {:alt => '[Haka Login]'}), SHIB_PATH + shibboleth_session_url(:protocol => 'https') %>
   </div>
 <% end %>
+
   
 <div class="container">
   
@@ -98,167 +99,6 @@
       <span class="glyphicon glyphicon-chevron-right"></span>
     </a>
   </div>
-
-
-  <!-- Features -->
-  <div class="row">
-    <div class="col-sm-6">
-      <h1>Features</h1>
-      <ul class="list-unstyled">
-        <li>Create a form for <strong>receiving submissions</strong>.</li>
-        <li><strong>Distribute submissions</strong> to reviewers.</li>
-        <li>Create <strong>assessment rubrics</strong>.</li>
-        <li>Annotate submissions with <strong>feedback</strong>.</li>
-        <!--li>Send feedback to students by email.</li-->
-      </ul>
-    </div>
-    <div class="col-sm-6 text-center hidden-xs hidden-sm">
-      <!--%= image_tag('stack.jpg', :alt => 'A stack of papers') %-->
-      <p class="pull-right demo-button clearfix">
-        <%= link_to annotation_demo_path, :class => 'btn btn-lg btn-primary' do %>
-          Try the Demo <span class="glyphicon glyphicon-chevron-right"></span>
-        <% end %>
-      </p>
-    </div>
-  </div>
-
-  <!-- Why rubrics -->
-  <div class="row">
-    <div class="col-sm-6 text-center hidden-xs hidden-sm">
-      <%= image_tag('pen.jpg', :alt => 'Manual assessment') %>
-      
-    </div>
-    <div class="col-sm-6">
-      <h1>Why rubrics</h1>
-      <ul class="list-unstyled">
-        <li>A <strong>rubric</strong> is an assessment template that defines the assessment criteria and describes what is required to reach each grade.</li>
-        <li>They help to ensure <strong>consistency</strong> when there are multiple reviewers.</li>
-        <li>They make it effortless to give <strong>comprehensive feedback</strong>.
-        Because many students make similar mistakes, large parts of feedback can be constructed from prewritten feedback phrases.</li>
-        <li>It is also possible to use Rubyric as ordinary <strong>annotation tool</strong> without preparing a rubric.</li>
-      </ul>
-    </div>
-    
-  </div>
-
-  <!-- Who's using -->
-  <div class="row">
-    <div class="col-sm-6">
-      <h1>Who's using Rubyric</h1>
-      <ul class="list-unstyled">
-        <li>So far, Rubyric has been used in over <strong>50 courses</strong></li>
-        <li>to assess <strong>34,000 submissions</strong> from <strong>7,000 students</strong>.</li>
-      </ul>
-    </div>
-    <div class="col-sm-6 text-center hidden-xs hidden-sm">
-      <%= image_tag('computer.jpg', :alt => 'Computer assisted assessment') %>
-    </div>
-  </div>
-
-  <!-- Privacy -->
-  <div class="row">
-    <div class="col-sm-6 text-center hidden-xs hidden-sm">
-      <%= image_tag('university.jpg', :alt => '') %>
-    </div>
-
-    <div class="col-sm-6">
-      <h1>We respect your privacy</h1>
-
-      <ul class="list-unstyled">
-        <li>
-          <strong>You are in control of your data.</strong><br />
-          <span class="">We do not store copies of students' submissions indefinitely or hand personal information over to third parties. Submissions and other personal data are deleted from our servers after the course has ended. You can download copies for archiving first, of course.</span>
-        </li>
-        <li>We are a Finnish company with <strong>servers located in Europe</strong>.</li>
-      </ul>
-    </div>
-  </div>
-
-
-  <div class="signup">
-      <div class="row">
-        <div class="col-sm-6">
-          <h1>Try before you buy</h1>
-          
-          <%= render 'orders/calculator' %>
-        </div>
-        <div class="col-sm-6">
-          <h1>Sign up <span class="text-muted">&ndash; It's free</span></h1>
-          <div class="well">
-            <%= form_for @user, :html => {:class => 'form-horizontal'} do |f| %>
-              <div class="form-group">
-                <%= f.label :email, 'Email', :class => 'col-sm-4 control-label' %>
-                <div class="col-sm-6">
-                  <%= f.text_field :email, :class => 'form-control' %>
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <%= f.label :password, 'Choose a Password', :class => 'col-sm-4 control-label' %>
-                <div class="col-sm-6">
-                  <%= f.password_field :password, :class => 'form-control' %>
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <div class="col-sm-4 col-sm-offset-4">
-                  <%= f.submit 'Sign up', :class => 'btn btn-lg btn-primary' %>
-                </div>
-              </div>
-            <% end %>
-
-          </div>
-          
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <% if false %>
-  <div class="row">
-    <div class="col-sm-4 col-sm-offset-1">
-      <!--
-      <h3>Try it for free</h3>
-      <p>
-        <%= link_to 'Create a test account here', new_user_path, :class => 'btn' %>
-      </p>
-      -->
-
-      <h2><%=t ('.frontpage_login_heading') %></h2>
-      <% if defined?(SHIB_AALTO_PATH) %>
-        <%= render :partial => 'sessions/aalto' %>
-      <% end %>
-      <% if defined?(SHIB_PATH) %>
-        <%= render :partial => 'sessions/shibboleth' %>
-      <% end %>
-      <%= render :partial => 'sessions/login' %>
-    </div>
-  </div>
-  <% end %>
-</div>
-
-<div class="container like-buttons">
-  <div class="row">
-    <div class="col-sm-12">
-      <!-- +1 button -->
-      <div class="social-button">
-        <div class="g-plusone" data-href="https://rubyric.com/"></div>
-        <script type="text/javascript">
-          (function() {
-            var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-            po.src = 'https://apis.google.com/js/platform.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-          })();
-        </script>
-      </div>
-      
-      <!-- Like button -->
-      <div class="social-button">
-        <div class="fb-like" data-href="https://rubyric.com" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="footer">
@@ -266,13 +106,13 @@
     <div class="row">
       <div class="col-sm-6">
         <p>
-          Rubyric is hosted by <a href="http://www.bythemark.com/" target="_blank">By The Mark</a>.
+          Rubyric is hosted by 
           <!--, an educational technology company originally founded by a group of researchers and teachers from <a href="http://www.aalto.fi/en/" target="_blank">Aalto University</a>, Finland.-->
         </p>
         
         <p>
           email:
-          contact<span class="obfuscate">-REMOVE-THIS-</span>@rubyric.com
+          <!-- contact<span class="obfuscate">-REMOVE-THIS-</span>@rubyric.com -->
         </p>
       </div>
     </div>
