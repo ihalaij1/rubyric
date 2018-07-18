@@ -276,8 +276,10 @@ class Review < ApplicationRecord
         pages = JSON.parse(self.payload)['pages']
         pages.each do |page|
           feedbacks = page['feedback']
-          feedbacks.each do |feedback|
-            final_comment.append feedback['text']
+          if feedbacks
+            feedbacks.each do |feedback|
+              final_comment.append feedback['text']
+            end
           end
         end
         final_comment.join()

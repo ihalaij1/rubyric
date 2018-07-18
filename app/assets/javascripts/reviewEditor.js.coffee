@@ -567,7 +567,7 @@ class @ReviewEditor extends @Rubric
       
       for category in @feedbackCategories
         categoryText = categoryTexts[category.id]
-        continue if categoryText.length < 1
+        continue if !categoryText || categoryText.length < 1
         
         finalText += "= #{category.name} =\n" if category.name.length > 0
         finalText += categoryText + '\n'
