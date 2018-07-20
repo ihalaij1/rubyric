@@ -1,5 +1,5 @@
 <% content_for :javascript do %>
-  <%= javascript_include_tag 'bootstrap.js' %>
+  <!--%= javascript_include_tag 'bootstrap.js' %-->
   <script>
     $(function () {
       $('[data-toggle="popover"]').popover({'trigger': 'hover', 'placement': 'top', 'html': true})
@@ -87,5 +87,8 @@
     var reviewModal = $(e.target);
     var url = reviewModal.data("url");
     $(".modal").children().children().load(url);
+    $(this).find('.modal-content').css( {
+      'overflow-x': 'scroll'
+    });
   });
 </script>
