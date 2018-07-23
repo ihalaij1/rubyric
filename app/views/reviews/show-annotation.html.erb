@@ -2,6 +2,8 @@
   <%= javascript_include_tag 'views/reviews/annotation' %>
 <% end %>
 
+<%= hidden_field_tag :show_review, true %>
+
 <div class="container-fluid">
   <div class="page-header">
     <h1><%= "#{@course.full_name} (#{@course_instance.name}) - #{@exercise.name}" %> </h1>

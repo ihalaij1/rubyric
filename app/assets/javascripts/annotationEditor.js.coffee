@@ -393,6 +393,7 @@ class @AnnotationEditor extends Rubric
 
     @element = $('#annotation-editor')
     @role = $('#role').val()
+    @show_review = $('#show_review').val()     # true if annotation editor is used in show view
     @submission_url = @element.data('submission-url')
     @page_count = @element.data('page-count')
     @page_width = parseFloat(@element.data('page-width'))
@@ -487,7 +488,7 @@ class @AnnotationEditor extends Rubric
       new_zoom = 2.0 if new_zoom > 2.0
       @zoom(new_zoom)
 
-    unless @demo_mode
+    unless @demo_mode || @show_review
       $(window).bind 'beforeunload', =>
         return "You have unsaved changes. Leave anyway?" unless @saved
 
@@ -651,6 +652,8 @@ class @AnnotationEditor extends Rubric
 # Populates the HTML-form from the model. This is called just before submitting.
   save: (options) ->
     options ||= {}
+    if @show_review
+      return false
 
     # Encode review as JSON
     $('#review_payload').val(JSON.stringify(@commandBuffer.as_json()))
