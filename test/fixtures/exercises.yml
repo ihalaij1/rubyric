@@ -130,3 +130,10 @@ authenticated_submit:
   name: Only authenticated can submit
   deadline: <%= 10.days.from_now.to_s(:db) %>
   submission_type: text
+
+lti_exercise:
+  course_instance: lti_instance
+  name: LTI exercise
+  deadline: <%= 10.days.from_now.to_s(:db) %>
+  submission_type: text
+  lti_resource_link_id: 12345

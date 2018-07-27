@@ -115,6 +115,33 @@ shibuser:
   lastname: 21
   email: student21@example.com
 
+lti_student1:
+  login: '00011'
+  studentnumber: '00011'
+  firstname: Student
+  lastname: 1
+  email: student11@example.com
+  lti_user_id: 9357054
+  lti_consumer: testi
+
+lti_student2:
+  login: 'student22'
+  studentnumber: '00022'
+  firstname: Student
+  lastname: 2
+  email: student22@example.com
+  lti_user_id: 9482579
+  lti_consumer: testi
+
+lti_student3:
+  login: 'student33'
+  studentnumber: '00033'
+  firstname: Student
+  lastname: 3
+  email: student33@example.com
+  lti_user_id: 8564760
+  lti_consumer: testi
+
 ghost:
   studentnumber: '00022'
 

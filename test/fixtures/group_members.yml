@@ -16,3 +16,11 @@ group3_member1:
 
 unauthenticated_user:
   group: unauthenticated_group
+
+lti_group_member1:
+  group: lti_group
+  user: lti_student1
+
+lti_group_member2:
+  group: lti_group
+  user: lti_student3
