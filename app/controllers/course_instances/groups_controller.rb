@@ -20,9 +20,9 @@ class CourseInstances::GroupsController < GroupsController
     user_ids << @course_instance.student_ids
     users = User.find(user_ids)
 
-    submissions = Submission.all
-    exercises = Exercise.where(course_instance_id: @course_instance.id)
-    
+    exercises = @course_instance.exercises
+    submissions = Submission.where(exercise_id: exercises.ids)
+
     @groups_json = {
       groups: groups.as_json(
                              :only => [:id],

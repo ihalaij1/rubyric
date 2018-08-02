@@ -261,7 +261,6 @@ class SubmissionsController < ApplicationController
       @submission.extension = 'txt'
     else
       @submission.file = params[:file]
-      @submission.annotatable = true
     end
     @submission.payload = params[:payload]
 

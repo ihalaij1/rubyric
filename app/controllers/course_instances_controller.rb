@@ -66,7 +66,7 @@ class CourseInstancesController < ApplicationController
     @course_instance = CourseInstance.new(course_instance_params)
     course_instance_valid = @course_instance.valid?
 
-    if params[:course_instance][:course_id]
+    if !params[:course_instance][:course_id].blank?
       @course = Course.find(params[:course_instance][:course_id])
       return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
       course_valid = true
@@ -94,6 +94,7 @@ class CourseInstancesController < ApplicationController
       redirect_to @course_instance
       log "create_course_instance success #{@course_instance.id}"
     else
+      @course_instance.course = @course
       render action: 'new', layout: 'narrow-new'
       log "create_course_instance invalid #{@course_instance.id} #{@course_instance.errors.full_messages.join('. ')}"
     end
