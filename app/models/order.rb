@@ -4,7 +4,7 @@ class Order < ApplicationRecord
   validates_presence_of :amount, :description, :user_id
   after_create :create_payment
 
-  attr_accessible :amount #, :description, :state, :payment_method
+  # attr_accessible :amount #, :description, :state, :payment_method
   attr_accessor :return_url, :cancel_url, :payment_method
 
   def payment
@@ -37,4 +37,4 @@ class Order < ApplicationRecord
     payment.links.find{|link| link.method == "REDIRECT" }.try(:href)
   end
 
-end 
+end
