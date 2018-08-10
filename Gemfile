@@ -70,7 +70,7 @@ gem 'rest-client'
 
 #gem 'paypal-sdk-core' # , :git => 'https://github.com/paypal/sdk-core-ruby.git'
 gem 'paypal-sdk-rest'
-gem 'ims-lti'
+gem 'ims-lti', '1.1.13'
 
 source 'https://rails-assets.org' do
   gem 'rails-assets-bootstrap-css'
