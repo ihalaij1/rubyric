@@ -1,10 +1,21 @@
-# Install Ruby environment
+# Install environment
+Install ruby 2.4.0, for example with rvm or rbenv. Then install rails:
 ```sh
-sudo aptitude install ruby2.1.9
-sudo gem install rake
-sudo gem install bundler
+gem install rails -v 5.0.2
 ```
-
+or
+```sh
+sudo gem install rails -v 5.0.2
+```
+Rubyric uses postgresql as database. Install postgresql and create user.
+```sh
+sudo apt-get install postgresql
+sudo -u postgres createuser --interactive
+```
+For Rubyric to work properly you should also have pdfinfo and ghostscript installed.
+```sh
+sudo apt-get install poppler-utils ghostscript
+```
 
 # Install Rubyric
 
@@ -27,10 +38,11 @@ sudo -u postgres createdb -O my_username rubyric
 
 ### Initialize database
 ```sh
-rake db:setup
+rails db:setup
 ```
 
 ### Start server
 ```sh
-bundle exec rails server
+bin/delayed_job start
+rails server
 ```
