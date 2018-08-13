@@ -6,7 +6,7 @@ require 'oauth/request_proxy/action_controller_request'
 class SessionsController < ApplicationController
   #before_filter :require_no_user, :only => [:new, :create]
   #before_filter :require_user, :only => :destroy
-  #skip_before_action :verify_authenticity_token, only: [:lti]
+  skip_before_action :verify_authenticity_token, only: [:lti]
 
   layout 'narrow-new'
 

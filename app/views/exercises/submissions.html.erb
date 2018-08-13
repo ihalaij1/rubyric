@@ -28,13 +28,18 @@
   <!-- No groups warning -->
   <div class="alert alert-info">
     <p>
-      No submissions have been received yet. 
-      Give the following link to students for submitting:
-      <%= link_to submit_url(@exercise.id), submit_url(@exercise.id) %>
+      No submissions have been received yet.
+      <% if @course_instance.submission_policy != 'lti' %>
+        Give the following link to students for submitting:
+        <%= link_to submit_url(@exercise.id), submit_url(@exercise.id) %>
+      <% end %>
     </p>
-  
+
     <p>
-      or <%= link_to 'Generate example submissions', exercise_create_example_submissions_path(@exercise), :class => 'btn btn-default' %>
+      <% if @course_instance.submission_policy != 'lti' %>
+        or
+      <% end %>
+      <%= link_to 'Generate example submissions', exercise_create_example_submissions_path(@exercise), :class => 'btn btn-default' %>
     </p>
   </div>
 <% end %>
@@ -67,8 +72,10 @@
 
 <% if @course_instance.submission_policy != 'lti' %>
   <p><strong>Submit url: </strong><%= link_to submit_url(@exercise.id), submit_url(@exercise.id) %> <span class="hint">- Give this link to students.</span></p>
+<% else %>
+  <p><strong>Service url: </strong><%= link_to root_url + "aplus/#{@exercise.id}", root_url + "aplus/#{@exercise.id}" %></p>
 <% end %>
-  
+
 <% unless @groups.empty? %>
   <h2>
     Submissions
@@ -79,7 +86,7 @@
       </div>
     <% end %>
   </h2>
-  
+
   <% if params[:view] == 'thumbnails' %>
     <div class="collaborative-assignments">
       <%= render :partial => 'collaborative_group', :collection => @groups %>

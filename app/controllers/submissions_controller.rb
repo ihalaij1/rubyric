@@ -1,5 +1,6 @@
 class SubmissionsController < ApplicationController
   before_action :load_submission, except: [:new, :create, :aplus_get, :aplus_submit, :receive_email]
+  skip_before_action :verify_authenticity_token, only: [:aplus_submit]
 
   layout 'narrow'
 
