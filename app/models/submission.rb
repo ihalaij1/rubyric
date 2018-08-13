@@ -1,6 +1,6 @@
 #require "ftools"
 require 'open3.rb'
-require 'rest_client'
+require 'rest-client'
 
 # http://wiki.rubyonrails.org/rails/pages/HowtoUploadFiles
 
