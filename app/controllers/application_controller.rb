@@ -100,7 +100,7 @@ class ApplicationController < ActionController::Base
       logger.debug "Existing lti_ids: #{existing_lti_ids}"
 
       # Are the arrays identical, ignoring order?
-      identical = requested_lti_ids.size == existing_lti_ids.size and requested_lti_ids & existing_lti_ids == requested_lti_ids
+      identical = requested_lti_ids.size == existing_lti_ids.size && requested_lti_ids & existing_lti_ids == requested_lti_ids
       logger.debug "Identical: #{identical}"
       identical
     end
@@ -109,7 +109,7 @@ class ApplicationController < ActionController::Base
       logger.debug "No existing group found. Creating."
 
       groupname = payload.collect{|member| member['email']}.join(', ')
-      logger.debug "Groupo name: #{groupname}"
+      logger.debug "Group name: #{groupname}"
       group = Group.new({:course_instance_id => exercise.course_instance_id, :exercise_id => exercise.id, :name => groupname})
       group.save(:validate => false)
 
@@ -120,7 +120,7 @@ class ApplicationController < ActionController::Base
         member = GroupMember.new(:email => member['email'], :studentnumber => member['student_id'].to_s)
         member.group = group
         member.user = group_user
-        member.save
+        member.save(:validate => false)
       end
     else
       logger.debug "Using existing group."
@@ -141,6 +141,7 @@ class ApplicationController < ActionController::Base
     user.studentnumber = studentnumber
     user.lastname = lastname
     user.firstname = firstname
+    user.email = email
     user.reset_persistence_token
     if user.save(:validate => false)
       course_instance.students << user unless course_instance.students.include?(user)

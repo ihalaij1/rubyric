@@ -210,7 +210,7 @@ class ExercisesController < ApplicationController
       options[:include_peer_review_count] = @exercise.peer_review?
     end
 
-    groups = Group.where(course_instance_id: @exercise.course_instance_id).includes([{submissions: [reviews: [:user, :submission], group: :users]}, {group_members: :user}])
+    groups = Group.where(course_instance_id: @exercise.course_instance_id).includes([{submissions: [reviews: :user]}, {group_members: :user}])
     @results = @exercise.results(groups, options)
 
     # Sort the result
@@ -534,8 +534,8 @@ class ExercisesController < ApplicationController
   def exercise_params
     # TODO: rename groupsizemin to group_size_min
     # TODO: rename groupsizemax to group_size_max
-    params.require(:exercise).permit(:course_instance_id, :name, :deadline, :groupsizemin, :groupsizemax, :submission_type, :allowed_extensions, :review_mode, 
-                                     :grader_can_email, :submit_pre_message, :peer_review_goal, :peer_review_timing, :collaborative_mode, :anonymous_graders, 
+    params.require(:exercise).permit(:course_instance_id, :name, :deadline, :groupsizemin, :groupsizemax, :submission_type, :allowed_extensions, :review_mode,
+                                     :grader_can_email, :submit_pre_message, :peer_review_goal, :peer_review_timing, :collaborative_mode, :anonymous_graders,
                                      :anonymous_submissions, :lti_resource_link_id, :lti_resource_link_id_review, :lti_resource_link_id_feedback)
   end
 end
