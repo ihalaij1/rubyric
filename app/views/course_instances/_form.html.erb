@@ -61,8 +61,8 @@
       </label>
     </div>
   </div>
-  
-  <% if @course_instance.submission_policy == 'lti' %>
+
+  <div id="lti-params" style="display:<%= @course_instance.submission_policy == 'lti' ? 'block' : 'none'%>">
     <div class="form-group<%= @course_instance.errors[:lti_consumer].any? ? ' has-error has-feedback' : '' %>">
       <%= f.label :lti_consumer, 'LTI consumer ID', :class => 'col-sm-2 control-label' %>
       <div class="col-sm-4">
@@ -85,8 +85,8 @@
         <% end %>
       </div>
     </div>
-  <% end %>
-  
+  </div>
+
   <!-- Active -->
   <% unless @course_instance.new_record? %>
     <div class="form-group">
