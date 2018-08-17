@@ -322,7 +322,7 @@ class Annotation
     screenPosition = {x: pagePosition.x * @zoom, y: pagePosition.y * @zoom} if !screenPosition && pagePosition
 
     @pagePosition = ko.observable(pagePosition || {x: 0, y: 0})
-    @minimized(true) if !@submissionPage.pageWidth()? || @pagePosition().x < 1.0 * @submissionPage.pageWidth()
+    @minimized(true) if !@submissionPage.pageWidth()? || @pagePosition().x > 1.0 * @submissionPage.pageWidth()
     @screenPosition = ko.observable(screenPosition || {x: 0, y: 0})
     this.limitCoordinates()
 
