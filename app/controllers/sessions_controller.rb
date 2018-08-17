@@ -213,8 +213,11 @@ class SessionsController < ApplicationController
       else # if lti_view == :review || lti_view == :feedback
         redirect_to exercise_path(:id => @exercise.id)
       end
-    else
+    elsif @course_instance
       redirect_to course_instance_path(:id => @course_instance.id)
+    else
+      flash[:warning] = "Course has not yet been configured."
+      redirect_to new_course_instance_path(submission_policy: 'lti')
     end
   end
 

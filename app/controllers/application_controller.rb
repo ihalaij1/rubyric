@@ -222,6 +222,7 @@ class ApplicationController < ActionController::Base
 #       params[:user_id] = '1'
 #     end
 
+    @is_instructor = (params['roles'] || '').split(',').any? {|role| role.strip == 'Instructor'}
     # Load course instance or ensure that the one already loaded matches the LTI headers.
     # (There could be a mismatch if LTI launched with an URL that specifies the exercise or course_instance_id).
     if defined?(@course_instance)
@@ -232,13 +233,13 @@ class ApplicationController < ActionController::Base
     else
       @course_instance = CourseInstance.where(:lti_consumer => params['oauth_consumer_key'], :lti_context_id => params[:context_id]).first
 
-      unless @course_instance
+      unless @course_instance || @is_instructor
         logger.warn "LTI login failed. Could not find a course instance with lti_consumer=#{params['oauth_consumer_key']}, lti_context_id=#{params[:context_id]}"
         render :template => "shared/lti_error"
         return false
       end
     end
-    @course =  @course_instance.course
+    @course =  @course_instance.course if @course_instance
 
     view = :submit
     if defined?(@exercise)
@@ -246,7 +247,7 @@ class ApplicationController < ActionController::Base
         logger.warn "LTI login failed. LTI headers specify exercise #{params['oauth_consumer_key']}/#{params[:context_id]}/#{params[:resource_link_id]} but @exercise (id #{@exercise.id}), which had alreay been loaded, has lti_resource_link_id=#{@exercise.lti_resource_link_id || 'nil'}"
         return false
       end
-    else
+    elsif @course_instance
       @exercise = Exercise.where(:course_instance_id => @course_instance.id, :lti_resource_link_id => params[:resource_link_id]).first
 
       unless @exercise
@@ -279,12 +280,13 @@ class ApplicationController < ActionController::Base
       return false
     end
 
-    # Add student to course
-    @is_instructor = (params['roles'] || '').split(',').any? {|role| role.strip == 'Instructor'}
-    if @is_instructor
-      @course_instance.course.teachers << @user unless @course_instance.course.teachers.include?(@user)
-    else
-      @course_instance.students << @user unless @course_instance.students.include?(@user) || @course_instance.assistants.include?(@user) || @course_instance.course.teachers.include?(@user)
+    # Add student to course if course exists
+    if @course_instance
+      if @is_instructor
+        @course_instance.course.teachers << @user unless @course_instance.course.teachers.include?(@user)
+      else
+        @course_instance.students << @user unless @course_instance.students.include?(@user) || @course_instance.assistants.include?(@user) || @course_instance.course.teachers.include?(@user)
+      end
     end
 
     # Create session

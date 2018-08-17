@@ -35,7 +35,8 @@ class CourseInstancesController < ApplicationController
 
     @pricing = current_user.get_pricing
     @pricing.planned_students = 20
-    @course_instance = CourseInstance.new(submission_policy: 'unauthenticated')
+    policy = ['unauthenticated', 'authenticated', 'enrolled', 'lti'].include?(params[:submission_policy]) ? params[:submission_policy] : 'unauthenticated'
+    @course_instance = CourseInstance.new(submission_policy: policy)
     @course_instance.course = @course
     # :name => Time.now.year
 
@@ -80,8 +81,8 @@ class CourseInstancesController < ApplicationController
 
       if @course.new_record?
         @course.organization_id = current_user.organization_id
-        @course.teachers << current_user
         @course.save
+        @course.teachers << current_user
       end
 
       @course_instance.pricing_id = @pricing.id
