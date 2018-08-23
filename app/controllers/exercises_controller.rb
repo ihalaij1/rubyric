@@ -36,11 +36,13 @@ class ExercisesController < ApplicationController
 
       # TODO: should we remove this?
       # Koodiaapinen hack. Remove after 2016.
-      sort_mode = if @exercise.id == 208 || @exercise.id == 289
-                    :name
-                  else
-                    :id
-                  end
+      #sort_mode = if @exercise.id == 208 || @exercise.id == 289
+      #              :name
+      #             else
+      #              :id
+      #            end
+
+      sort_mode = :id
 
       @groups = @groups.to_a
 

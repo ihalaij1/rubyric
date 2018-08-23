@@ -1,7 +1,7 @@
 class FeedbackMailer < ActionMailer::Base
   default :from => RUBYRIC_EMAIL
   default_url_options[:host] = RUBYRIC_HOST
-  
+
   # Sends the review by email to the students
   def review(review)
     @review = review
@@ -33,21 +33,21 @@ class FeedbackMailer < ActionMailer::Base
       review.save
       return
     end
-    
+
     # Attachment
     unless @review.filename.blank?
       attachments[@review.filename] = File.read(@review.full_filename)
     end
-    
+
     subject = "#{@course.full_name} - #{@exercise.name}"
-    
+
     if review.type == 'AnnotationAssessment'
       template_name = 'annotation'
       @review_url = review_url(review.id, :group_token => group.access_token, :protocol => 'https://')
     else
       template_name = 'review'
     end
-    
+
     I18n.with_locale(@course_instance.locale || I18n.locale) do
       mail(
         :to => recipients.join(","),
@@ -62,37 +62,37 @@ class FeedbackMailer < ActionMailer::Base
     review.status = 'mailed'
     review.save
   end
-  
+
   def bundled_reviews(course_instance, user, reviews, exercise_grades)
     return if user.email.blank?
-    
+
     @reviews = reviews
     @exercise_grades = exercise_grades
     @course_instance = course_instance
     @course = @course_instance.course
-    
-    from = @course.email 
+
+    from = @course.email
     from = RUBYRIC_EMAIL if from.blank?
-    
+
     subject = "#{@course.full_name}"
-    
+
     # Attachments
     @reviews.each do |review|
       attachments[review.filename] = File.read(review.full_filename) unless review.filename.blank?
     end
-    
+
     I18n.with_locale(@course_instance.locale || I18n.locale) do
       mail(
         :to => user.email, :from => from, :subject => subject
       )
     end
   end
-  
+
   def delivery_errors(errors)
     @errors = errors
     mail(:to => ERRORS_EMAIL, :subject => '[Rubyric] Undelivered feedback mails')
   end
-  
+
   # Sends grades and feedback to A+
   def aplus_feedback(submission_id)
     submission = Submission.find(submission_id)
@@ -103,7 +103,7 @@ class FeedbackMailer < ActionMailer::Base
     subject = "#{@course.full_name} - #{@exercise.name}"
     peer_reviews_required = @exercise.peer_review?
     always_pass = @exercise.rubric_grading_mode == 'always_pass'
-    
+
     @reviews = []
     review_ids = []
     submission.reviews.each do |review|
@@ -111,16 +111,16 @@ class FeedbackMailer < ActionMailer::Base
       @reviews << review
       review_ids << review.id
     end
-    
+
     # Get final grade of the group. FIXME: repetition in ExercisesController#results
-    grading_mode = begin 
+    grading_mode = begin
         JSON.parse(@exercise.grading_mode || '{}')
       rescue Exception => e
         logger.warn "Invalid grading mode for exercise #{@exercise.id}: #{@exercise.grading_mode}\n#{e}"
         {}
       end
     logger.debug "GRADING MODE: #{grading_mode}"
-    
+
     if always_pass
       max_grade = 1
       combined_grade = 1
@@ -138,27 +138,27 @@ class FeedbackMailer < ActionMailer::Base
       combined_grade = 1
       logger.warn "No max_grade for exercise #{@exercise.id}."
     end
-    
+
     # Get feedback (same for every member)
     feedback = I18n.with_locale(@course_instance.locale || I18n.locale) do
       render_to_string(action: :aplus).to_str
     end
-    
+
     # Koodiaapinen hack 2016
     # Convert points to pass/fail
-    if [218, 235, 255, 257].include?(@exercise.id)
-      if combined_grade >= 4.99
-        combined_grade = max_grade
-      else
-        combined_grade = 0
-      end
-    end
-    
+    #if [218, 235, 255, 257].include?(@exercise.id)
+    #  if combined_grade >= 4.99
+    #    combined_grade = max_grade
+    #  else
+    #    combined_grade = 0
+    #  end
+    #end
+
     # Have all members conducted peer reviews?
     # peer_reviews_ok = !peer_reviews_required || group.users.all? { |student|
     #    student.peer_review_count(@exercise)[:finished_peer_reviews] >= @exercise.peer_review_goal
     #  }
-    
+
     # Deliver
     success = false
     response = nil
@@ -174,7 +174,7 @@ class FeedbackMailer < ActionMailer::Base
       logger.debug params
       logger.debug params.class.name
       provider = IMS::LTI::ToolProvider.new(consumer_key, secret, params)
-      
+
       response = provider.post_replace_result!(combined_grade / max_grade)
       if response.success? || response.processing?
         success = true
@@ -193,7 +193,7 @@ class FeedbackMailer < ActionMailer::Base
         logger.debug "Skipping A+ API call in development environment. #{submission.aplus_feedback_url}, points: #{combined_grade.round}, max_points: #{max_grade.round}"
       end
     end
-    
+
     # Generate JSON for manual transfer
 #       object = {
 #         "students_by_email" => submission.group.group_members.map {|member| member.email },
@@ -203,12 +203,12 @@ class FeedbackMailer < ActionMailer::Base
 #         "submission_time" => submission.created_at,
 #         "points" => (6 * combined_grade / max_grade).round
 #       }
-#       
+#
 #       File.open('aplus_grades.json', 'a') do |file|
 #         file.print object.to_json
 #         file.puts ','
 #       end
-    
+
     if success
       Review.where(:id => review_ids, :status => ['finished', 'mailing']).update_all(:status => 'mailed')
     else
@@ -224,9 +224,9 @@ class FeedbackMailer < ActionMailer::Base
     @exercise = @submission.exercise
     @course_instance = @exercise.course_instance
     @course = @course_instance.course
-    
+
     subject = "#{@course.full_name} - #{@exercise.name}"
-    
+
     # FIXME: repetition, see review()
     recipients = []
     @group.group_members.each do |member|
@@ -236,14 +236,14 @@ class FeedbackMailer < ActionMailer::Base
         recipients << member.user.email
       end
     end
-    
+
     I18n.with_locale(@course_instance.locale || I18n.locale) do
       mail(
         :to => recipients.join(","),
         :subject => subject
       )
     end
-    
+
   end
-  
+
 end
