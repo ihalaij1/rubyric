@@ -40,6 +40,8 @@ class CourseInstancesController < ApplicationController
     @course_instance.course = @course
     # :name => Time.now.year
 
+    @ask_agree_terms = Rails.configuration.ask_agree_terms    # whether or not it is needed to ask user to agree to the terms
+
     render :action => 'new', :layout => 'narrow-new'
     log "create_course_instance #{@pricing.shortname} #{@course.id}"
   end
@@ -61,10 +63,15 @@ class CourseInstancesController < ApplicationController
   # POST /course_instances
   # POST /course_instances.xml
   def create
+    @ask_agree_terms = Rails.configuration.ask_agree_terms
     @pricing = current_user.get_pricing
     @pricing.planned_students = params[:planned_students].to_i
 
     @course_instance = CourseInstance.new(course_instance_params)
+
+    # If configurations say it is not needed to ask user to agree to terms
+    # set course instances agree_terms attribute to true ('1')
+    @course_instance.agree_terms = '1' unless @ask_agree_terms
     course_instance_valid = @course_instance.valid?
 
     if !params[:course_instance][:course_id].blank?

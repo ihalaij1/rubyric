@@ -106,7 +106,7 @@
   <% end %>
 
   <!-- Terms and conditions -->
-  <% if @course_instance.new_record? %>
+  <% if @course_instance.new_record? && @ask_agree_terms %>
     <%= render :partial => 'toc', :locals => { :f => f } %>
   <% end %>
 

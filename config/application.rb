@@ -13,8 +13,11 @@ module Rubyric
     # -- all .rb files in that directory are automatically loaded.
     config.autoload_paths += Dir[Rails.root.join('app', 'models', '{*/}')]
 
+    # Custom configuration whether or not to ask agree terms in create course instance
+    config.ask_agree_terms = true
+
     config.after_initialize do
-		Delayed::Backend::ActiveRecord::Job.table_name='delayed_jobs'    	
+		Delayed::Backend::ActiveRecord::Job.table_name='delayed_jobs'
     end
   end
 end

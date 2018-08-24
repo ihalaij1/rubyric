@@ -50,4 +50,8 @@ Rails.application.configure do
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
   # config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+
+  # Custom configuration whether or not to ask agree terms in create course instance
+  # Default for all environments is defined in application.rb as true
+  config.ask_agree_terms = false
 end
