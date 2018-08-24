@@ -36,7 +36,7 @@ class CourseInstancesController < ApplicationController
     @pricing = current_user.get_pricing
     @pricing.planned_students = 20
     policy = ['unauthenticated', 'authenticated', 'enrolled', 'lti'].include?(params[:submission_policy]) ? params[:submission_policy] : 'unauthenticated'
-    @course_instance = CourseInstance.new(submission_policy: policy)
+    @course_instance = CourseInstance.new(submission_policy: policy, lti_consumer: params[:lti_consumer], lti_context_id: params[:lti_context_id])
     @course_instance.course = @course
     # :name => Time.now.year
 

@@ -217,7 +217,7 @@ class SessionsController < ApplicationController
       redirect_to course_instance_path(:id => @course_instance.id)
     else
       flash[:warning] = "Course has not yet been configured."
-      redirect_to new_course_instance_path(submission_policy: 'lti')
+      redirect_to new_course_instance_path(submission_policy: 'lti', lti_context_id: params[:context_id], lti_consumer: params[:oauth_consumer_key])
     end
   end
 
