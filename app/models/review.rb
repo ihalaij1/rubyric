@@ -401,8 +401,8 @@ class Review < ApplicationRecord
     end
 
     aplus_submission_ids.each do |submission_id|
-      # NOTE: intentionally omitting .deliver because we don't actually want to send the reviews by email but post them to A+
-      FeedbackMailer.aplus_feedback(submission_id)
+      # Call .deliver, even though no mail is supposed to be send. No mail should be send since mail-method is not called in aplus_feedback
+      FeedbackMailer.aplus_feedback(submission_id).deliver
     end
 
     # Send delivery errors to teacher
