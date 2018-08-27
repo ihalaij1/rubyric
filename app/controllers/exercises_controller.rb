@@ -217,6 +217,8 @@ class ExercisesController < ApplicationController
 
     # Sort the result
     case params[:sort]
+    when 'lti-user-id'
+      @results.sort! { |a, b| (a[:member].user ? a[:member].user.lti_user_id || '' : '').downcase <=> (b[:member].user ? b[:member].user.lti_user_id || '' : '').downcase }
     when 'student-id'
       @results.sort! { |a, b| (a[:member].studentnumber || '').downcase <=> (b[:member].studentnumber || '').downcase }
     when 'first-name'
