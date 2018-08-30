@@ -1,5 +1,6 @@
 # Install environment
-Install ruby 2.4.0, for example with rvm or rbenv. Then install rails:
+Install ruby version 2.3.1 or higher, for example with rvm or rbenv. Then
+install rails:
 ```sh
 gem install rails -v 5.0.2
 ```
@@ -45,4 +46,19 @@ rails db:setup
 ```sh
 bin/delayed_job start
 rails server
+```
+
+### Make user Rubyric admin
+Open rails console
+```sh
+rails c
+```
+Find user and update admin attribute. You can find user by their user id with
+User.find(id) or by some other attributes with User.find_by(attribute: value).
+```sh
+User.find(id).update_attributes(admin: '1')
+```
+or you can create a new user as admin
+```sh
+User.create(email: email, password: password, admin: '1')
 ```
