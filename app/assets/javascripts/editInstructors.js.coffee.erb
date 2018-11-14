@@ -51,7 +51,7 @@ class UserEditor
     if data.length < 1
       # If query string looks like email, add invitation option
       if @query_string && @query_string.match(/.+@.+\..+/)
-        @search_results_table.html("<tr><td>User not found. <button class='btn btn-small btn-primary send-invitation-button'>Send invitation</button></td></tr>")
+        @search_results_table.html("<tr><td>User not found. <button class='btn btn-sm btn-primary send-invitation-button'>Send invitation</button></td></tr>")
       else
         @search_results_table.html("<tr><td><p class='hint'>No users found.</p></td></tr>")
       
@@ -59,7 +59,7 @@ class UserEditor
       html = ""
       for row in data
         @found_users[row['id']] = {firstname: row['firstname'], lastname: row['lastname']}
-        html += "<tr><td>#{row['lastname']} #{row['firstname']}</td><td><button class='btn btn-mini add-user' data-id='#{row['id']}'><i class='icon-plus' /></button></td></tr>"
+        html += "<tr><td>#{row['lastname']} #{row['firstname']}</td><td><button class='btn btn-xs add-user' data-id='#{row['id']}'><i class='icon-plus' /></button></td></tr>"
       
       @search_results_table.html(html)
   

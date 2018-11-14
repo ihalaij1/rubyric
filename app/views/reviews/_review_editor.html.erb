@@ -124,7 +124,7 @@
         <div class="alert alert-info">
           Individual pages cannot be edited because feedback is already finalized.
           <% if !@exercise.collaborative_mode.blank? || @is_assistant || @is_teacher %>
-            <button class="btn btn-small" data-bind="click: $root.clickCancelFinalize">Cancel finalizing</button>
+            <button class="btn btn-sm" data-bind="click: $root.clickCancelFinalize">Cancel finalizing</button>
           <% end %>
         </div>
       <!-- /ko -->
@@ -193,7 +193,7 @@
       </div>
 
       <!-- ko if: criteria().size > 0 -->
-        <p><button class="btn btn-small" type="button" data-bind="click: togglePhraseVisibility">Show/Hide Phrases</button></p>
+        <p><button class="btn btn-sm" type="button" data-bind="click: togglePhraseVisibility">Show/Hide Phrases</button></p>
       <!-- /ko -->
 
       <!-- Grades -->

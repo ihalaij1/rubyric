@@ -116,7 +116,7 @@
         <div class="alert alert-info">
           Individual pages cannot be edited because feedback is already finalized.
           <% if @exercise.collaborative_mode.blank? || @is_assistant || @is_teacher %>
-              <button class="btn btn-small" data-bind="click: $root.clickCancelFinalize">Cancel finalizing</button>
+              <button class="btn btn-sm" data-bind="click: $root.clickCancelFinalize">Cancel finalizing</button>
           <% end %>
         </div>
         <!-- /ko -->
@@ -137,7 +137,7 @@
             <!-- Heading -->
             <h3>
               <span data-bind="text: name"></span>
-              <span data-bind="text: grade()" type="button" class="btn btn-small highlighted"></span>
+              <span data-bind="text: grade()" type="button" class="btn btn-sm highlighted"></span>
             </h3>
             <div class="clear"></div>
 
@@ -327,13 +327,13 @@
         <div class="clearfix"></div>
 
         <div class="statusbar">
-          <button class="btn btn-mini pull-right" title="Delete annotation" data-bind="click: $parent.deleteAnnotation, clickBubble: false">
+          <button class="btn btn-xs pull-right" title="Delete annotation" data-bind="click: $parent.deleteAnnotation, clickBubble: false">
             <i class="glyphicon glyphicon-remove"></i>
           </button>
-          <button class="btn btn-mini pull-right minimize-button" title="Minimize" data-bind="click: $parent.minimizeAnnotation, clickBubble: false">
+          <button class="btn btn-xs pull-right minimize-button" title="Minimize" data-bind="click: $parent.minimizeAnnotation, clickBubble: false">
             <i class="glyphicon glyphicon-chevron-down"></i>
           </button>
-          <button class="btn btn-mini pull-right maximize-button" title="Maximize" data-bind="click: $parent.maximizeAnnotation, clickBubble: false">
+          <button class="btn btn-xs pull-right maximize-button" title="Maximize" data-bind="click: $parent.maximizeAnnotation, clickBubble: false">
             <i class="glyphicon glyphicon-chevron-up"></i>
           </button>
           <!-- ko if: phrase -->

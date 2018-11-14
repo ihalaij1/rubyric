@@ -58,7 +58,7 @@
   <!-- TODO: Should we remove this now? -->
   <!-- Koodiaapinen hack. Remove after 2016. -->
   <% if @exercise.peer_review_active? && @own_submission_count > 0 %> <!-- || @exercise.id == 289 || @exercise.id == 261) %-->
-    <%= button_to t('.new_peer_review'), exercise_create_peer_review_path(@exercise.id), class: 'btn btn-primary btn-large' %>
+    <%= button_to t('.new_peer_review'), exercise_create_peer_review_path(@exercise.id), class: 'btn btn-primary btn-lg' %>
   <% end %>
 <% end %>
 
