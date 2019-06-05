@@ -15,7 +15,7 @@ class ReviewsController < ApplicationController
 
     @can_view_review_raters = (@group.has_member? current_user) or (@review.user == current_user) or (@course.has_teacher current_user)
     @can_rate_review = @group.has_member? current_user
-    @rating_item = ReviewRating.where(user_id: current_user.id, review_id: @review.id).first_or_initialize
+    @rating_item = ReviewRating.where(user: current_user, review_id: @review.id).first_or_initialize
 
     if @review.type == 'AnnotationAssessment'
       @submission = @review.submission
@@ -84,7 +84,7 @@ class ReviewsController < ApplicationController
     if @review.status == 'mailed' || @review.status == 'invalidated'
       flash[:warning] = 'This review cannot be edited any more'
       respond_to do |format|
-        format.json { 
+        format.json {
           render json: {status: "fail", message: "This review cannot be edited any more"} } # TODO: error message
         format.html {
           redirect_to @exercise
@@ -113,7 +113,7 @@ class ReviewsController < ApplicationController
       Review.delay.deliver_reviews([@review.id]) if @deliver_immediately
 
       # If review has been invalidated or mailed, redirect back to exercise
-      if params[:review][:status] == 'mailed' || params[:review][:status] == 'mailing' || params[:review][:status] == 'invalidated' 
+      if params[:review][:status] == 'mailed' || params[:review][:status] == 'mailing' || params[:review][:status] == 'invalidated'
         respond_to do |format|
           format.html {
             redirect_to @exercise
@@ -312,7 +312,7 @@ class ReviewsController < ApplicationController
     review = Review.find(params[:id])
     @exercise = review.submission.exercise
     load_course
-    
+
     rating = params[:rating]
 
     # only group member of submission can perform review rating
@@ -320,17 +320,17 @@ class ReviewsController < ApplicationController
 
     if @course.has_teacher(current_user) || group.has_member?(current_user)
       rating_item = ReviewRating.where(user_id: current_user.id, review_id: review.id).first_or_initialize
-      
+
       logger.info(rating_item)
-      
+
       rating_item.rating = rating
       rating_item.save
-      
+
       #ReviewRating.delay.deliver_ratings_lti(rating_item.id)
-      
-      render nothing: true, status: :ok
+
+      head :ok
     else
-      render nothing: true, status: :forbidden
+      head :forbidden
     end
   end
 
@@ -338,6 +338,6 @@ class ReviewsController < ApplicationController
 
   def review_params
     params.require(:review).permit(:payload, :status, :grade, :feedback)
-  end  
+  end
 
 end
