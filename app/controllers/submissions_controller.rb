@@ -415,6 +415,7 @@ class SubmissionsController < ApplicationController
       @user.save(validate: false)
     else
       @user = lti_create_user(params['oauth_consumer_key'], params[:user_id], organization, @exercise.course_instance, params[:custom_student_id], params['lis_person_name_family'], params['lis_person_name_given'], params['lis_person_contact_email_primary'])
+      add_user_to_course_instance(@user, @exercise.course_instance)
     end
     @is_teacher = @course.has_teacher(current_user)
 

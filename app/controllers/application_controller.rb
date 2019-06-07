@@ -116,6 +116,7 @@ class ApplicationController < ActionController::Base
       # Create group
       payload.each do |member|
         group_user = User.where(:lti_consumer => lti_consumer, :lti_user_id => member['user'].to_s).first || lti_create_user(lti_consumer, member['user'].to_s, organization, exercise.course_instance, member['student_id'].to_s, nil, nil, member['email'])
+        add_user_to_course_instance(group_user, exercise.course_instance)
         logger.debug "Creating member: #{member['user'].to_s} #{member['email']}"
         member = GroupMember.new(:email => member['email'], :studentnumber => member['student_id'].to_s)
         member.group = group
@@ -144,8 +145,6 @@ class ApplicationController < ActionController::Base
     user.email = email
     user.reset_persistence_token
     if user.save(:validate => false)
-      course_instance.students << user unless course_instance.students.include?(user)
-
       logger.info("Created new user #{oauth_consumer_key}/#{lti_user_id} (LTI)")
       CustomLogger.info("#{oauth_consumer_key}/#{lti_user_id} create_user_lti success")
     else
@@ -157,6 +156,12 @@ class ApplicationController < ActionController::Base
 
     user
   end
+  
+  def add_user_to_course_instance(user, course_instance)
+    if course_instance && user
+      course_instance.students << user unless course_instance.students.include?(user)
+    end
+  end
 
 
   # Authenticates the LTI signature
@@ -164,6 +169,7 @@ class ApplicationController < ActionController::Base
   # Renders an error message and returns false otherwise.
   def authenticate_lti_signature(options = {})
     #return true if Rails.env == 'development' && request.local?
+    #return true if Rails.env.test? # Allows skipping authetication in test environment
 
     unless params['oauth_consumer_key'] && params[:context_id] && params[:resource_link_id] && params[:user_id]
       @heading =  "Insufficient LTI parameters received"
@@ -271,6 +277,7 @@ class ApplicationController < ActionController::Base
       @user.save(:validate => false)
     else
       @user = lti_create_user(params['oauth_consumer_key'], params[:user_id], @organization, @course_instance, params[:custom_student_id], params['lis_person_name_family'], params['lis_person_name_given'], params['lis_person_contact_email_primary'])
+      add_user_to_course_instance(@user, @course_instance)
     end
 
     unless @user
