@@ -21,6 +21,8 @@ teacher1:
   lastname: 1
   email: teacher1@example.com
   persistence_token: 6cde0674657a8a313ce952df979de2830309aa4c11ca65805dd00bfdc65dbcc2f5e36718660a1d2e68c1a08c276d996763985d2f06fd3d076eb7bc4d97b1e317
+  lti_user_id: 9357059
+  lti_consumer: testi
 
 teacher2:
   login: teacher2
@@ -116,13 +118,14 @@ shibuser:
   email: student21@example.com
 
 lti_student1:
-  login: '00011'
+  login: 'student11'
   studentnumber: '00011'
   firstname: Student
   lastname: 1
   email: student11@example.com
   lti_user_id: 9357054
   lti_consumer: testi
+  persistence_token: 6cde0674657a8a313ce952df979de2830309aa4c11ca65805dd00bfdc65dbcc2f5e36718660a1d2e68c1a08c276d996763985d2f06fd3d076eb7bc4d97b1e317
 
 lti_student2:
   login: 'student22'
