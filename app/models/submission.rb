@@ -320,8 +320,8 @@ class Submission < ApplicationRecord
     unless submission.filename.blank?
       Open3.popen3('file', submission.full_filename()) do |stdin, stdout, stderr, wait_thr|
         line = stdout.gets
-        parts = line.strip.split(':')
-        logger.debug "File type: (#{parts[1]})"
+        parts = (line || "").strip.split(':')
+        logger.debug "File type: (#{parts[1]})" if parts.size > 1
 
         if parts.size < 1
           logger.error "file command failed: #{line}"
@@ -415,7 +415,7 @@ class Submission < ApplicationRecord
     # Get size
     Open3.popen3("identify -format \"%wx%h\" #{self.full_filename()}") do |stdin, stdout, stderr, wait_thr|
       line = stdout.gets
-      parts = line.split('x')
+      parts = (line || "").split('x')
 
       if parts.size < 1
         logger.error "failed to determine image size: #{line}"
@@ -437,7 +437,7 @@ class Submission < ApplicationRecord
   end
 
   def convert_ascii_to_html(file_type)
-    parts = file_type.split(',')
+    parts = (file_type || "").split(',')
 
     enable_syntax_highlight = !parts[0].include?('text')
 
