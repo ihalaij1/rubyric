@@ -456,9 +456,27 @@ class Submission < ApplicationRecord
     end
 
     unless enable_syntax_highlight
+      
+      # Tries to find file encoding from file_type so that file can be read and converted
+      # Assumes that file_type where ISO-8859 appears is ISO-8859-1 encoded which is not 
+      # always the case
+      # If encoding is not ISO-8859, UTF-8 or ASCII returns as reading file would fail
+      # TODO: Do something about assumption that ISO-8859 means ISO-8859-1
+      #       Possibly add support for more encodings
+      file_encoding = file_type ? file_type.split(' ').first.strip : ""
+      if file_encoding.include?("ISO-8859")
+        file_encoding = "ISO-8859-1:UTF-8"
+      elsif file_encoding.include?("UTF-8") || file_encoding.include?("ASCII")
+        file_encoding = "UTF-8"
+      else
+        logger.error "failed to recognize file type: #{file_type}"
+        return
+      end
+      
+      # Opens the file, reads and rewrites it
       File.open(converted_html_filename, "w") do |file|
         width = 80
-        content = IO.read(self.full_filename).gsub('<', '&lt;').gsub('>', '&gt;')
+        content = IO.read(self.full_filename, encoding: file_encoding).gsub('<', '&lt;').gsub('>', '&gt;')
         content = content.scan(/\S.{0,#{width}}\S(?=\s|$)|\S+/)
         content = '<div class="highlight"><pre>' + content.join("\n") + '</pre></div>'
 
