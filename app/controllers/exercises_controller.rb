@@ -540,6 +540,7 @@ class ExercisesController < ApplicationController
     # TODO: rename groupsizemax to group_size_max
     params.require(:exercise).permit(:course_instance_id, :name, :deadline, :groupsizemin, :groupsizemax, :submission_type, :allowed_extensions, :review_mode,
                                      :grader_can_email, :submit_pre_message, :peer_review_goal, :peer_review_timing, :collaborative_mode, :anonymous_graders,
-                                     :anonymous_submissions, :lti_resource_link_id, :lti_resource_link_id_review, :lti_resource_link_id_feedback)
+                                     :anonymous_submissions, :lti_resource_link_id, :lti_resource_link_id_review, :lti_resource_link_id_feedback,
+                                     :reviewers_see_all_submissions)
   end
 end

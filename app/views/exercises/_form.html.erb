@@ -104,6 +104,13 @@
         <%= f.check_box :grader_can_email %>
       </div>
     </div>
+    
+    <div class="control-group">
+      <%= f.label :reviewers_see_all_submissions, 'Allow reviewers to review all submissions', class: 'control-label' %><br/>
+      <div class="controls">
+        <%= f.check_box :reviewers_see_all_submissions %>
+      </div>
+    </div>
 
     <%
       # <h2>Message to be shown before submitting (HTML allowed):</h2>
