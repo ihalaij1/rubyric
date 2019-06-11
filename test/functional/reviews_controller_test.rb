@@ -9,6 +9,8 @@ class ReviewsControlllerTest < ActionDispatch::IntegrationTest
     @review2 = reviews(:second_review)   # review done by teacher1 for group1
     @review3 = reviews(:third_review)    # review done by teacher1 for group2
     @review4 = reviews(:fourth_review)   # review done by teacher1 for group3 in another course instance
+    @review5 = reviews(:fifth_review)    # review done by teacher1 for group2 at 
+                                         # exercise which allows reviewers to see all submissions
   end
 
   context "when logged in as a teacher of the course" do
@@ -65,8 +67,13 @@ class ReviewsControlllerTest < ActionDispatch::IntegrationTest
       post session_path, params: { session: { email: 'assistant1@example.com', password: 'assistant1'} }
     end
 
-    should "be able to view own  review" do
+    should "be able to view own review" do
       get review_path(@review1)
+      assert_response :success
+    end
+    
+    should "be able to view someone else's review if exercise allows reviwers to see all submissions" do
+      get review_path(@review5)
       assert_response :success
     end
 
@@ -92,6 +99,8 @@ class ReviewsControlllerTest < ActionDispatch::IntegrationTest
     should "not be able to access edit review done by somebody else" do
       get edit_review_path(@review2)
       assert_forbidden
+      get edit_review_path(@review5)
+      assert_forbidden
     end
 
     should "be able to update own review" do
@@ -106,6 +115,12 @@ class ReviewsControlllerTest < ActionDispatch::IntegrationTest
       patch review_path(@review2), params: { review: { grade:    "1",
                                                        feedback: "Terrible!" } }
       assert_equal_attributes Review.find(@review2.id), { grade: review_grade, feedback: review_feedback }
+      
+      review_grade2 = @review5.grade
+      review_feedback2 = @review5.feedback
+      patch review_path(@review5), params: { review: { grade:    "1",
+                                                       feedback: "Terrible!" } }
+      assert_equal_attributes Review.find(@review5.id), { grade: review_grade2, feedback: review_feedback2 }
     end
 
     should "be able to invalidate review through update" do
@@ -124,6 +139,8 @@ class ReviewsControlllerTest < ActionDispatch::IntegrationTest
       # Invalidate someone else's review
       get invalidate_review_path(@review2)
       assert_not_equal Review.find(@review2.id).status, "invalidated"
+      get invalidate_review_path(@review5)
+      assert_not_equal Review.find(@review5.id).status, "invalidated"
     end
     
   end

@@ -59,6 +59,10 @@ class Exercise < ApplicationRecord
   def peer_review_active?
     peer_review_goal && peer_review_goal != 0 && (peer_review_timing != 'after_deadline' || Time.now > deadline)
   end
+  
+  def show_all_submissions_to?(user)
+    user && course_instance.has_assistant(user) && reviewers_see_all_submissions
+  end
 
   # Returns a relation representing groups who have submitted this exercise. Users and submissions are eager loaded.
   def groups_with_submissions

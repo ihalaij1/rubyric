@@ -75,7 +75,7 @@ class ExercisesController < ApplicationController
       @viewable_peer_groups = Set.new
 
       @exercise.groups_with_submissions.order('submissions.created_at DESC, reviews.id').each do |group|
-        @assigned_groups << group if explicitly_assigned_groups.include?(group.id)
+        @assigned_groups << group if explicitly_assigned_groups.include?(group.id) || @exercise.show_all_submissions_to?(current_user)
 
         group.submissions.each do |submission|
           @viewable_peer_groups << group if @exercise.collaborative_mode != '' && !group.users.include?(current_user)

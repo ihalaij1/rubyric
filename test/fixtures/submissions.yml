@@ -21,3 +21,9 @@ fourth_submission:
   group: group3
   filename: test.txt
   extension: txt
+  
+fifth_submission:
+  exercise: review_all_exercise
+  group: group2
+  filename: test.txt
+  extension: txt

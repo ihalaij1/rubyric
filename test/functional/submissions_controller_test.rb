@@ -12,6 +12,7 @@ class SubmissionsControlllerTest < ActionDispatch::IntegrationTest
     @submission2 = submissions(:another_submission)     # Submission made by group2
     @submission3 = submissions(:third_submission)       # Submission made by group3
     @submission4 = submissions(:fourth_submission)      # Submission made by group3 for submit_without_login exercise
+    @submission5 = submissions(:fifth_submission)       # Submission made by group2 for review_all_exercise
 
     @group1 = groups(:group1)
     @group2 = groups(:group2)
@@ -69,6 +70,11 @@ class SubmissionsControlllerTest < ActionDispatch::IntegrationTest
       get submission_path(@submission1)
       assert_response :success
     end
+    
+    should "be able to view submission if exercise allows reviwers to see all submissions" do
+      get submission_path(@submission5)
+      assert_response :success
+    end
 
     should "not be able to view submission of group that has not been assigned to them" do
       get submission_path(@submission2)
@@ -107,6 +113,13 @@ class SubmissionsControlllerTest < ActionDispatch::IntegrationTest
     should "be able to create new review for submission" do
       assert_difference 'Review.count', 1 do
         get review_submission_path(@submission1)
+      end
+      assert_response :redirect
+    end
+    
+    should "be able to create new review for submission if exercise allows reviwers to see all submissions" do
+      assert_difference 'Review.count', 1 do
+        get review_submission_path(@submission5)
       end
       assert_response :redirect
     end
