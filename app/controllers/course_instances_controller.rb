@@ -228,8 +228,15 @@ class CourseInstancesController < ApplicationController
     @exercise = Exercise.where(course_instance_id: @course_instance.id, lti_resource_link_id: params[:resource_link_id]).first
     unless @exercise
       sub_url = params[:submission_url]
-      sub_url = (sub_url || "").split("grader").first #.sub('plus', '172.18.0.3')
-      exercise_name    = params[:resource_link_title] #JSON.load(open(sub_url)).display_name
+      # sub_url = sub_url.sub('plus', '172.18.0.3') # To be used when running Rubyric and aplus locally (change ip to fit your aplus)
+      exercise_name = JSON.load(RestClient.get(sub_url))
+      exercise_name = exercise_name.is_a?(Hash) ? exercise_name["exercise"] : nil
+      exercise_name = exercise_name.is_a?(Hash) ? exercise_name["display_name"] : nil
+      if !exercise_name
+        @heading = 'Failed to get exercise information'
+        render template: 'shared/error', layout: 'wide'
+        return false
+      end
       submit_type      = 'file'
       review_mode      = 'annotation'
       resource_link_id = params[:resource_link_id]
