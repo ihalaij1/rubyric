@@ -1,5 +1,5 @@
 class CourseInstancesController < ApplicationController
-  before_action :login_required, except: [:show, :aplus_exercise]
+  before_action :login_required, except: [:show]
 
   # GET /course_instances/1
   def show
@@ -201,56 +201,6 @@ class CourseInstancesController < ApplicationController
     log "send_feedback_bundle #{@course_instance.id}"
   end
   
-  # A+ calls this. Redirects to submit to exercise if exercise exists. Otherwise creates the exercise and then redirects to it.
-  def aplus_exercise
-    # Authorized IP?
-    remote_ip = (request.env['HTTP_X_FORWARDED_FOR'] || request.remote_ip).split(',').first
-    unless APLUS_IP_WHITELIST.include? remote_ip
-      @heading = 'LTI error: Requests only allowed from A+'
-      render template: 'shared/error'
-      return false
-    end
-    # Check that neccessary lti related params are included in the request
-    if params['oauth_consumer_key'].blank? || params[:context_id].blank? || params[:resource_link_id].blank?
-      @heading = 'Not enough parameters'
-      render template: 'shared/error', layout: 'wide'
-      return false
-    end
-    # Find the course_instance
-    @course_instance = CourseInstance.where(lti_consumer: params['oauth_consumer_key'], lti_context_id: params[:context_id]).first
-    unless @course_instance
-      @heading = 'This LTI course is not configured'
-      logger.warn "LTI login failed. Could not find a course instance with lti_consumer=#{params['oauth_consumer_key']}, lti_context_id=#{params[:context_id]}"
-      render template: 'shared/error'
-      return false
-    end
-    # Find exercise and create one if it does not exist yet
-    @exercise = Exercise.where(course_instance_id: @course_instance.id, lti_resource_link_id: params[:resource_link_id]).first
-    unless @exercise
-      sub_url = params[:submission_url]
-      # sub_url = sub_url.sub('plus', '172.18.0.3') # To be used when running Rubyric and aplus locally (change ip to fit your aplus)
-      exercise_name = JSON.load(RestClient.get(sub_url))
-      exercise_name = exercise_name.is_a?(Hash) ? exercise_name["exercise"] : nil
-      exercise_name = exercise_name.is_a?(Hash) ? exercise_name["display_name"] : nil
-      if !exercise_name
-        @heading = 'Failed to get exercise information'
-        render template: 'shared/error', layout: 'wide'
-        return false
-      end
-      submit_type      = 'file'
-      review_mode      = 'annotation'
-      resource_link_id = params[:resource_link_id]
-      @exercise = Exercise.new(course_instance: @course_instance, name: exercise_name,
-                               submission_type: submit_type,      review_mode: review_mode,
-                               lti_resource_link_id: resource_link_id)
-      if !@exercise.save
-        @heading = 'Failed to configure exercise'
-        render template: 'shared/error', layout: 'wide'
-        return false
-      end
-    end
-    redirect_to aplus_get_path(@exercise, request.parameters)
-  end
 
   private
 

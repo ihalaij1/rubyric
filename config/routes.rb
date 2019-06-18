@@ -25,7 +25,6 @@ Rails.application.routes.draw do
   resources :course_instances do
     post :send_feedback_bundle
     get :create_example_groups
-    get 'aplus_exercise'
 
     resources :exercises, only: [:new, :create, :update] do
       member do
@@ -133,7 +132,8 @@ Rails.application.routes.draw do
   post '/receive_email', to: 'submissions#receive_email'
 
   get 'aplus/:exercise' => 'submissions#aplus_get', as: :aplus_get
-  post 'course_instances/:course_instance_id/aplus_exercise' => 'submissions#aplus_submit'
+  get 'aplus_exercise' => 'exercises#aplus_exercise'
+  post 'aplus_exercise' => 'submissions#aplus_submit'
   post 'aplus/:exercise' => 'submissions#aplus_submit'
 
   get '/login' => 'sessions#new', as: :login
