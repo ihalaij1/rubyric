@@ -33,6 +33,34 @@ class ExercisesController < ApplicationController
     if @course.has_teacher(current_user) || is_admin?(current_user)
       # Teacher's view
       @groups = @exercise.groups_with_submissions.order('groups.id, submissions.created_at DESC, reviews.id')
+      
+      # Count how many reviews everyone has done
+      @finished = []
+      @mailed = []
+      @started = []
+      @not_started =[]
+      # List graders (= teachers, assistants and all users who have done a review to submission on the exercise)
+      grader_ids = Review.where(submission_id: @exercise.submissions).map { |r| r.user_id } + @course.teacher_ids + @course_instance.assistant_ids
+      @graders = User.where(id: grader_ids)
+      
+      @graders.each do |g|
+        all_reviews = g.reviews.where(submission_id: @exercise.submissions)
+        assigned_submissions = g.assigned_groups.where(id: @groups.ids).map{ |group| group.submissions.where(id: @exercise.submissions).ids}.flatten
+        f = 0; m = 0; s = 0; n = assigned_submissions.size
+        all_reviews.each do |review|
+          f = f + 1 if ["finished", "mailing"].include?(review.status)
+          m = m + 1 if review.status == "mailed"
+          s = s + 1 if review.status == "started"
+          if review.status != "invalidated" && assigned_submissions.include?(review.submission.id)
+            n = n - 1
+            assigned_submissions -= [review.submission.id]
+          end
+        end
+        @finished << f
+        @mailed << m
+        @started << s
+        @not_started << n
+      end
 
       # TODO: should we remove this?
       # Koodiaapinen hack. Remove after 2016.

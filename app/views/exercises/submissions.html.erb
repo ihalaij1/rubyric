@@ -148,6 +148,38 @@
   <%= link_to 'Batch upload submissions', batch_upload_exercise_submissions_path(:exercise_id => @exercise.id) %>
 <% end %>
 
+<div class="col-md-5 well">
+  <h2>Completed reviews</h2>
+  
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Reviewer</th>
+        <th>Not started</th>
+        <th>Started</th>
+        <th>Completed* (Mailed)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% (0..@graders.size - 1).each do |i| %>
+        <tr>
+          <td><%= @graders[i].firstname %> <%= @graders[i].lastname %></td>
+          <td><%= @not_started[i] %></td>
+          <td><%= @started[i] %></td>
+          <td><%= @finished[i] + @mailed[i] %> (<%= @mailed[i] %>)</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  
+  <p>Completed reviews: <%= @finished.sum + @mailed.sum %></p>
+  <p>Total submissions: <%= @groups.map{|g| g.submissions.size}.sum %></p>
+  
+  <p class="italics-paragrapgh">
+    * Completed refers to reviews with status finished, mailing or mailed
+  </p>
+</div>
+
 <script type="text/javascript">
   $('.modal').on('shown.bs.modal', function(e) {
     var reviewModal = $(e.target);
