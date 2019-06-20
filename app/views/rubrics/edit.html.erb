@@ -26,6 +26,9 @@
         Save
       <!-- /ko -->
     </button>
+    <% if @review %>
+      <%= link_to "Back to review", edit_review_path(@review), class: "btn btn-primary"%>
+    <% end %>
     <p id="save-message" class="transient-message">Changes saved</p>
   </div>
   

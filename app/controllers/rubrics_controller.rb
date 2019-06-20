@@ -15,6 +15,7 @@ class RubricsController < ApplicationController
 
   def edit
     @exercise = Exercise.find(params[:exercise_id])
+    @review = params[:review_id] ? Review.find(params[:review_id]) : nil
     load_course
 
     return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
