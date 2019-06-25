@@ -158,6 +158,12 @@ class FeedbackMailer < ActionMailer::Base
     # peer_reviews_ok = !peer_reviews_required || group.users.all? { |student|
     #    student.peer_review_count(@exercise)[:finished_peer_reviews] >= @exercise.peer_review_goal
     #  }
+    
+    # Convert string type and nil grades to 0 points so it can be sent to A+
+    if combined_grade.nil? || combined_grade.is_a?(String)
+      puts "Converting string grade #{combined_grade} to 0 points"
+      combined_grade = 0
+    end
 
     # Deliver
     success = false
