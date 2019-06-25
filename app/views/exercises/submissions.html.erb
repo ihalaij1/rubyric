@@ -107,8 +107,18 @@
         </tbody>
         <tfoot>
           <tr>
-            <td><%= @groups.size %> groups
-            </td>
+            <td><%= @groups.size %> groups</td>
+            <td colspan="3">If sending several reviews for one submission set sent points equal to:</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><%= radio_button_tag "send_grade_mode", "best_grade", true %> Best grade
+              <%= radio_button_tag "send_grade_mode", "average" %> Average grade</td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td></td>
             <td>
               <button class="btn btn-default" id="reviews-select-all" onclick="return false;"> Select all</button>
               <button class="btn btn-default" id="reviews-select-finished" onclick="return false;">Select finished</button>
@@ -187,8 +197,11 @@
         <h3>Send reviews</h3>
       </div>
       <div class="modal-body">
-        String type and empty grades cannot be sent to A+ as they are. 
-        They will be sent as 0 points.
+        <p>Non-numerical grades cannot be sent to A+ as they are.</p>
+        <p>
+          Non-numerical grades will not be taken into account when calculating points 
+          to be sent to A+ (although the feedback will still be sent to A+).
+        </p>
       </div>
       <div class="modal-footer">
         <a href="#" class="btn" data-dismiss="modal">Cancel</a>

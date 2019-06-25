@@ -337,7 +337,8 @@ class ExercisesController < ApplicationController
 
     # Collect selected review ids
     review_ids = (params[:reviews_checkboxes] || []).reject { |id, value| value != '1' }.keys
-    @exercise.deliver_reviews(review_ids)
+    send_grade_mode = ["best_grade", "average"].include?(params[:send_grade_mode]) ? params[:send_grade_mode] : nil
+    @exercise.deliver_reviews(review_ids, send_grade_mode)
 
     redirect_to @exercise
     log "send_reviews #{@exercise.id} #{review_ids.size}"

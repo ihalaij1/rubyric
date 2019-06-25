@@ -378,9 +378,10 @@ class Review < ApplicationRecord
     return text
   end
 
-  def self.deliver_reviews(review_ids)
+  def self.deliver_reviews(review_ids, send_grade_mode = nil)
     errors = []
     aplus_submission_ids = Set.new # Groups whose feedback should be sent to A+
+    aplus_review_ids_by_submission = {}
 
     Review.where(id: review_ids).find_each do |review|
       next if review.status == 'invalidated'
@@ -388,6 +389,11 @@ class Review < ApplicationRecord
       begin
         if review.submission.is_a?(AplusSubmission) || !review.submission.lti_launch_params.blank? #|| review.submission.exercise_id == 289  # Koodiaapinen hack for exercise 289 (some submissions were received via email)
           aplus_submission_ids << review.submission_id
+          if aplus_review_ids_by_submission[review.submission_id]
+            aplus_review_ids_by_submission[review.submission_id] << review.id
+          else
+            aplus_review_ids_by_submission[review.submission_id] = [review.id]
+          end
         else
           FeedbackMailer.review(review).deliver
         end
@@ -402,7 +408,7 @@ class Review < ApplicationRecord
 
     aplus_submission_ids.each do |submission_id|
       # Call .deliver, even though no mail is supposed to be send. No mail should be send since mail-method is not called in aplus_feedback
-      FeedbackMailer.aplus_feedback(submission_id).deliver
+      FeedbackMailer.aplus_feedback(submission_id, aplus_review_ids_by_submission[submission_id], send_grade_mode).deliver
     end
 
     # Send delivery errors to teacher

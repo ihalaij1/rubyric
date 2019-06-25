@@ -473,13 +473,13 @@ class Exercise < ApplicationRecord
 
   # Schedules review mails to be sent.
   # review_ids: array of ids or a singular id
-  def deliver_reviews(review_ids)
+  def deliver_reviews(review_ids, send_grade_mode = nil)
     # Send a warning to admin if delayed_job queue is long
     ErrorMailer.long_mail_queue.deliver if Delayed::Job.count > 1
 
     Review.where(:id => review_ids, :status => 'finished').update_all(:status => 'mailing')
 
-    Review.delay.deliver_reviews(review_ids)
+    Review.delay.deliver_reviews(review_ids, send_grade_mode)
   end
 
   def initialize_example_rubric

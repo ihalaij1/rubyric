@@ -94,7 +94,9 @@ class FeedbackMailer < ActionMailer::Base
   end
 
   # Sends grades and feedback to A+
-  def aplus_feedback(submission_id)
+  # send_grade_mode tells whether sent grade should be average of sent reviews
+  # or the best grade, best grade is used if send_grade_mode is blank
+  def aplus_feedback(submission_id, review_ids, send_grade_mode = nil)
     submission = Submission.find(submission_id)
     group = submission.group
     @exercise = submission.exercise
@@ -103,39 +105,37 @@ class FeedbackMailer < ActionMailer::Base
     subject = "#{@course.full_name} - #{@exercise.name}"
     peer_reviews_required = @exercise.peer_review?
     always_pass = @exercise.rubric_grading_mode == 'always_pass'
-
-    @reviews = []
-    review_ids = []
-    submission.reviews.each do |review|
-      next if !review.include_in_results? && !always_pass
-      @reviews << review
-      review_ids << review.id
-    end
-
-    # Get final grade of the group. FIXME: repetition in ExercisesController#results
-    grading_mode = begin
-        JSON.parse(@exercise.grading_mode || '{}')
-      rescue Exception => e
-        logger.warn "Invalid grading mode for exercise #{@exercise.id}: #{@exercise.grading_mode}\n#{e}"
-        {}
+    @reviews = Review.where(id: review_ids, status: ["finished", "mailing", "mailed"])
+    
+    # Calculate grade to be sent to A+
+    # Ignores non-numerical grades
+    average = send_grade_mode == "average"
+    best_grade = send_grade_mode.blank? || send_grade_mode == "best_grade"
+    grade = 0
+    count = 0
+    @reviews.each do |review|
+      cast = Review.cast_grade(review.grade)
+      if average && !cast.is_a?(String)
+        grade += cast
+        count += 1
+      elsif best_grade && !cast.is_a?(String) && grade < cast
+        grade = cast
       end
-    logger.debug "GRADING MODE: #{grading_mode}"
-
+    end
+    grade = 1.0 * grade / count if average && count > 0
+    logger.debug "GRADE: #{grade}"
+    
+    # Get max grade
+    max_grade = @exercise.max_grade
+    
     if always_pass
       max_grade = 1
-      combined_grade = 1
-      group_result = {}
-    else
-      max_grade = @exercise.max_grade
-      group_result = group.result(@exercise, grading_mode)
-      combined_grade = Review.cast_grade(group_result[:grade])
-      logger.debug "GRADE: #{group_result}"
+      grade = 1
     end
-
     # A+ always requires max_grade
     if max_grade.nil? || max_grade == 0
       max_grade = 1
-      combined_grade = 1
+      grade = 1
       logger.warn "No max_grade for exercise #{@exercise.id}."
     end
 
@@ -144,33 +144,12 @@ class FeedbackMailer < ActionMailer::Base
       render_to_string(action: :aplus).to_str
     end
 
-    # Koodiaapinen hack 2016
-    # Convert points to pass/fail
-    #if [218, 235, 255, 257].include?(@exercise.id)
-    #  if combined_grade >= 4.99
-    #    combined_grade = max_grade
-    #  else
-    #    combined_grade = 0
-    #  end
-    #end
-
-    # Have all members conducted peer reviews?
-    # peer_reviews_ok = !peer_reviews_required || group.users.all? { |student|
-    #    student.peer_review_count(@exercise)[:finished_peer_reviews] >= @exercise.peer_review_goal
-    #  }
-    
-    # Convert string type and nil grades to 0 points so it can be sent to A+
-    if combined_grade.nil? || combined_grade.is_a?(String)
-      puts "Converting string grade #{combined_grade} to 0 points"
-      combined_grade = 0
-    end
-
     # Deliver
     success = false
     response = nil
-    if group_result[:not_enough_reviews] || group_result[:no_submissions]
+    if @reviews.empty? || !submission
       logger.info "Not enough reviews for group #{group.id}"
-    elsif combined_grade.nil? || combined_grade.is_a?(String)
+    elsif grade.nil? || grade.is_a?(String)
       logger.info "No numeric grade for group #{group.id}."
     elsif !submission.lti_launch_params.blank?
       # Send grades via LTI
@@ -193,28 +172,13 @@ class FeedbackMailer < ActionMailer::Base
     elsif !submission.aplus_feedback_url.blank?
       # Send grades to A+
       if Rails.env == 'production'
-        response = RestClient.post(submission.aplus_feedback_url, {points: combined_grade.round, max_points: max_grade.round, feedback: feedback, notify: 'yes'})
+        response = RestClient.post(submission.aplus_feedback_url, {points: grade.round, max_points: max_grade.round, feedback: feedback, notify: 'yes'})
         success = true if response.code == 200
       else
-        logger.debug "Skipping A+ API call in development environment. #{submission.aplus_feedback_url}, points: #{combined_grade.round}, max_points: #{max_grade.round}"
+        logger.debug "Skipping A+ API call in development environment. #{submission.aplus_feedback_url}, points: #{grade.round}, max_points: #{max_grade.round}"
       end
     end
-
-    # Generate JSON for manual transfer
-#       object = {
-#         "students_by_email" => submission.group.group_members.map {|member| member.email },
-#         "feedback" => feedback,
-#         "grader" => 3832,
-#         "exercise_id" => 1719,
-#         "submission_time" => submission.created_at,
-#         "points" => (6 * combined_grade / max_grade).round
-#       }
-#
-#       File.open('aplus_grades.json', 'a') do |file|
-#         file.print object.to_json
-#         file.puts ','
-#       end
-
+    
     if success
       Review.where(:id => review_ids, :status => ['finished', 'mailing']).update_all(:status => 'mailed')
     else
