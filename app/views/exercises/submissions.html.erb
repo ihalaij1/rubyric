@@ -112,8 +112,10 @@
           </tr>
           <tr>
             <td></td>
-            <td><%= radio_button_tag "send_grade_mode", "best_grade", true %> Best grade
-              <%= radio_button_tag "send_grade_mode", "average" %> Average grade</td>
+            <td>
+              <%= radio_button_tag "send_grade_mode", "best_grade", true %> Best grade
+              <%= radio_button_tag "send_grade_mode", "average" %> Average grade
+            </td>
             <td></td>
             <td></td>
           </tr>
@@ -194,13 +196,17 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Send reviews</h3>
+        <h3>Sending non-numerical grades</h3>
       </div>
       <div class="modal-body">
-        <p>Non-numerical grades cannot be sent to A+ as they are.</p>
+        <p>
+          You are trying to send review with non-numerical grade to A+. Non-numerical grades 
+          cannot be sent to A+ as it requires numerical grade. Non-numerical grades can be 
+          for example "Failed" or "Boomerang".
+        </p>
         <p>
           Non-numerical grades will not be taken into account when calculating points 
-          to be sent to A+ (although the feedback will still be sent to A+).
+          to be sent to A+ but the feedback will still be sent to A+.
         </p>
       </div>
       <div class="modal-footer">

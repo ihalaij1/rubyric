@@ -94,8 +94,8 @@ class FeedbackMailer < ActionMailer::Base
   end
 
   # Sends grades and feedback to A+
-  # send_grade_mode tells whether sent grade should be average of sent reviews
-  # or the best grade, best grade is used if send_grade_mode is blank
+  # send_grade_mode tells whether sent grade should be average of sent reviews or 
+  # the best grade, best grade is used if send_grade_mode's value is not among recognized modes
   def aplus_feedback(submission_id, review_ids, send_grade_mode = nil)
     submission = Submission.find(submission_id)
     group = submission.group
@@ -110,7 +110,7 @@ class FeedbackMailer < ActionMailer::Base
     # Calculate grade to be sent to A+
     # Ignores non-numerical grades
     average = send_grade_mode == "average"
-    best_grade = send_grade_mode.blank? || send_grade_mode == "best_grade"
+    best_grade = send_grade_mode != "average"
     grade = 0
     count = 0
     @reviews.each do |review|
@@ -160,7 +160,7 @@ class FeedbackMailer < ActionMailer::Base
       logger.debug params.class.name
       provider = IMS::LTI::ToolProvider.new(consumer_key, secret, params)
 
-      response = provider.post_replace_result!(combined_grade / max_grade)
+      response = provider.post_replace_result!(grade / max_grade)
       if response.success? || response.processing?
         success = true
       elsif response.unsupported?
