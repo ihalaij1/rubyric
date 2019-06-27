@@ -338,6 +338,22 @@ class FeedbackCategory
   
   activateEditor: ->
     @editorActive(true)
+    
+class Language
+  constructor: (data, @languages) ->
+    @name = ko.observable(data || '')
+    @editorActive = ko.observable(false)
+    
+  to_json: ->
+    value = @name()
+    return value
+    
+  deleteLanguage: ->
+    return unless @languages
+    @languages.remove(this)
+    
+  activateEditor: ->
+    @editorActive(true)
 
 
 class @RubricEditor
@@ -353,8 +369,9 @@ class @RubricEditor
     @feedbackCategoriesById = {}               # id => FeedbackCategory
     @finalComment = ko.observable('')
     @pages = ko.observableArray()
+    @languages = ko.observableArray()
 
-    $('.tooltip-help').popover({placement: 'right', trigger: 'hover', html: true})
+    $('.tooltip-help').popover({placement: 'left', trigger: 'hover', html: true})
     #$('#tooltip-final-comment').popover({placement: 'right', trigger: 'hover', html: true})
 
     unless @demo_mode
@@ -371,6 +388,7 @@ class @RubricEditor
     @grades.subscribe -> notSaved()
     @feedbackCategories.subscribe -> notSaved()
     @gradingMode.subscribe -> notSaved()
+    @languages.subscribe -> notSaved()
     
 
   setHelpTexts: ->
@@ -428,6 +446,11 @@ class @RubricEditor
     grade = new Grade('', @grades)
     @grades.push(grade)
     grade.activateEditor()
+    
+  clickAddLanguage: () ->
+    lang = new Language('', @languages)
+    @languages.push(lang)
+    lang.activateEditor()
 
   #
   # Loads the rubric by AJAX
@@ -465,6 +488,14 @@ class @RubricEditor
             grade = new Grade(grade.toString(), @grades)
             @grades.push(grade)
             @gradesByValue[grade.value()] = grade
+      
+      # Load languages
+      if data['languages']
+        for lang in data['languages']
+          language = new Language(lang.toString(), @languages)
+          @languages.push(language)
+      else
+        @languages.push(new Language('', @languages))
 
       # Load pages
       for page_data in data['pages']
@@ -491,6 +522,7 @@ class @RubricEditor
     pages = @pages().map (page) -> page.to_json()
     categories = @feedbackCategories().map (category) -> category.to_json()
     grades = @grades().map (grade) -> grade.to_json()
+    languages = @languages().map (lang) -> lang.to_json()
 
     json = {
       version: '2'
@@ -499,6 +531,7 @@ class @RubricEditor
       grades: grades
       gradingMode: @gradingMode()
       finalComment: @finalComment()
+      languages: languages
     }
     json_string = JSON.stringify(json)
 
