@@ -242,7 +242,23 @@
                       <input title="Points (optional)" class="phraseType" type="text" data-bind="value: gradeValue" />
                     </td>
                   <!-- /ko -->
-                  <td class="phrase" data-bind="editable: {value: content, editorActive: editorActive, type: 'textarea', placeholder: 'click to edit', inputPlaceholder: 'Feedback phrase'}"></td>
+                  <td class="phrase">
+                    <!-- ko if: textFields().length > 1 -->
+                      <!-- ko foreach: textFields -->
+                        <p>
+                          (<span data-bind="text: language.name"></span>)
+                          <span data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'click to edit', inputPlaceholder: 'Feedback phrase'}"></span>
+                        </p>
+                      <!-- /ko -->
+                    <!-- /ko -->
+                    <!-- ko if: textFields().length <= 1 -->
+                      <!-- ko foreach: textFields -->
+                        <p>
+                          <span data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'click to edit', inputPlaceholder: 'Feedback phrase'}"></span>
+                        </p>
+                      <!-- /ko -->
+                    <!-- /ko -->
+                  </td>
                   <td class="buttons-column">
                     <div class="buttons">
                       <span class="glyphicon glyphicon-pencil edit-phrase-button" title="Edit phrase" data-bind="click: activateEditor" aria-hidden="true"></span>

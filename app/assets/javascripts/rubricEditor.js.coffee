@@ -92,11 +92,9 @@ class Page
       @namesByLanguageId[name.language.id] = name
 
     criterion = new Criterion(@rubricEditor, this)
-    criterion.name('Criterion 1')
     @criteria.push(criterion)
 
     criterion = new Criterion(@rubricEditor, this)
-    criterion.name('Criterion 2')
     @criteria.push(criterion)
 
   load_json: (data) ->
@@ -210,6 +208,7 @@ class Criterion
     
     @editorActive.subscribe => @rubricEditor.saved = false if @rubricEditor
     @phrases.subscribe => @rubricEditor.saved = false if @rubricEditor
+    @textFields.subscribe => @rubricEditor.saved = false if @rubricEditor
 
   load_json: (data) =>
     if data['id']
@@ -266,12 +265,12 @@ class Criterion
 
   initializeDefault: () ->
     phrase = new Phrase(@rubricEditor, this)
-    phrase.content("What went well")
+    phrase.initializeExample(1)#("What went well")
     phrase.category(0)
     @phrases.push(phrase)
 
     phrase = new Phrase(@rubricEditor, this)
-    phrase.content("What could be improved")
+    phrase.initializeExample(2)#("What could be improved")
     phrase.category(1)
     @phrases.push(phrase)
 
@@ -316,15 +315,18 @@ class Criterion
     name.text('')
     @textFields.push(name)
     @namesByLanguageId[name.language.id] = name
+    for phrase in @phrases
+      phrase.addLanguage(lang)
 
 
 class Phrase
   constructor: (@rubricEditor, @criterion, data) ->
-    @content = ko.observable('')
     @category = ko.observable()
     @grade = ko.observable()         # Grade object
     @gradeValue = ko.observable()    # grade value (used in sum mode)
     @editorActive = ko.observable(false)
+    @textFields = ko.observableArray()
+    @namesByLanguageId = {}
     
     if data
       this.load_json(data)
@@ -335,11 +337,23 @@ class Phrase
     @category.subscribe => @rubricEditor.saved = false if @rubricEditor
     @grade.subscribe => @rubricEditor.saved = false if @rubricEditor
     @gradeValue.subscribe => @rubricEditor.saved = false if @rubricEditor
+    @textFields.subscribe => @rubricEditor.saved = false if @rubricEditor
     
 
   load_json: (data) ->
     @id = @rubricEditor.nextId('phrase', parseInt(data['id']))
-    @content(data['text'])
+    if @rubricEditor.bilingual 
+      for lang in @rubricEditor.languages()
+        name = new TextField(@rubricEditor, this, lang)
+        name.text(data['text'][lang.name()] || '') if data['text']
+        @textFields.push(name)
+        @namesByLanguageId[name.language.id] = name
+    else
+      for lang in @rubricEditor.languages()
+        name = new TextField(@rubricEditor, this, lang)
+        name.text(data['text'] || '')
+        @textFields.push(name)
+        @namesByLanguageId[name.language.id] = name
 
     category = @rubricEditor.feedbackCategoriesById[data['category']]
     @category(category)
@@ -374,7 +388,27 @@ class Phrase
 
   deletePhrase: ->
     @criterion.phrases.remove(this)
-
+    
+  addLanguage: (lang) ->
+    name = new TextField(@rubricEditor, this, lang)
+    name.text('')
+    @textFields.push(name)
+    @namesByLanguageId[name.language.id] = name
+    
+  initializeExample: (example) ->
+    count = 0
+    for lang in @rubricEditor.languages()
+      name = new TextField(@rubricEditor, this, lang)
+      if count == 0 && example == 1
+        name.text('What went well')
+      else if count == 0
+        name.text('What could be improved')
+      else
+        name.text('')
+      @textFields.push(name)
+      @namesByLanguageId[name.language.id] = name
+      count = count + 1
+          
 
 class Grade
   constructor: (data, @container) ->
