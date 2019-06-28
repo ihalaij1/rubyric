@@ -6,7 +6,7 @@
         <a id="tab-settings-link" href="#tab-settings" data-toggle="tab"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <strong>Settings</strong></a>
       </li>
       <!-- ko foreach: pages -->
-        <li><a data-toggle='tab' data-bind="text: name, attr: { href: tabUrl, id: tabLinkId }"></a></li>
+        <li><a data-toggle='tab' data-bind="text: showName(), attr: { href: tabUrl, id: tabLinkId }"></a></li>
       <!-- /ko -->
       
       <li id="create-page-tab">
@@ -139,7 +139,18 @@
     <div class="tab-pane page" data-bind="attr: { id: tabId }">
       <div class="page-title">
         <h2 title="Page title">
-          <span class="title" data-bind="editable: {value: name, editorActive: editorActive, placeholder: 'Untitled page', inputPlaceholder: 'Page title'}"></span>
+          <!-- ko if: textFields().length > 1 -->
+            <!-- ko foreach: textFields -->
+              (<span data-bind="text: language().name"></span>)
+              <span class="title" data-bind="editable: {value: text, editorActive: editorActive, placeholder: 'Untitled page', inputPlaceholder: 'Page title'}"></span> | 
+            <!-- /ko -->
+          <!-- /ko -->
+          
+          <!-- ko if: textFields().length <= 1 -->
+            <!-- ko foreach: textFields -->
+              <span class="title" data-bind="editable: {value: text, editorActive: editorActive, placeholder: 'Untitled page', inputPlaceholder: 'Page title'}"></span>
+            <!-- /ko -->
+          <!-- /ko -->
           <span class="sumRangeSummary" data-bind="html: sumRangeHtml"></span>
         </h2>
         
