@@ -141,7 +141,7 @@
         <h2 title="Page title">
           <!-- ko if: textFields().length > 1 -->
             <!-- ko foreach: textFields -->
-              (<span data-bind="text: language().name"></span>)
+              (<span data-bind="text: language.name"></span>)
               <span class="title" data-bind="editable: {value: text, editorActive: editorActive, placeholder: 'Untitled page', inputPlaceholder: 'Page title'}"></span> | 
             <!-- /ko -->
           <!-- /ko -->
@@ -182,7 +182,17 @@
           <!-- Heading -->
           <div class="criterion-title">
             <h3>
-              <span class="title" title="Criterion title (click to edit)" data-bind="editable: {value: name, editorActive: editorActive, placeholder: 'Untitled Criterion', inputPlaceholder: 'Criterion title' }"></span>
+              <!-- ko if: textFields().length > 1 -->
+                <!-- ko foreach: textFields -->
+                  (<span data-bind="text: language.name"></span>)
+                  <span class="title" title="Criterion title (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, placeholder: 'Untitled Criterion', inputPlaceholder: 'Criterion title' }"></span> |
+                <!-- /ko -->
+              <!-- /ko -->
+              <!-- ko if: textFields().length <= 1 -->
+                <!-- ko foreach: textFields -->
+                  <span class="title" title="Criterion title (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, placeholder: 'Untitled Criterion', inputPlaceholder: 'Criterion title' }"></span>
+                <!-- /ko -->
+              <!-- /ko -->
               <span class="sumRangeSummary" data-bind="html: sumRangeHtml"></span>
             </h3>
             

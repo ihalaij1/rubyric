@@ -10,11 +10,10 @@
 # cut'n'paste
 
 class TextField
-  constructor: (@rubricEditor, @owner, lang) ->
-    @language = ko.observable(lang)
+  constructor: (@rubricEditor, @owner, @language) ->
     @text = ko.observable('')
     @editorActive = ko.observable(false)
-    lang.textFields.push(this)
+    @language.textFields.push(this)
     
     @editorActive.subscribe => @rubricEditor.saved = false if @rubricEditor
         
@@ -22,6 +21,7 @@ class TextField
     @editorActive(true)
       
   deleteText: ->
+    return unless @owner && @owner.textFields
     @owner.textFields.remove(this)
 
 
@@ -89,7 +89,7 @@ class Page
       name = new TextField(@rubricEditor, this, lang)
       name.text('Untitled Page')
       @textFields.push(name)
-      @namesByLanguageId[name.language().id] = name
+      @namesByLanguageId[name.language.id] = name
 
     criterion = new Criterion(@rubricEditor, this)
     criterion.name('Criterion 1')
@@ -107,13 +107,13 @@ class Page
         name = new TextField(@rubricEditor, this, lang)
         name.text(data['name'][lang.name()])
         @textFields.push(name)
-        @namesByLanguageId[name.language().id] = name
+        @namesByLanguageId[name.language.id] = name
     else
       for lang in @rubricEditor.languages()
         name = new TextField(@rubricEditor, this, lang)
         name.text(data['name'])
         @textFields.push(name)
-        @namesByLanguageId[name.language().id] = name
+        @namesByLanguageId[name.language.id] = name
     @minSum(data['minSum'])
     @maxSum(data['maxSum'])
     @instructions(data['instructions'])
@@ -148,7 +148,7 @@ class Page
 
     name = {}
     for text in @textFields()
-      name[text.language().name()] = text.text()
+      name[text.language.name()] = text.text()
     return {id: @id(), name: name, instructions: instructions, minSum: minSum, maxSum: maxSum, criteria: criteria}
 
     # TODO: Criteria can be dropped into page tabs
@@ -193,13 +193,17 @@ class Page
     name = new TextField(@rubricEditor, this, lang)
     name.text('')
     @textFields.push(name)
-    @namesByLanguageId[name.language().id] = name
+    @namesByLanguageId[name.language.id] = name
+    for criterion in @criteria()
+      criterion.addLanguage(lang)
 
 class Criterion
   constructor: (@rubricEditor, @page, data) ->
     @phrases = ko.observableArray()
     @editorActive = ko.observable(false)
     @instructionsEditorActive = ko.observable(false)
+    @textFields = ko.observableArray()
+    @namesByLanguageId = {}
     
     this.load_json(data || {})
     this.initializeDefault() unless data?
@@ -213,7 +217,19 @@ class Criterion
     else
       @id = @rubricEditor.nextId('criterion')
       
-    @name = ko.observable(data['name'] || '')
+    if @rubricEditor.bilingual 
+      for lang in @rubricEditor.languages()
+        name = new TextField(@rubricEditor, this, lang)
+        name.text(data['name'][lang.name()] || '') if data['name']
+        @textFields.push(name)
+        @namesByLanguageId[name.language.id] = name
+    else
+      for lang in @rubricEditor.languages()
+        name = new TextField(@rubricEditor, this, lang)
+        name.text(data['name'] || '')
+        @textFields.push(name)
+        @namesByLanguageId[name.language.id] = name
+    
     @minSum = ko.observable(data['minSum']).extend(number: true)
     @maxSum = ko.observable(data['maxSum']).extend(number: true)
     @maxSum.extend
@@ -273,10 +289,15 @@ class Criterion
       minSum = undefined
       maxSum = undefined
     
-    return {id: @id, name: @name(), minSum: minSum, maxSum: maxSum, instructions: instructions, phrases: phrases}
+    name = {}
+    for text in @textFields()
+      name[text.language.name()] = text.text()
+    return {id: @id, name: name, minSum: minSum, maxSum: maxSum, instructions: instructions, phrases: phrases}
   
   activateEditor: ->
-    @editorActive(true)
+    #@editorActive(true)
+    for textField in @textFields()
+      textField.activateEditor()
 
   clickCreatePhrase: ->
     phrase = new Phrase(@rubricEditor, this)
@@ -289,6 +310,12 @@ class Criterion
     
   addInstructions: ->
     @instructionsEditorActive(true)
+    
+  addLanguage: (lang) ->
+    name = new TextField(@rubricEditor, this, lang)
+    name.text('')
+    @textFields.push(name)
+    @namesByLanguageId[name.language.id] = name
 
 
 class Phrase
@@ -411,6 +438,7 @@ class Language
     @rubricEditor.languages.remove(this)
     for textField in @textFields()
       textField.deleteText()
+    @textFields([])
     
   activateEditor: ->
     @editorActive(true)
