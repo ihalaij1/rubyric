@@ -69,7 +69,20 @@
           <table>
             <tbody id="feedback-categories" data-bind="sortable: {data: feedbackCategories, options: {containment: '#feedback-categories', axis: 'y', distance: 5}}">
               <tr class="category">
-                <td class="category" data-bind="editable: {value: name, editorActive: editorActive, placeholder: '<no name>'}"></td>
+                <!-- ko if: textFields().length > 1 -->
+                  <!-- ko foreach: textFields -->
+                    <td class="category">
+                      (<span data-bind="text: language.name"></span>)
+                      <span data-bind="editable: {value: text, editorActive: editorActive, placeholder: '<no name>'}"></span>
+                      <span class="pull-right">|</span> 
+                    </td>
+                  <!-- /ko -->
+                <!-- /ko -->
+                <!-- ko if: textFields().length <= 1 -->
+                  <!-- ko foreach: textFields -->
+                    <td class="category" data-bind="editable: {value: text, editorActive: editorActive, placeholder: '<no name>'}"></td>
+                  <!-- /ko -->
+                <!-- /ko -->
                 <td class="buttons-column">
                   <div class="buttons">
                     <span class="glyphicon glyphicon-pencil edit-button" title="Edit" data-bind="click: activateEditor" aria-hidden="true"></span>
@@ -227,7 +240,7 @@
                 <tr class="phrase">
                   <!-- ko if: $root.feedbackCategories().length > 1 -->
                     <td class="phraseType">
-                      <select class="phraseType" data-bind="options: $root.feedbackCategories, optionsText: 'name', value: category">
+                      <select class="phraseType" data-bind="options: $root.feedbackCategories, optionsText: function(item) {return item.fullName()}, value: category">
                       </select>
                     </td>
                   <!-- /ko -->

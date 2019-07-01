@@ -124,11 +124,11 @@ class Page
     name = ''
     for lang in @rubricEditor.languages()
       lang_text = @namesByLanguageId[lang.id]
-      if lang_text && lang_text.text()
+      if lang_text && lang_text.text() && lang_text.text().length > 0
         name = name + lang_text.text() + ' / '
       else
         name = name + 'Untitled page / '
-    return name
+    return name.slice(0, -2)
 
   to_json: ->
     criteria = @criteria().map (criterion) -> criterion.to_json()
@@ -438,25 +438,56 @@ class Grade
 
 class FeedbackCategory
   constructor: (@rubricEditor, data) ->
-    @name = ko.observable('')
     @editorActive = ko.observable(false)
+    @textFields = ko.observableArray()
+    @namesByLanguageId = {}
+    
+    for lang in @rubricEditor.languages()
+      name = new TextField(@rubricEditor, this, lang)
+      @textFields.push(name)
+      @namesByLanguageId[name.language.id] = name
     
     @editorActive.subscribe => @rubricEditor.saved = false if @rubricEditor
   
     if data
-      @name(data['name'])
+      if data['name']
+        for lang in @rubricEditor.languages()
+          name = @namesByLanguageId[lang.id]
+          name.text(data['name'][lang.name()] || '') if @rubricEditor.bilingual
+          name.text(data['name'] || '') if !@rubricEditor.bilingual
       @id = @rubricEditor.nextId('feedbackCategory', data['id'])
     else
       @id = @rubricEditor.nextId('feedbackCategory')
   
   to_json: ->
-    return {id: @id, name: @name()}
+    name = {}
+    for text in @textFields()
+      name[text.language.name()] = text.text()
+    return {id: @id, name: name}
   
   deleteCategory: ->
     @rubricEditor.feedbackCategories.remove(this)
   
   activateEditor: ->
-    @editorActive(true)
+    #@editorActive(true)
+    for textField in @textFields()
+      textField.activateEditor()
+  
+  addLanguage: (lang) ->
+    name = new TextField(@rubricEditor, this, lang)
+    name.text('')
+    @textFields.push(name)
+    @namesByLanguageId[name.language.id] = name
+    
+  fullName: () ->
+    name = ''
+    for lang in @rubricEditor.languages()
+      lang_text = @namesByLanguageId[lang.id]
+      if lang_text && lang_text.text() && lang_text.text().length > 0
+        name = name + lang_text.text() + ' / '
+      else
+        name = name + 'No name / '
+    return name.slice(0, -2)
     
 class Language
   constructor: (@rubricEditor, data) ->
@@ -578,6 +609,8 @@ class @RubricEditor
     lang.activateEditor()
     for page in @pages()
       page.addLanguage(lang)
+    for category in @feedbackCategories()
+      category.addLanguage(lang)
     @languages.push(lang)
 
   #
@@ -599,9 +632,18 @@ class @RubricEditor
     if !data
       this.initializeDefault()
     else
-      @bilingual = data['bilingual'] || 0
+      @bilingual = data['bilingual'] == '1'
       @gradingMode(data['gradingMode'] || 'average')
       @finalComment(data['finalComment'] || '')
+      
+      # Load languages
+      if data['languages']
+        for lang in data['languages']
+          language = new Language(this, lang.toString())
+          @languages.push(language)
+      else
+        language = new Language(this, 'default')
+        @languages.push(language)
       
       # Load feedback categories
       if data['feedbackCategories']
@@ -617,15 +659,6 @@ class @RubricEditor
             grade = new Grade(grade.toString(), @grades)
             @grades.push(grade)
             @gradesByValue[grade.value()] = grade
-      
-      # Load languages
-      if data['languages']
-        for lang in data['languages']
-          language = new Language(this, lang.toString())
-          @languages.push(language)
-      else
-        language = new Language(this, 'default')
-        @languages.push(language)
 
       # Load pages
       for page_data in data['pages']
