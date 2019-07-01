@@ -133,12 +133,24 @@
       
       <div class="span4 well">
         <h3>Feedback email</h3>
-
-        <p>
-          Final comment
-          <i id="tooltip-final-comment" class="tooltip-help pull-right glyphicon glyphicon-question-sign" data-content="<%=t 'rubrics.edit.tooltip_final_comment' %>"></i>
-        </p>
-        <textarea data-bind="value: finalComment"></textarea>
+        <i id="tooltip-final-comment" class="tooltip-help pull-right glyphicon glyphicon-question-sign" data-content="<%=t 'rubrics.edit.tooltip_final_comment' %>"></i>
+        
+        <!-- ko if: finalComment().length > 1 -->
+          <!-- ko foreach: finalComment() -->
+            <p>
+              Final comment (<span data-bind="text: language.name"></span>)
+            </p>
+            <textarea data-bind="value: text"></textarea>
+          <!-- /ko -->
+        <!-- /ko -->
+        <!-- ko if: finalComment().length <= 1 -->
+          <!-- ko foreach: finalComment() -->
+            <p>
+              Final comment
+            </p>
+            <textarea data-bind="value: text"></textarea>
+          <!-- /ko -->
+        <!-- /ko -->
         
       </div>
     </div>

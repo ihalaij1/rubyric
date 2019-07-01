@@ -16,13 +16,14 @@ class TextField
     @language.textFields.push(this)
     
     @editorActive.subscribe => @rubricEditor.saved = false if @rubricEditor
+    @text.subscribe => @rubricEditor.saved = false if @rubricEditor
         
   activateEditor: ->
     @editorActive(true)
       
   deleteText: ->
-    return unless @owner && @owner.textFields
-    @owner.textFields.remove(this)
+    return unless @owner
+    @owner.remove(this)
 
 
 class Page
@@ -86,7 +87,7 @@ class Page
     @id(@rubricEditor.nextId('page'))
     @textFields()
     for lang in @rubricEditor.languages()
-      name = new TextField(@rubricEditor, this, lang)
+      name = new TextField(@rubricEditor, @textFields, lang)
       name.text('Untitled Page')
       @textFields.push(name)
       @namesByLanguageId[name.language.id] = name
@@ -102,13 +103,13 @@ class Page
     if @rubricEditor.bilingual 
       @textFields([]) 
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, this, lang)
+        name = new TextField(@rubricEditor, @textFields, lang)
         name.text(data['name'][lang.name()])
         @textFields.push(name)
         @namesByLanguageId[name.language.id] = name
     else
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, this, lang)
+        name = new TextField(@rubricEditor, @textFields, lang)
         name.text(data['name'])
         @textFields.push(name)
         @namesByLanguageId[name.language.id] = name
@@ -188,7 +189,7 @@ class Page
     @instructionsEditorActive(true)
     
   addLanguage: (lang) ->
-    name = new TextField(@rubricEditor, this, lang)
+    name = new TextField(@rubricEditor, @textFields, lang)
     name.text('')
     @textFields.push(name)
     @namesByLanguageId[name.language.id] = name
@@ -218,13 +219,13 @@ class Criterion
       
     if @rubricEditor.bilingual 
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, this, lang)
+        name = new TextField(@rubricEditor, @textFields, lang)
         name.text(data['name'][lang.name()] || '') if data['name']
         @textFields.push(name)
         @namesByLanguageId[name.language.id] = name
     else
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, this, lang)
+        name = new TextField(@rubricEditor, @textFields, lang)
         name.text(data['name'] || '')
         @textFields.push(name)
         @namesByLanguageId[name.language.id] = name
@@ -311,7 +312,7 @@ class Criterion
     @instructionsEditorActive(true)
     
   addLanguage: (lang) ->
-    name = new TextField(@rubricEditor, this, lang)
+    name = new TextField(@rubricEditor, @textFields, lang)
     name.text('')
     @textFields.push(name)
     @namesByLanguageId[name.language.id] = name
@@ -329,7 +330,7 @@ class Phrase
     @namesByLanguageId = {}
     
     for lang in @rubricEditor.languages()
-      name = new TextField(@rubricEditor, this, lang)
+      name = new TextField(@rubricEditor, @textFields, lang)
       @textFields.push(name)
       @namesByLanguageId[name.language.id] = name
     
@@ -395,7 +396,7 @@ class Phrase
     @criterion.phrases.remove(this)
     
   addLanguage: (lang) ->
-    name = new TextField(@rubricEditor, this, lang)
+    name = new TextField(@rubricEditor, @textFields, lang)
     name.text('')
     @textFields.push(name)
     @namesByLanguageId[name.language.id] = name
@@ -443,7 +444,7 @@ class FeedbackCategory
     @namesByLanguageId = {}
     
     for lang in @rubricEditor.languages()
-      name = new TextField(@rubricEditor, this, lang)
+      name = new TextField(@rubricEditor, @textFields, lang)
       @textFields.push(name)
       @namesByLanguageId[name.language.id] = name
     
@@ -474,7 +475,7 @@ class FeedbackCategory
       textField.activateEditor()
   
   addLanguage: (lang) ->
-    name = new TextField(@rubricEditor, this, lang)
+    name = new TextField(@rubricEditor, @textFields, lang)
     name.text('')
     @textFields.push(name)
     @namesByLanguageId[name.language.id] = name
@@ -524,7 +525,7 @@ class @RubricEditor
     @gradesByValue = {}                        # string => Grade
     @feedbackCategories = ko.observableArray() # Array of FeedbackCategory objects
     @feedbackCategoriesById = {}               # id => FeedbackCategory
-    @finalComment = ko.observable('')
+    @finalComment = ko.observableArray()
     @pages = ko.observableArray()
     @languages = ko.observableArray()
 
@@ -611,6 +612,8 @@ class @RubricEditor
       page.addLanguage(lang)
     for category in @feedbackCategories()
       category.addLanguage(lang)
+    comment = new TextField(this, @finalComment, lang)
+    @finalComment.push(comment)
     @languages.push(lang)
 
   #
@@ -634,16 +637,21 @@ class @RubricEditor
     else
       @bilingual = data['bilingual'] == '1'
       @gradingMode(data['gradingMode'] || 'average')
-      @finalComment(data['finalComment'] || '')
       
-      # Load languages
+      # Load languages and final comment
       if data['languages']
         for lang in data['languages']
           language = new Language(this, lang.toString())
           @languages.push(language)
+          comment = new TextField(this, @finalComment, language)
+          comment.text(data['finalComment'][language.name()] || '') if data['finalComment'] && @bilingual
+          @finalComment.push(comment)
       else
         language = new Language(this, 'default')
         @languages.push(language)
+        comment = new TextField(this, @finalComment, language)
+        comment.text(data['finalComment'] || '') if !@bilingual
+        @finalComment.push(comment)
       
       # Load feedback categories
       if data['feedbackCategories']
@@ -686,6 +694,9 @@ class @RubricEditor
     categories = @feedbackCategories().map (category) -> category.to_json()
     grades = @grades().map (grade) -> grade.to_json()
     languages = @languages().map (lang) -> lang.to_json()
+    finalComment = {}
+    for comment in @finalComment()
+      finalComment[comment.language.name()] = comment.text()
 
     json = {
       version: '2'
@@ -694,7 +705,7 @@ class @RubricEditor
       feedbackCategories: categories
       grades: grades
       gradingMode: @gradingMode()
-      finalComment: @finalComment()
+      finalComment: finalComment
       languages: languages
     }
     json_string = JSON.stringify(json)
