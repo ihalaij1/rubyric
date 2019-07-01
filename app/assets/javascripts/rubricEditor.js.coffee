@@ -315,7 +315,7 @@ class Criterion
     name.text('')
     @textFields.push(name)
     @namesByLanguageId[name.language.id] = name
-    for phrase in @phrases
+    for phrase in @phrases()
       phrase.addLanguage(lang)
 
 
@@ -327,6 +327,11 @@ class Phrase
     @editorActive = ko.observable(false)
     @textFields = ko.observableArray()
     @namesByLanguageId = {}
+    
+    for lang in @rubricEditor.languages()
+      name = new TextField(@rubricEditor, this, lang)
+      @textFields.push(name)
+      @namesByLanguageId[name.language.id] = name
     
     if data
       this.load_json(data)
@@ -344,17 +349,12 @@ class Phrase
     @id = @rubricEditor.nextId('phrase', parseInt(data['id']))
     if @rubricEditor.bilingual 
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, this, lang)
+        name = @namesByLanguageId[lang.id]
         name.text(data['text'][lang.name()] || '') if data['text']
-        @textFields.push(name)
-        @namesByLanguageId[name.language.id] = name
     else
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, this, lang)
+        name = @namesByLanguageId[lang.id]
         name.text(data['text'] || '')
-        @textFields.push(name)
-        @namesByLanguageId[name.language.id] = name
-
     category = @rubricEditor.feedbackCategoriesById[data['category']]
     @category(category)
     
@@ -364,7 +364,10 @@ class Phrase
 
 
   to_json: ->
-    json = { id: @id, text: @content() }
+    content = {}
+    for text in @textFields()
+      content[text.language.name()] = text.text()
+    json = { id: @id, text: content }
     json['category'] = @category().id if @category()
     
     # TODO: this could be less hacky
@@ -384,7 +387,9 @@ class Phrase
     return json
 
   activateEditor: ->
-    @editorActive(true)
+    #@editorActive(true)
+    for textField in @textFields()
+      textField.activateEditor()
 
   deletePhrase: ->
     @criterion.phrases.remove(this)
@@ -398,15 +403,14 @@ class Phrase
   initializeExample: (example) ->
     count = 0
     for lang in @rubricEditor.languages()
-      name = new TextField(@rubricEditor, this, lang)
+      name = @namesByLanguageId[lang.id]
+      continue unless name
       if count == 0 && example == 1
         name.text('What went well')
       else if count == 0
         name.text('What could be improved')
       else
         name.text('')
-      @textFields.push(name)
-      @namesByLanguageId[name.language.id] = name
       count = count + 1
           
 
