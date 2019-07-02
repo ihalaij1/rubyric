@@ -52,6 +52,9 @@ class ReviewsController < ApplicationController
     @review = Review.find(params[:id])
     @exercise = @review.submission.exercise
     @submission = @review.submission
+    # Passing language of review as param for testing multilingual rubrics
+    # TODO: save language to model or review payload
+    @language = params[:lang]
     load_course
     I18n.locale = @course_instance.locale || I18n.locale
 

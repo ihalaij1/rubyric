@@ -16,13 +16,18 @@
     <li id="tutorial-tab" class="active"><a href="#tab-overview" data-toggle="tab">Overview</a></li>
 
     <!-- ko foreach: pages -->
-      <li><a data-bind="text:name, attr:{ href: '#page-' + id, id: 'page-' + id + '-link' }" data-toggle='tab'></a></li>
+      <!-- ko if: !$root.changedLanguage() -->
+        <li><a data-bind="text:name, attr:{ href: '#page-' + id, id: 'page-' + id + '-link' }" data-toggle='tab'></a></li>
+      <!-- /ko -->
+      <!-- ko if: $root.changedLanguage() -->
+        <li class="disabled"><a title="Cannot review if language has been changed" data-bind="text:name"></a></li>
+      <!-- /ko -->
     <!-- /ko -->
 
-    <!-- ko if: finishable() -->
+    <!-- ko if: finishable() && !changedLanguage() -->
       <li><a href="#tab-finish" id="tab-finish-link" data-toggle="tab" data-bind="click: finish">Finalize</a></li>
     <!-- /ko -->
-    <!-- ko if: !finishable() -->
+    <!-- ko if: !finishable() || changedLanguage() -->
       <li class="disabled"><a title="<%= t('reviews.edit.finalize_hint') %>">Finalize</a></li>
     <!-- /ko -->
 
@@ -48,6 +53,15 @@
   <!-- Overview tab -->
   <div class="tab-pane active" id="tab-overview">
     <div class="row-fluid">
+      <!-- ko if: $root.changedLanguage -->
+        <div class="alert alert-info">
+          You changed language of this review. Save and go to following page to continue 
+          grading with the new language.
+          <p>
+            <%= root_url %>reviews/<%= @review.id %>/edit?lang=<span data-bind="text:$root.language"></span>
+          </p>
+        </div>
+      <!-- /ko -->
       <h2>Review</h2>
 
       <!-- Warnings -->
@@ -103,7 +117,17 @@
           </table>
         </div>
       <% end %>
-
+      
+      <!-- ko if: $root.available_languages.length > 1 -->
+        <div class="span4 well">
+          <h3>Language</h3>
+          <p>
+            <select class="phraseType" data-bind="options: $root.available_languages, value: language"></select>
+          </p>
+          Multilingual: <span data-bind="text: bilingual"></span>
+        </div>
+      <!-- /ko -->
+      
       <!-- Upload review -->
       <% unless true || @exercise.new_record? %>
         <div class="span4 well">

@@ -35,7 +35,8 @@ class Page
       ), this)
 
   load_rubric: (data) ->
-    @name = data['name']
+    name = if @rubricEditor.bilingual && data['name'] then data['name'][@rubricEditor.language()] else data['name']
+    @name = name || ''
     @id = data['id']
     @minSum = if data['minSum']? then parseFloat(data['minSum']) else undefined
     @maxSum = if data['maxSum']? then parseFloat(data['maxSum']) else undefined
@@ -131,7 +132,8 @@ class Page
 class Criterion
   constructor: (@rubricEditor, @page, data) ->
     @id = data['id']
-    @name = data['name']
+    name = if @rubricEditor.bilingual && data['name'] then data['name'][@rubricEditor.language()] else data['name']
+    @name = name || ''
     @minSum = if data['minSum']? then parseFloat(data['minSum']) else undefined
     @maxSum = if data['maxSum']? then parseFloat(data['maxSum']) else undefined
     @instructions = data['instructions']
@@ -198,7 +200,8 @@ class Phrase
     @id = data['id']
     @categoryId = data['category']
     @grade = data['grade']
-    @content = data['text']
+    content = if @page.rubricEditor.bilingual && data['text'] then data['text'][@page.rubricEditor.language()] else data['text']
+    @content = content || ''
     @escaped_content = @content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br />')
     
     @criterion.gradeRequired = true if @grade?
@@ -239,6 +242,16 @@ class @Rubric
     data ||= {}
     
     @gradingMode = data['gradingMode'] || 'no'
+    @bilingual = data['bilingual'] || 0
+    
+    # Load available languages
+    @available_languages = data['languages'] || []
+    # If given language is not one of available languages use the first language
+    if !@language() || @language() not in @available_languages
+      if @available_languages.length > 0
+        @language(@available_languages[0])
+      else
+        @language('')
 
     # Parse feedback categories
     raw_categories = data['feedbackCategories']
@@ -250,8 +263,16 @@ class @Rubric
     raw_categories[0].name = '' if raw_categories.length == 1
     
     for category in raw_categories
-      @feedbackCategories.push(category)
-      @feedbackCategoriesById[category.id] = category
+      if @bilingual
+        categoryItem = {}
+        categoryItem['id'] = category.id
+        name = if category['name'] then category['name'][@language()] else ''
+        categoryItem['name'] = name || ''
+        @feedbackCategories.push(categoryItem)
+        @feedbackCategoriesById[category.id] = categoryItem
+      else
+        @feedbackCategories.push(category)
+        @feedbackCategoriesById[category.id] = category
 
 
     if data['grades']
@@ -272,7 +293,12 @@ class @Rubric
       
       previousPage = page
 
-    @finalComment = data['finalComment']
+    if @bilingual
+      @finalComment = ''
+      if data['finalComment']
+        @finalComment = data['finalComment'][@language()]
+    else 
+      @finalComment = data['finalComment']
 
     if @role? && @role == 'collaborator'
       @finishable = ko.observable(false)
@@ -364,6 +390,7 @@ class @ReviewEditor extends @Rubric
     @finishedText = ko.observable('')
     @finalizing = ko.observable(false)
     @busySaving = ko.observable(false)
+    @changedLanguage = ko.observable(false)
     
     element = $('#review-editor')
     @role = $('#role').val()
@@ -372,8 +399,14 @@ class @ReviewEditor extends @Rubric
     unless @demo_mode
       $(window).bind 'beforeunload', =>
         return "You have unsaved changes. Leave anyway?" unless @saved
+        
+    @language = ko.observable('')
+    @language($('#review_language').val())
     
     this.parseRubric(rubric)
+    
+    @language.subscribe => @saved = false
+    @language.subscribe => @changedLanguage(true)
     
     @initialPage = @pagesById[parseInt(initialPageId)] if initialPageId? && initialPageId.length > 0
     @initialPage = @pages[0] unless @initialPage?
