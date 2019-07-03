@@ -55,11 +55,8 @@
     <div class="row-fluid">
       <!-- ko if: $root.changedLanguage -->
         <div class="alert alert-info">
-          You changed language of this review. Save and go to following page to continue 
+          You changed language of this review. Save and reload page to continue 
           grading with the new language.
-          <p>
-            <%= root_url %>reviews/<%= @review.id %>/edit?lang=<span data-bind="text:$root.language"></span>
-          </p>
         </div>
       <!-- /ko -->
       <h2>Review</h2>
@@ -124,7 +121,6 @@
           <p>
             <select class="phraseType" data-bind="options: $root.available_languages, value: language"></select>
           </p>
-          Multilingual: <span data-bind="text: bilingual"></span>
         </div>
       <!-- /ko -->
       

@@ -222,6 +222,9 @@ class @Rubric
     @numericGrading = false
     @gradingMode = 'none'
     
+    @language = ko.observable('')
+    @language($('#review_language').val())
+    
   #
   # Loads the rubric by AJAX
   #
@@ -399,9 +402,6 @@ class @ReviewEditor extends @Rubric
     unless @demo_mode
       $(window).bind 'beforeunload', =>
         return "You have unsaved changes. Leave anyway?" unless @saved
-        
-    @language = ko.observable('')
-    @language($('#review_language').val())
     
     this.parseRubric(rubric)
     
@@ -525,6 +525,8 @@ class @ReviewEditor extends @Rubric
       status = 'started'
     
     $('#review_status').val(status)
+    lang = @language()
+    $('#review_language').val(lang)
     
     # Send immediately?
     $('#send_review').val('true') if status == 'finished' && options['send']?
