@@ -447,6 +447,10 @@ class @AnnotationEditor extends Rubric
     # reviewEditor features
     @saved = true
     @finalizing = ko.observable(false)
+    @changedLanguage = ko.observable(false)
+    
+    @language.subscribe => @saved = false
+    @language.subscribe => @changedLanguage(true)
 
     @finalGrade = ko.observable()
     finalGrade = $('#review_grade').val()
@@ -683,6 +687,9 @@ class @AnnotationEditor extends Rubric
       status = 'started'
 
     $('#review_status').val(status)
+    
+    lang = @language()
+    $('#review_language').val(lang)
 
     # Send immediately?
     $('#send_review').val('true') if status == 'finished' && options['send']?

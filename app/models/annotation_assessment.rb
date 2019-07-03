@@ -7,6 +7,7 @@ class AnnotationAssessment < Review
       review.grade = params['grade']
       review.feedback = params['feedback']
       review.status = params['status']
+      review.language = params['language']
       
       commands = JSON.parse(params['payload'])
       assessment = JSON.parse(review.payload || '{"annotations": [], "pages": []}')
