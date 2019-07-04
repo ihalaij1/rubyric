@@ -40,7 +40,7 @@ class Page
     @id = data['id']
     @minSum = if data['minSum']? then parseFloat(data['minSum']) else undefined
     @maxSum = if data['maxSum']? then parseFloat(data['maxSum']) else undefined
-    @instructions = data['instructions']
+    @instructions = if @rubricEditor.bilingual && data['instructions'] then data['instructions'][@rubricEditor.language()] else data['instructions']
 
     for criterion_data in data['criteria']
       criterion = new Criterion(@rubricEditor, this, criterion_data)
@@ -136,7 +136,7 @@ class Criterion
     @name = name || ''
     @minSum = if data['minSum']? then parseFloat(data['minSum']) else undefined
     @maxSum = if data['maxSum']? then parseFloat(data['maxSum']) else undefined
-    @instructions = data['instructions']
+    @instructions = if @rubricEditor.bilingual && data['instructions'] then data['instructions'][@rubricEditor.language()] else data['instructions']
     @phrases = []
     @phrasesById = {} # id => Phrase
     @selectedPhrase = ko.observable()  # Phrase object which is selected as the grade

@@ -26,6 +26,45 @@ class TextField
   deleteText: ->
     return unless @owner
     @owner.remove(this)
+    
+class GradingInstructions
+  constructor: (@rubricEditor, data) ->
+    @textFields = ko.observableArray()
+    @textFieldsByLanguageId = {}
+    
+    this.load_json(data)  
+    
+  load_json: (data) ->
+    if @rubricEditor.bilingual 
+      @textFields([]) 
+      for lang in @rubricEditor.languages()
+        instructions = @textFieldsByLanguageId[lang.id] || new TextField(@rubricEditor, @textFields, lang, @textFieldsByLanguageId)
+        instructions.text(data[lang.name()]) if data && data[lang.name()]
+    else
+      for lang in @rubricEditor.languages()
+        instructions = @textFieldsByLanguageId[lang.id] || new TextField(@rubricEditor, @textFields, lang, @textFieldsByLanguageId)
+        instructions.text(data) if data
+    
+  to_json: ->
+    max_len = 0
+    instructions = {}
+    for textField in @textFields()
+      max_len = textField.text().length if textField.text().length > max_len
+      instructions[textField.language.name()] = textField.text()
+    instructions = undefined if max_len == 0
+    return instructions
+    
+  showInstructions: () ->
+    for textField in @textFields()
+      return true if (textField.text() && textField.text().length > 0) || textField.editorActive()
+    return false
+        
+  activateEditor: ->
+    for textField in @textFields()
+      textField.activateEditor()
+      
+  addLanguage: (lang) ->
+    instruction = new TextField(@rubricEditor, @textFields, lang, @textFieldsByLanguageId)
 
 
 class Page
@@ -53,8 +92,7 @@ class Page
             message: 'Must be less than maximum'
             params: @maxSum
         }
-    @instructions = ko.observable()
-    @instructionsEditorActive = ko.observable(false)
+    @instructions = ko.observable(null)
     
     @sumRangeHtml = ko.computed(() ->
         min = @minSum()
@@ -87,11 +125,15 @@ class Page
 
   initializeDefault: () ->
     @id(@rubricEditor.nextId('page'))
-    @textFields()
+    @textFields([])
     for lang in @rubricEditor.languages()
       name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
       name.text('Untitled Page')
 
+    # Create instructions text fields
+    instructions = new GradingInstructions(@rubricEditor)
+    @instructions(instructions)
+    
     criterion = new Criterion(@rubricEditor, this)
     @criteria.push(criterion)
 
@@ -104,20 +146,23 @@ class Page
       @textFields([]) 
       for lang in @rubricEditor.languages()
         name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
-        name.text(data['name'][lang.name()])
+        name.text(data['name'][lang.name()]) if data['name']
     else
       for lang in @rubricEditor.languages()
         name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
         name.text(data['name'])
     @minSum(data['minSum'])
     @maxSum(data['maxSum'])
-    @instructions(data['instructions'])
+    
+    # Create instructions text fields
+    instructions = new GradingInstructions(@rubricEditor, data['instructions'])
+    @instructions(instructions)
 
     # Load criteria
     for criterion_data in data['criteria']
       @criteria.push(new Criterion(@rubricEditor, this, criterion_data))
       
-  showName: () ->
+  fullName: () ->
     name = ''
     for lang in @rubricEditor.languages()
       lang_text = @namesByLanguageId[lang.id]
@@ -130,8 +175,8 @@ class Page
   to_json: ->
     criteria = @criteria().map (criterion) -> criterion.to_json()
 
-    instructions = @instructions()
-    instructions = undefined if !instructions? || instructions.length == 0
+    instructions = undefined
+    instructions = @instructions().to_json() if @instructions()
     
     minSum = @minSum()
     maxSum = @maxSum()
@@ -182,20 +227,21 @@ class Page
       textField.activateEditor()
 
   addInstructions: ->
-    @instructionsEditorActive(true)
+    @instructions().activateEditor() if @instructions()
     
   addLanguage: (lang) ->
     name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
     for criterion in @criteria()
       criterion.addLanguage(lang)
+    @instructions().addLanguage(lang) if @instructions()
 
 class Criterion
   constructor: (@rubricEditor, @page, data) ->
     @phrases = ko.observableArray()
     @editorActive = ko.observable(false)
-    @instructionsEditorActive = ko.observable(false)
     @textFields = ko.observableArray()
     @namesByLanguageId = {}
+    @instructions = ko.observable(null)
     
     this.load_json(data || {})
     this.initializeDefault() unless data?
@@ -238,7 +284,8 @@ class Criterion
             params: @maxSum
         }
     
-    @instructions = ko.observable(data['instructions'])
+    instructions = new GradingInstructions(@rubricEditor, data['instructions'])
+    @instructions(instructions)
     
     @sumRangeHtml = ko.computed(() ->
         min = @minSum()
@@ -267,8 +314,8 @@ class Criterion
   to_json: ->
     phrases = @phrases().map (phrase) -> phrase.to_json()
     
-    instructions = @instructions()
-    instructions = undefined if !instructions? || instructions.length == 0
+    instructions = undefined
+    instructions = @instructions().to_json() if @instructions()
     
     minSum = @minSum()
     maxSum = @maxSum()
@@ -298,12 +345,13 @@ class Criterion
     @page.criteria.remove(this)
     
   addInstructions: ->
-    @instructionsEditorActive(true)
+    @instructions().activateEditor() if @instructions()
     
   addLanguage: (lang) ->
     name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
     for phrase in @phrases()
       phrase.addLanguage(lang)
+    @instructions().addLanguage() if @instructions()
 
 
 class Phrase
@@ -528,9 +576,13 @@ class @RubricEditor
     for page in @pages()
       list = this.sortedFields(page.namesByLanguageId)
       page.textFields(list) if list
+      list = this.sortedFields(page.instructions().textFieldsByLanguageId) if page.instructions()
+      page.instructions().textFields(list) if list
       for criterion in page.criteria()
         list = this.sortedFields(criterion.namesByLanguageId)
         criterion.textFields(list) if list
+        list = this.sortedFields(criterion.instructions().textFieldsByLanguageId) if criterion.instructions()
+        criterion.instructions().textFields(list) if list
         for phrase in criterion.phrases()
           list = this.sortedFields(phrase.namesByLanguageId)
           phrase.textFields(list) if list

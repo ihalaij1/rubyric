@@ -6,7 +6,7 @@
         <a id="tab-settings-link" href="#tab-settings" data-toggle="tab"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <strong>Settings</strong></a>
       </li>
       <!-- ko foreach: pages -->
-        <li><a data-toggle='tab' data-bind="text: showName(), attr: { href: tabUrl, id: tabLinkId }"></a></li>
+        <li><a data-toggle='tab' data-bind="text: fullName(), attr: { href: tabUrl, id: tabLinkId }"></a></li>
       <!-- /ko -->
       
       <li id="create-page-tab">
@@ -183,7 +183,7 @@
           <input placeholder="min" type="text" data-bind="value: minSum, valueUpdate: 'input'" />&ndash;<input placeholder="max" class="sumRange" type="text" data-bind="value: maxSum, valueUpdate: 'input'" />
         </span>
         
-        <!-- ko if: !instructions() || instructions().length == 0 -->
+        <!-- ko if: instructions -->
           <span class="buttons addInstructions">
             <a data-bind="click: addInstructions">Add grading instructions</a>
           </span>
@@ -197,8 +197,22 @@
         <div class="clear"></div>
         
         <!-- Grading instructions (page) -->
-        <!-- ko if: (instructions() && instructions().length > 0) || instructionsEditorActive() -->
-          <p class="grading-instructions" title="Instructions for reviewer (click to edit)" data-bind="editable: {value: instructions, editorActive: instructionsEditorActive, type: 'textarea', inputPlaceholder: 'Instructions for reviewer'}"></p>
+        <!-- ko if: instructions -->
+          <!-- ko if: instructions().textFields().length > 1 && instructions().showInstructions() -->
+            <!-- ko foreach: instructions().textFields -->
+              <p class="grading-instructions">
+                (<span data-bind="text: language.name()"></span>)
+                <span title="Instructions for reviewer (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'Add grading instructions', inputPlaceholder: 'Instructions for reviewer'}"></span>
+              </p>
+            <!-- /ko -->
+          <!-- /ko -->
+          <!-- ko if: instructions().textFields().length <= 1 && instructions().showInstructions() -->
+            <!-- ko foreach: instructions().textFields -->
+              <p class="grading-instructions">
+                <span title="Instructions for reviewer (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'Add grading instructions', inputPlaceholder: 'Instructions for reviewer'}"></span>
+              </p>
+            <!-- /ko -->
+          <!-- /ko -->
         <!-- /ko -->
       </div>
       
@@ -225,7 +239,7 @@
               <input placeholder="min" type="text" data-bind="value: minSum, valueUpdate: 'input'" />&ndash;<input placeholder="max" class="sumRange" type="text" data-bind="value: maxSum, valueUpdate: 'input'" />
             </span>
             
-            <!-- ko if: !instructions() || instructions().length == 0 -->
+            <!-- ko if: instructions-->
               <span class="buttons addInstructions">
                 <a data-bind="click: addInstructions">Add grading instructions</a>
               </span>
@@ -241,8 +255,22 @@
           </div>
 
           <!-- Grading instructions (criterion) -->
-          <!-- ko if: (instructions() && instructions().length > 0) || instructionsEditorActive() -->
-            <p class="grading-instructions" title="Instructions for reviewer (click to edit)" data-bind="editable: {value: instructions, editorActive: instructionsEditorActive, type: 'textarea', inputPlaceholder: 'Instructions for reviewer'}"></p>
+          <!-- ko if: instructions -->
+            <!-- ko if: instructions().textFields().length > 1 && instructions().showInstructions() -->
+              <!-- ko foreach: instructions().textFields -->
+                <p class="grading-instructions">
+                  (<span data-bind="text: language.name()"></span>)
+                  <span title="Instructions for reviewer (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'Add grading instructions', inputPlaceholder: 'Instructions for reviewer'}"></span>
+                </p>
+              <!-- /ko -->
+            <!-- /ko -->
+            <!-- ko if: instructions().textFields().length <= 1 && instructions().showInstructions() -->
+              <!-- ko foreach: instructions().textFields -->
+                <p class="grading-instructions">
+                  <span title="Instructions for reviewer (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'Add grading instructions', inputPlaceholder: 'Instructions for reviewer'}"></span>
+                </p>
+              <!-- /ko -->
+            <!-- /ko -->
           <!-- /ko -->
 
           <!-- Phrases -->
