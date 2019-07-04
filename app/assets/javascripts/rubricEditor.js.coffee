@@ -10,10 +10,12 @@
 # cut'n'paste
 
 class TextField
-  constructor: (@rubricEditor, @owner, @language) ->
+  constructor: (@rubricEditor, @owner, @language, hash) ->
     @text = ko.observable('')
     @editorActive = ko.observable(false)
-    @language.textFields.push(this)
+    @language.textFields.push(this) if @language
+    @owner.push(this)               if @owner
+    hash[@language.id] = this      if hash && @language
     
     @editorActive.subscribe => @rubricEditor.saved = false if @rubricEditor
     @text.subscribe => @rubricEditor.saved = false if @rubricEditor
@@ -87,10 +89,8 @@ class Page
     @id(@rubricEditor.nextId('page'))
     @textFields()
     for lang in @rubricEditor.languages()
-      name = new TextField(@rubricEditor, @textFields, lang)
+      name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
       name.text('Untitled Page')
-      @textFields.push(name)
-      @namesByLanguageId[name.language.id] = name
 
     criterion = new Criterion(@rubricEditor, this)
     @criteria.push(criterion)
@@ -103,16 +103,12 @@ class Page
     if @rubricEditor.bilingual 
       @textFields([]) 
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, @textFields, lang)
+        name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
         name.text(data['name'][lang.name()])
-        @textFields.push(name)
-        @namesByLanguageId[name.language.id] = name
     else
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, @textFields, lang)
+        name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
         name.text(data['name'])
-        @textFields.push(name)
-        @namesByLanguageId[name.language.id] = name
     @minSum(data['minSum'])
     @maxSum(data['maxSum'])
     @instructions(data['instructions'])
@@ -189,10 +185,7 @@ class Page
     @instructionsEditorActive(true)
     
   addLanguage: (lang) ->
-    name = new TextField(@rubricEditor, @textFields, lang)
-    name.text('')
-    @textFields.push(name)
-    @namesByLanguageId[name.language.id] = name
+    name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
     for criterion in @criteria()
       criterion.addLanguage(lang)
 
@@ -219,16 +212,12 @@ class Criterion
       
     if @rubricEditor.bilingual 
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, @textFields, lang)
+        name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
         name.text(data['name'][lang.name()] || '') if data['name']
-        @textFields.push(name)
-        @namesByLanguageId[name.language.id] = name
     else
       for lang in @rubricEditor.languages()
-        name = new TextField(@rubricEditor, @textFields, lang)
+        name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
         name.text(data['name'] || '')
-        @textFields.push(name)
-        @namesByLanguageId[name.language.id] = name
     
     @minSum = ko.observable(data['minSum']).extend(number: true)
     @maxSum = ko.observable(data['maxSum']).extend(number: true)
@@ -312,10 +301,7 @@ class Criterion
     @instructionsEditorActive(true)
     
   addLanguage: (lang) ->
-    name = new TextField(@rubricEditor, @textFields, lang)
-    name.text('')
-    @textFields.push(name)
-    @namesByLanguageId[name.language.id] = name
+    name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
     for phrase in @phrases()
       phrase.addLanguage(lang)
 
@@ -330,9 +316,7 @@ class Phrase
     @namesByLanguageId = {}
     
     for lang in @rubricEditor.languages()
-      name = new TextField(@rubricEditor, @textFields, lang)
-      @textFields.push(name)
-      @namesByLanguageId[name.language.id] = name
+      name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
     
     if data
       this.load_json(data)
@@ -396,10 +380,7 @@ class Phrase
     @criterion.phrases.remove(this)
     
   addLanguage: (lang) ->
-    name = new TextField(@rubricEditor, @textFields, lang)
-    name.text('')
-    @textFields.push(name)
-    @namesByLanguageId[name.language.id] = name
+    name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
     
   initializeExample: (example) ->
     count = 0
@@ -410,8 +391,6 @@ class Phrase
         name.text('What went well')
       else if count == 0
         name.text('What could be improved')
-      else
-        name.text('')
       count = count + 1
           
 
@@ -444,9 +423,7 @@ class FeedbackCategory
     @namesByLanguageId = {}
     
     for lang in @rubricEditor.languages()
-      name = new TextField(@rubricEditor, @textFields, lang)
-      @textFields.push(name)
-      @namesByLanguageId[name.language.id] = name
+      name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
     
     @editorActive.subscribe => @rubricEditor.saved = false if @rubricEditor
   
@@ -475,10 +452,7 @@ class FeedbackCategory
       textField.activateEditor()
   
   addLanguage: (lang) ->
-    name = new TextField(@rubricEditor, @textFields, lang)
-    name.text('')
-    @textFields.push(name)
-    @namesByLanguageId[name.language.id] = name
+    name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
     
   fullName: () ->
     name = ''
@@ -526,6 +500,7 @@ class @RubricEditor
     @feedbackCategories = ko.observableArray() # Array of FeedbackCategory objects
     @feedbackCategoriesById = {}               # id => FeedbackCategory
     @finalComment = ko.observableArray()
+    @finalCommentByLanguageId = {}
     @pages = ko.observableArray()
     @languages = ko.observableArray()
 
@@ -538,7 +513,32 @@ class @RubricEditor
     this.setHelpTexts()
 
     this.parseRubric(rawRubric)
-
+    
+  
+  # Uses given hash {language_id: value} to sort hash values to be in same order
+  # as @languages array, returns new array in right order
+  sortedFields: (hash) ->
+    orderedList = []
+    for lang in @languages()
+      orderedList.push(hash[lang.id]) if hash[lang.id]
+    return orderedList
+    
+  # Sorts all textFields by order of @languages array
+  sortAllByLanguages: () ->
+    for page in @pages()
+      list = this.sortedFields(page.namesByLanguageId)
+      page.textFields(list) if list
+      for criterion in page.criteria()
+        list = this.sortedFields(criterion.namesByLanguageId)
+        criterion.textFields(list) if list
+        for phrase in criterion.phrases()
+          list = this.sortedFields(phrase.namesByLanguageId)
+          phrase.textFields(list) if list
+    for category in @feedbackCategories()
+      list = this.sortedFields(category.namesByLanguageId)
+      category.textFields(list) if list
+    list = this.sortedFields(@finalCommentByLanguageId)
+    @finalComment(list) if list
   
   subscribeToChanges: ->
     notSaved = => @saved = false
@@ -547,6 +547,7 @@ class @RubricEditor
     @feedbackCategories.subscribe -> notSaved()
     @gradingMode.subscribe -> notSaved()
     @languages.subscribe -> notSaved()
+    @languages.subscribe => this.sortAllByLanguages()
     
 
   setHelpTexts: ->
@@ -569,7 +570,7 @@ class @RubricEditor
 
   initializeDefault: ->
     @gradingMode('average')
-    @finalComment('')
+    @finalComment([])
     #@feedbackCategories([new FeedbackCategory(this, {name: 'Strengths', id:0}),new FeedbackCategory(this, {name:'Weaknesses', id:1}),new FeedbackCategory(this, {name:'Other comments', id:2})])
 
     page = new Page(this)
@@ -612,8 +613,7 @@ class @RubricEditor
       page.addLanguage(lang)
     for category in @feedbackCategories()
       category.addLanguage(lang)
-    comment = new TextField(this, @finalComment, lang)
-    @finalComment.push(comment)
+    new TextField(this, @finalComment, lang, @finalCommentByLanguageId)
     @languages.push(lang)
 
   #
@@ -643,15 +643,13 @@ class @RubricEditor
         for lang in data['languages']
           language = new Language(this, lang.toString())
           @languages.push(language)
-          comment = new TextField(this, @finalComment, language)
+          comment = new TextField(this, @finalComment, language, @finalCommentByLanguageId)
           comment.text(data['finalComment'][language.name()] || '') if data['finalComment'] && @bilingual
-          @finalComment.push(comment)
       else
         language = new Language(this, 'default')
         @languages.push(language)
-        comment = new TextField(this, @finalComment, language)
+        comment = new TextField(this, @finalComment, language, @finalCommentByLanguageId)
         comment.text(data['finalComment'] || '') if !@bilingual
-        @finalComment.push(comment)
       
       # Load feedback categories
       if data['feedbackCategories']
