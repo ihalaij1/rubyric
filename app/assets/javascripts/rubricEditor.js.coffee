@@ -570,7 +570,9 @@ class @RubricEditor
 
   initializeDefault: ->
     @gradingMode('average')
-    @finalComment([])
+    language = new Language(this, 'default')
+    @languages.push(language)
+    comment = new TextField(this, @finalComment, language, @finalCommentByLanguageId)
     #@feedbackCategories([new FeedbackCategory(this, {name: 'Strengths', id:0}),new FeedbackCategory(this, {name:'Weaknesses', id:1}),new FeedbackCategory(this, {name:'Other comments', id:2})])
 
     page = new Page(this)
