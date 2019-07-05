@@ -1,47 +1,109 @@
 == Rubric ==
 
 {
-  "version": '3',
+  "version":"2",
   "pages": [
+  {
+    "id":1,
+    "name":"Page 1",
+    "instructions":"Some instructions for the grader.",
+    "minSum":"0",
+    "maxSum":"5",
+    "criteria":[
     {
-      "id": 0,
-      "name": "Page 1",
-      minSum: 0,
-      maxSum: 20,
-      "criteria": [
-        {
-          "id": 0,
-          "name": "Criterion 1.1",
-          minSum: 0,
-          maxSum: 5,
-          instructions: "Instructions for <b>grader</b>",
-          "phrases":[
-             {"id": 0, "text": "What went well\nSecond line", "category": 0, "grade": 5},
-             {"id": 1, "text": "<b>Things to improve</b>", "category": 1, "grade": "Failed"},
-             {"id": 3, "text": "Something else","category": 2}
-           ]
-        },
-        {
-          "id":1,
-          "name":"Criterion 1.2",
-          "phrases": [
-            {"id": 4,"text": "Good work!","category": 0},
-            {"id": 5,"text": "You fail!","category": 1}
-          ]
-        }
-      ]
+      "id":1,
+      "name":"Criterion 1",
+      "instructions":"Instructions",
+      "minSum":"0",
+      "maxSum":"2",
+      "phrases":[
+      {"id":1,"text":"Some positive feedback","category":1,"grade":2},
+      {"id":2,"text":"Something to improve","category":2,"grade":1},
+      {"id":5,"text":"General feedback","category":3}]
     },
-  ],
-  "grades": ["Failed",1,2,3,4,5],
-  "gradingMode": "average",
-  "feedbackCategories": [
-    {id:0, name:"Strengths"},
-    {id:1, name:"Weaknesses"},
-    {id:2, name:"Other comments"}
-  ],
-  "finalComment": "Final comment\n<b>Other line</b>"
+    {
+      "id":2,
+      "name":"Criterion 2",
+      "minSum":"0",
+      "maxSum":"3",
+      "phrases":[
+      {"id":3,"text":"Failing grade","category":2,"grade":"Failed"},
+      {"id":4,"text":"Well done!","category":1,"grade":3}]
+    }]
+  }],
+  "feedbackCategories":[
+  {"id":1, "name":"Strengths"},
+  {"id":2, "name":"Weaknesses"},
+  {"id":3,"name":"Other"}],
+  "grades":["Failed",1,2,3,4,5],
+  "gradingMode":"average",
+  "finalComment":""
 }
 
+{
+  "version":"3",
+  "pages":[
+  {
+    "id":1,
+    "name":{"en":"Page 1","fi":"Sivu 1"},
+    "instructions":{"en":"Some instructions for the grader.", "fi":"Ohjeita arvostelijalle."},
+    "minSum":"0",
+    "maxSum":"5",
+    "criteria":[
+    {
+      "id":1,
+      "name":{"en":"Criterion 1","fi":"Kriteeri 1"},
+      "instructions":{"en":"Instructions", "fi":"Ohjeita"},
+      "minSum":"0",
+      "maxSum":"2",
+      "phrases":[
+      {
+        "id":1,
+        "text":{"en":"Some positive feedback","fi":"Jotain positiivista"},
+        "category":1,
+        "grade":2
+      },
+      {
+        "id":2,
+        "text":{"en":"Something to improve","fi":"Jotain parannettavaa"},
+        "category":2,
+        "grade":1
+      },
+      {
+        "id":5,
+        "text":{"en":"General feedback","fi":"Yleistä palautetta"},
+        "category":3
+      }]
+    },
+    {
+      "id":2,
+      "name":{"en":"Criterion 2","fi":"Kriteeri 2"},
+      "minSum":"0",
+      "maxSum":"3",
+      "phrases":[
+      {
+        "id":3,
+        "text":{"en":"Failing grade","fi":"Hylätty arvosana"},
+        "category":2,
+        "grade":"Failed"
+      },
+      {
+        "id":4,
+        "text":{"en":"Well done!","fi":"Hyvin tehty!"},
+        "category":1,
+        "grade":3
+      }]
+    }]
+  }],
+  "feedbackCategories":[
+    {"id":1,"name":{"en":"Strengths","fi":"Vahvuudet"}},
+    {"id":2,"name":{"en":"Weaknesses","fi":"Heikkoudet"}},
+    {"id":3,"name":{"en":"Other","fi":"Muuta"}}],
+  "grades":["Failed",1,2,3,4,5],
+  "gradingMode":"average",
+  "finalComment":{"en":"","fi":""},
+  "languages":["en","fi"]
+}
 
 
 == Review ==

@@ -35,7 +35,7 @@ class GradingInstructions
     this.load_json(data)  
     
   load_json: (data) ->
-    if @rubricEditor.bilingual 
+    if @rubricEditor.multilingual 
       @textFields([]) 
       for lang in @rubricEditor.languages()
         instructions = @textFieldsByLanguageId[lang.id] || new TextField(@rubricEditor, @textFields, lang, @textFieldsByLanguageId)
@@ -142,7 +142,7 @@ class Page
 
   load_json: (data) ->
     @id(@rubricEditor.nextId('page', parseInt(data['id'])))
-    if @rubricEditor.bilingual 
+    if @rubricEditor.multilingual 
       @textFields([]) 
       for lang in @rubricEditor.languages()
         name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
@@ -256,7 +256,7 @@ class Criterion
     else
       @id = @rubricEditor.nextId('criterion')
       
-    if @rubricEditor.bilingual 
+    if @rubricEditor.multilingual 
       for lang in @rubricEditor.languages()
         name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
         name.text(data['name'][lang.name()] || '') if data['name']
@@ -380,7 +380,7 @@ class Phrase
 
   load_json: (data) ->
     @id = @rubricEditor.nextId('phrase', parseInt(data['id']))
-    if @rubricEditor.bilingual 
+    if @rubricEditor.multilingual 
       for lang in @rubricEditor.languages()
         name = @namesByLanguageId[lang.id]
         name.text(data['text'][lang.name()] || '') if data['text']
@@ -479,8 +479,8 @@ class FeedbackCategory
       if data['name']
         for lang in @rubricEditor.languages()
           name = @namesByLanguageId[lang.id]
-          name.text(data['name'][lang.name()] || '') if @rubricEditor.bilingual
-          name.text(data['name'] || '') if !@rubricEditor.bilingual
+          name.text(data['name'][lang.name()] || '') if @rubricEditor.multilingual
+          name.text(data['name'] || '') if !@rubricEditor.multilingual
       @id = @rubricEditor.nextId('feedbackCategory', data['id'])
     else
       @id = @rubricEditor.nextId('feedbackCategory')
@@ -689,7 +689,7 @@ class @RubricEditor
     if !data
       this.initializeDefault()
     else
-      @bilingual = data['bilingual'] == '1'
+      @multilingual = data['version'] == '3'
       @gradingMode(data['gradingMode'] || 'average')
       
       # Load languages and final comment
@@ -698,12 +698,12 @@ class @RubricEditor
           language = new Language(this, lang.toString())
           @languages.push(language)
           comment = new TextField(this, @finalComment, language, @finalCommentByLanguageId)
-          comment.text(data['finalComment'][language.name()] || '') if data['finalComment'] && @bilingual
+          comment.text(data['finalComment'][language.name()] || '') if data['finalComment'] && @multilingual
       else
         language = new Language(this, 'default')
         @languages.push(language)
         comment = new TextField(this, @finalComment, language, @finalCommentByLanguageId)
-        comment.text(data['finalComment'] || '') if !@bilingual
+        comment.text(data['finalComment'] || '') if !@multilingual
       
       # Load feedback categories
       if data['feedbackCategories']
@@ -751,8 +751,7 @@ class @RubricEditor
       finalComment[comment.language.name()] = comment.text()
 
     json = {
-      version: '2'
-      bilingual: '1'
+      version: '3'
       pages: pages
       feedbackCategories: categories
       grades: grades

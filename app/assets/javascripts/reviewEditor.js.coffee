@@ -35,12 +35,12 @@ class Page
       ), this)
 
   load_rubric: (data) ->
-    name = if @rubricEditor.bilingual && data['name'] then data['name'][@rubricEditor.language()] else data['name']
+    name = if @rubricEditor.multilingual && data['name'] then data['name'][@rubricEditor.language()] else data['name']
     @name = name || ''
     @id = data['id']
     @minSum = if data['minSum']? then parseFloat(data['minSum']) else undefined
     @maxSum = if data['maxSum']? then parseFloat(data['maxSum']) else undefined
-    @instructions = if @rubricEditor.bilingual && data['instructions'] then data['instructions'][@rubricEditor.language()] else data['instructions']
+    @instructions = if @rubricEditor.multilingual && data['instructions'] then data['instructions'][@rubricEditor.language()] else data['instructions']
 
     for criterion_data in data['criteria']
       criterion = new Criterion(@rubricEditor, this, criterion_data)
@@ -132,11 +132,11 @@ class Page
 class Criterion
   constructor: (@rubricEditor, @page, data) ->
     @id = data['id']
-    name = if @rubricEditor.bilingual && data['name'] then data['name'][@rubricEditor.language()] else data['name']
+    name = if @rubricEditor.multilingual && data['name'] then data['name'][@rubricEditor.language()] else data['name']
     @name = name || ''
     @minSum = if data['minSum']? then parseFloat(data['minSum']) else undefined
     @maxSum = if data['maxSum']? then parseFloat(data['maxSum']) else undefined
-    @instructions = if @rubricEditor.bilingual && data['instructions'] then data['instructions'][@rubricEditor.language()] else data['instructions']
+    @instructions = if @rubricEditor.multilingual && data['instructions'] then data['instructions'][@rubricEditor.language()] else data['instructions']
     @phrases = []
     @phrasesById = {} # id => Phrase
     @selectedPhrase = ko.observable()  # Phrase object which is selected as the grade
@@ -200,7 +200,7 @@ class Phrase
     @id = data['id']
     @categoryId = data['category']
     @grade = data['grade']
-    content = if @page.rubricEditor.bilingual && data['text'] then data['text'][@page.rubricEditor.language()] else data['text']
+    content = if @page.rubricEditor.multilingual && data['text'] then data['text'][@page.rubricEditor.language()] else data['text']
     @content = content || ''
     @escaped_content = @content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br />')
     
@@ -245,7 +245,7 @@ class @Rubric
     data ||= {}
     
     @gradingMode = data['gradingMode'] || 'no'
-    @bilingual = data['bilingual'] || 0
+    @multilingual = data['version'] == '3'
     
     # Load available languages
     @available_languages = data['languages'] || []
@@ -266,7 +266,7 @@ class @Rubric
     raw_categories[0].name = '' if raw_categories.length == 1
     
     for category in raw_categories
-      if @bilingual
+      if @multilingual
         categoryItem = {}
         categoryItem['id'] = category.id
         name = if category['name'] then category['name'][@language()] else ''
@@ -296,7 +296,7 @@ class @Rubric
       
       previousPage = page
 
-    if @bilingual
+    if @multilingual
       @finalComment = ''
       if data['finalComment']
         @finalComment = data['finalComment'][@language()]
