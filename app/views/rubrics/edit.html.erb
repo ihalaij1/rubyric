@@ -5,6 +5,7 @@
 
 <form>
   <%= hidden_field_tag :rubric_payload, @exercise.rubric %>
+  <%= hidden_field_tag :review_tab_id, @tab_id %>
 </form>
 
 <div class="page-header">
@@ -27,7 +28,7 @@
       <!-- /ko -->
     </button>
     <% if @review %>
-      <%= link_to "Back to review", edit_review_path(@review), class: "btn btn-primary"%>
+      <%= link_to "Back to review", edit_review_path(@review, tab_id: @tab_id), class: "btn btn-primary"%>
     <% end %>
     <p id="save-message" class="transient-message">Changes saved</p>
   </div>

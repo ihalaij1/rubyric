@@ -15,7 +15,7 @@
       <%= hidden_field_tag :role, 'collaborator' %>
     <% end %>
 
-    <div class="tabbable review-editor" id="review-editor" data-review-url="<%= review_url(@review.id) %>">
+    <div class="tabbable review-editor" id="review-editor" data-review-url="<%= review_url(@review.id) %>" data-initial-rubric-page="<%= @tab_id %>">
       <%= render :partial => 'review_editor', :locals => {:f => f} %>
     </div>
    <% end %>

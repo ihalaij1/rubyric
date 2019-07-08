@@ -474,7 +474,7 @@ class @AnnotationEditor extends Rubric
     ko.applyBindings(this)
 
     # Select initial rubric page
-    initialPage = @pagesById[parseInt(initialPageId)] if initialPageId? && initialPageId.length > 0
+    initialPage = @pagesById[initialPageId] if initialPageId?
     initialPage = @pages[0] unless initialPage?
 
     if @finalizing()

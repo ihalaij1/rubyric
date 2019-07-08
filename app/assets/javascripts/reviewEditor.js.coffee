@@ -408,7 +408,7 @@ class @ReviewEditor extends @Rubric
     @language.subscribe => @saved = false
     @language.subscribe => @changedLanguage(true)
     
-    @initialPage = @pagesById[parseInt(initialPageId)] if initialPageId? && initialPageId.length > 0
+    @initialPage = @pagesById[initialPageId] if initialPageId?
     @initialPage = @pages[0] unless @initialPage?
 
   #

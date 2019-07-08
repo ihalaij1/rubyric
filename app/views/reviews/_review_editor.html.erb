@@ -3,13 +3,6 @@
     <%= link_to exercise_path(@exercise.id, :anchor => "group#{@review.submission.group.id}"), :class => 'back-button pull-left', :title => 'Return to menu' do %>
       <i class="glyphicon glyphicon-arrow-left"></i>
     <% end %>
-    <% if @course.has_teacher(current_user) || is_admin?(current_user) %>
-      <%= link_to edit_exercise_rubric_path(@exercise.id, review_id: @review.id), 
-          :class => 'btn btn-primary pull-right', 
-          :title => 'Edit Rubric' do %>
-        Edit Rubric <span class="glyphicon glyphicon-pencil" aria-hidden="true" style="color:white"></span>
-      <% end %>
-    <% end %>
   <% end %>
 
   <ul id="tabs" class="nav nav-tabs">
@@ -59,6 +52,15 @@
           grading with the new language.
         </div>
       <!-- /ko -->
+      
+      <% if @course.has_teacher(current_user) || is_admin?(current_user) %>
+        <%= link_to edit_exercise_rubric_path(@exercise.id, review_id: @review.id), 
+            :class => 'btn btn-primary pull-right', 
+            :title => 'Edit Rubric' do %>
+          Edit Rubric <span class="glyphicon glyphicon-pencil" aria-hidden="true" style="color:white"></span>
+        <% end %>
+      <% end %>
+      
       <h2>Review</h2>
 
       <!-- Warnings -->
@@ -155,6 +157,12 @@
           <% end %>
         </div>
       <!-- /ko -->
+      
+      <% if @course.has_teacher(current_user) || is_admin?(current_user) %>
+        <a class="btn btn-primary pull-right" data-bind="attr: { href: '<%= edit_exercise_rubric_path(@exercise, review_id: @review) %>&tab_id=' + id }">
+          Edit Rubric <span class="glyphicon glyphicon-pencil" aria-hidden="true" style="color:white"></span>
+        </a>
+      <% end %>
 
       <!-- View group -->
       <% if @submission && @submission.group && !@exercise.anonymous_submissions %>

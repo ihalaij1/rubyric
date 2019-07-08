@@ -6,7 +6,7 @@
   data-page-count="<%= @submission.page_count %>"
   data-page-width="<%= @submission.page_width %>"
   data-page-height="<%= @submission.page_height %>"
-  data-initial-rubric-page="<%= params['rubric_page'] || current_user.submission_sort_preference %>"
+  data-initial-rubric-page="<%= @tab_id || params['rubric_page'] || current_user.submission_sort_preference %>"
   data-initial-zoom="<%= params['zoom'] || current_user.zoom_preference %>"
   >
   <%= form_for @review, as: :review, url: review_path(@review), remote: true, html: {id: 'review-form'} do |f| %>

@@ -562,6 +562,12 @@ class @RubricEditor
 
     this.parseRubric(rawRubric)
     
+    reviewTabId = $('#review_tab_id').val()
+    if reviewTabId
+      for page in @pages()
+        if String(page.id()) == reviewTabId
+          page.showTab()
+    
   
   # Uses given hash {language_id: value} to sort hash values to be in same order
   # as @languages array, returns new array in right order
