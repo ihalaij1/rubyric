@@ -351,7 +351,7 @@ class Criterion
     name = new TextField(@rubricEditor, @textFields, lang, @namesByLanguageId)
     for phrase in @phrases()
       phrase.addLanguage(lang)
-    @instructions().addLanguage() if @instructions()
+    @instructions().addLanguage(lang) if @instructions()
 
 
 class Phrase
