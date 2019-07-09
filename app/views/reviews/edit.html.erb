@@ -8,13 +8,14 @@
     <%= f.hidden_field :payload %>
     <%= f.hidden_field :status %>
     <%= f.hidden_field :grade %>
+    <%= f.hidden_field :language %>
     <%= hidden_field_tag :rubric_payload, @exercise.rubric %>
     <%= hidden_field_tag :send_review %>
     <% if @exercise.collaborative_mode == 'review' && !@is_assistant && !@is_teacher %>
       <%= hidden_field_tag :role, 'collaborator' %>
     <% end %>
 
-    <div class="tabbable review-editor" id="review-editor" data-review-url="<%= review_url(@review.id) %>">
+    <div class="tabbable review-editor" id="review-editor" data-review-url="<%= review_url(@review.id) %>" data-initial-rubric-page="<%= @tab_id %>">
       <%= render :partial => 'review_editor', :locals => {:f => f} %>
     </div>
    <% end %>

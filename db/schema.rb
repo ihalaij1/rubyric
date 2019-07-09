@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190610052205) do
+ActiveRecord::Schema.define(version: 20190703065509) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -298,6 +298,7 @@ ActiveRecord::Schema.define(version: 20190610052205) do
     t.string   "extension",         limit: 255
     t.string   "type",              limit: 255, default: "Review", null: false
     t.text     "lti_launch_params"
+    t.string   "language"
   end
 
   create_table "roles", id: false, force: :cascade do |t|

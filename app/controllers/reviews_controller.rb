@@ -52,6 +52,7 @@ class ReviewsController < ApplicationController
     @review = Review.find(params[:id])
     @exercise = @review.submission.exercise
     @submission = @review.submission
+    @tab_id = params[:tab_id]
     load_course
     I18n.locale = @course_instance.locale || I18n.locale
 
@@ -337,7 +338,7 @@ class ReviewsController < ApplicationController
   private
 
   def review_params
-    params.require(:review).permit(:payload, :status, :grade, :feedback)
+    params.require(:review).permit(:payload, :status, :grade, :feedback, :language)
   end
 
 end

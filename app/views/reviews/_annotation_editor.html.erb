@@ -24,22 +24,38 @@
       <% end %>
 
       <!-- ko foreach: pages -->
-      <li>
-        <a data-bind="attr:{ href: '#page-' + id, id: 'page-' + id + '-link' }" data-toggle='tab'>
-          <span data-bind="text: name"></span>
-          <!-- ko if: $root.gradingMode == 'sum'-->
-          <span data-bind="text: averageGrade"></span>
-          <!-- /ko -->
-          <!-- ko if: $root.gradingMode == 'average' && $root.grades.length > 0 -->
-          <span data-bind="text: grade"></span>
-          <!-- /ko -->
-        </a>
-      </li>
+        <!-- ko if: !$root.changedLanguage() -->
+          <li>
+            <a data-bind="attr:{ href: '#page-' + id, id: 'page-' + id + '-link' }" data-toggle='tab'>
+              <span data-bind="text: name"></span>
+              <!-- ko if: $root.gradingMode == 'sum'-->
+              <span data-bind="text: averageGrade"></span>
+              <!-- /ko -->
+              <!-- ko if: $root.gradingMode == 'average' && $root.grades.length > 0 -->
+              <span data-bind="text: grade"></span>
+              <!-- /ko -->
+            </a>
+          </li>
+        <!-- /ko -->
+        <!-- ko if: $root.changedLanguage() -->
+          <li class="disabled">
+            <a title="Cannot review if language has been changed">
+              <span data-bind="text: name"></span>
+              <!-- ko if: $root.gradingMode == 'sum'-->
+              <span data-bind="text: averageGrade"></span>
+              <!-- /ko -->
+              <!-- ko if: $root.gradingMode == 'average' && $root.grades.length > 0 -->
+              <span data-bind="text: grade"></span>
+              <!-- /ko -->
+            </a>
+          </li>
+        <!-- /ko -->
       <!-- /ko -->
-      <!-- ko if: finishable() -->
+      
+      <!-- ko if: finishable() && !changedLanguage() -->
       <li><a href="#tab-finish" id="tab-finish-link" data-toggle="tab" data-bind="click: finish">Finalize</a></li>
       <!-- /ko -->
-      <!-- ko if: !finishable() -->
+      <!-- ko if: !finishable() || changedLanguage() -->
       <li class="disabled"><a title="<%= t('reviews.edit.finalize_hint') %>">Finalize</a></li>
       <!-- /ko -->
       <% unless @exercise.new_record? %>
@@ -49,13 +65,6 @@
           <% end %>
           <li><p id="save-message" class="transient-message"></p></li>
           
-          <% if @course.has_teacher(current_user) || is_admin?(current_user) %>
-            <%= link_to edit_exercise_rubric_path(@exercise.id, review_id: @review.id), 
-                :class => 'btn btn-primary pull-right', 
-                :title => 'Edit Rubric' do %>
-              Edit Rubric <span class="glyphicon glyphicon-pencil" aria-hidden="true" style="color:white"></span>
-            <% end %>
-          <% end %>
           
       <% end %>
     </ul>
@@ -69,6 +78,14 @@
                 This review has already been mailed and cannot be modified any more.
               </div>
           <% end %>
+          
+          <!-- ko if: $root.changedLanguage -->
+            <div class="alert alert-info">
+              You changed language of this review. Save and 
+              <%= link_to "click here", edit_review_path(@review) %>
+              to continue grading with the new language.
+            </div>
+          <!-- /ko -->
 
           <!-- Notes to grader -->
           <% if @review && !@review.notes_to_grader.blank? %>
@@ -76,6 +93,17 @@
                 <%= @review.notes_to_grader %>
               </div>
           <% end %>
+        </div>
+        
+        <div class="row-fluid">
+          <% if @course.has_teacher(current_user) || is_admin?(current_user) %>
+            <%= link_to edit_exercise_rubric_path(@exercise.id, review_id: @review.id), 
+                :class => 'btn btn-primary pull-right', 
+                :title => 'Edit Rubric' do %>
+              Edit Rubric <span class="glyphicon glyphicon-pencil" aria-hidden="true" style="color:white"></span>
+            <% end %>
+          <% end %>
+          <h2>Review</h2>
         </div>
 
         <% if !@exercise.new_record? %>
@@ -115,6 +143,17 @@
               </div>
             </div>
         <% end %>
+        
+        <!-- ko if: $root.available_languages.length > 1 -->
+          <div class="row-fluid">
+            <div class="well">
+              <h3>Language</h3>
+              <p>
+                <select class="phraseType" data-bind="options: $root.available_languages, value: language"></select>
+              </p>
+            </div>
+          </div>
+        <!-- /ko -->
       </div>
 
       <!-- ko foreach: pages -->
@@ -129,6 +168,12 @@
           <% end %>
         </div>
         <!-- /ko -->
+        
+        <% if @course.has_teacher(current_user) || is_admin?(current_user) %>
+          <a class="btn btn-primary pull-right" data-bind="attr: { href: '<%= edit_exercise_rubric_path(@exercise, review_id: @review) %>&tab_id=' + id }">
+            Edit Rubric <span class="glyphicon glyphicon-pencil" aria-hidden="true" style="color:white"></span>
+          </a>
+        <% end %>
 
         <!-- View group -->
         <% if @submission && @submission.group && !@exercise.anonymous_submissions %>

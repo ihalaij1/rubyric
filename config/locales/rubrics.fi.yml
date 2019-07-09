@@ -4,4 +4,6 @@ fi:
       tooltip_categories: 'You can optionally divide feedback into categories such as <i>strengths</i> as <i>weaknesses</i>.'
       tooltip_final_comment: '<i>Final comment</i> is automatically added to the end of feedback, but can be edited by the reviewer.'
       no-categories: 'Not using categories'
+      tooltip_languages: 'You can allow reviewers to choose between different language versions of rubric.'
+      one_language: 'You are not using multilingual rubrics.'
   
