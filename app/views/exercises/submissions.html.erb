@@ -76,6 +76,48 @@
   <p><strong>Service url: </strong><%= link_to root_url + "aplus/#{@exercise.id}", root_url + "aplus/#{@exercise.id}" %></p>
 <% end %>
 
+<div>
+  <h2>
+    Completed reviews
+    <a data-toggle="collapse" href="#reviews-table-content" role="button" aria-expanded="true" aria-controls="reviews-table-content">
+      <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true" style="font-size:50%"></span>
+    </a>
+  </h2>
+</div>
+<div class="col-md-12">
+  <div class="col-md-5 collapse in" id="reviews-table-content">
+    <div class="well">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Reviewer</th>
+            <th>Not started</th>
+            <th>Started</th>
+            <th>
+              Completed (Mailed)
+              <i id="tooltip-completed" class="glyphicon glyphicon-question-sign" 
+                 data-toggle="tooltip" data-content="Completed refers to reviews with status finished, mailing or mailed"></i>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (0..@graders.size - 1).each do |i| %>
+            <tr>
+              <td><%= @graders[i].firstname %> <%= @graders[i].lastname %></td>
+              <td><%= @not_started[i] %></td>
+              <td><%= @started[i] %></td>
+              <td><%= @finished[i] + @mailed[i] %> (<%= @mailed[i] %>)</td>
+            </tr>
+          <% end %>
+        </tbody>      
+      </table>
+        
+      <p>Completed reviews: <%= @finished.sum + @mailed.sum %></p>
+      <p>Total submissions: <%= @groups.map{|g| g.submissions.size}.sum %></p>
+    </div>
+  </div>
+</div>
+
 <% unless @groups.empty? %>
   <h2>
     Submissions
@@ -158,37 +200,6 @@
   <%= link_to 'Batch upload submissions', batch_upload_exercise_submissions_path(:exercise_id => @exercise.id) %>
 <% end %>
 
-<div class="col-md-5 well">
-  <h2>Completed reviews</h2>
-  
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Reviewer</th>
-        <th>Not started</th>
-        <th>Started</th>
-        <th>Completed* (Mailed)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% (0..@graders.size - 1).each do |i| %>
-        <tr>
-          <td><%= @graders[i].firstname %> <%= @graders[i].lastname %></td>
-          <td><%= @not_started[i] %></td>
-          <td><%= @started[i] %></td>
-          <td><%= @finished[i] + @mailed[i] %> (<%= @mailed[i] %>)</td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-  
-  <p>Completed reviews: <%= @finished.sum + @mailed.sum %></p>
-  <p>Total submissions: <%= @groups.map{|g| g.submissions.size}.sum %></p>
-  
-  <p class="italics-paragrapgh">
-    * Completed refers to reviews with status finished, mailing or mailed
-  </p>
-</div>
 
 <!-- Modal for sending reviews -->
 <div id="modal-send-reviews" class="modal fade">
