@@ -6,10 +6,21 @@
 
 <% if @course.has_teacher(current_user) && @review.status == 'mailed' %>
   <div class="row">
-    <div class="alert">
-      <p>This review has already been mailed and cannot be modified any more.</p>
+    <div class="alert alert-info">
+      <p>This review has already been mailed and cannot be modified anymore.</p>
       <%= link_to 'Reopen', reopen_review_path(@review), class: 'btn' %>
       <%= link_to 'Invalidate', invalidate_review_path(@review), class: 'btn' %>
+    </div>
+  </div>
+<% end %>
+
+<% if @review.status == 'invalidated' %>
+  <div class="row">
+    <div class="alert alert-warning">
+      <p>
+        This review has been invalidated and cannot be modified anymore nor
+        delivered to students.
+      </p>
     </div>
   </div>
 <% end %>
@@ -30,6 +41,11 @@
 <% if @submission.video? %>
   <%= video_player(@submission.payload) %>
 <% end %>
+
+<!-- Review created/updated time -->
+<p>
+  <b>Review updated:</b> <%=l @review.updated_at, format: :long %> <small>(created <%=l @review.created_at%>)</small>
+</p>
 
 <% if !@exercise.anonymous_graders && @grader %>
   <p><b>Reviewer:</b> <%= @grader.name %></p>
@@ -58,4 +74,3 @@
 <% else %>
   <p><%= link_to t('Back'), submit_url(@exercise.id, group: @group, member_token: params[:member_token], group_token: params[:group_token]) %></p>
 <% end %>
-
