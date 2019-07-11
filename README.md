@@ -13,9 +13,9 @@ Rubyric uses postgresql as database. Install postgresql and create user.
 sudo apt-get install postgresql
 sudo -u postgres createuser --interactive
 ```
-For Rubyric to work properly you should also have pdfinfo and ghostscript installed.
+Rubyric requires pdfinfo, ghostscript and libpq-dev to work
 ```sh
-sudo apt-get install poppler-utils ghostscript
+sudo apt-get install poppler-utils ghostscript libpq-dev
 ```
 
 # Install Rubyric
