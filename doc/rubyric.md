@@ -19,9 +19,9 @@ developer as well as end user.
 ## Contents
 
 1. Installation
-  * Install environment
-  * Install Rubyric
-  * Connect local Rubyric to A+ course in docker (optional for testing)
+   * Install environment
+   * Install Rubyric
+   * Connect local Rubyric to A+ course in docker (optional for testing)
 2. Technical documentation
 3. User Guide
 
@@ -107,11 +107,11 @@ To add Rubyric as a LTI service to A+ you need to
   1. Go to http://localhost:8000/admin and login as `root`:`root`
   2. Choose `Lti services` and `Add Lti service`
   3. Set settings as
-    * Url: http://[docker ip]:[port]/session/lti
-    * Destination region: hosted in the same organization
-    * Access settings: allow API access
-    * Consumer key: test
-    * Consumer secret: secret
+     * Url: http://[docker ip]:[port]/session/lti
+     * Destination region: hosted in the same organization
+     * Access settings: allow API access
+     * Consumer key: test
+     * Consumer secret: secret
     
 Key-secret pair test:secret are part of default configuration of Rubyric. You
 can change these in `config/initializers/settings.rb`. In production version
@@ -505,8 +505,52 @@ and read these tables and "Results" page can be found at chapter
 [Results](#results).
 
 ### Rubrics and reviews
-TODO: This chapter will introduce rubrics and different types of reviews you can
-do at Rubyric.
+This chapter will first explain how to create rubrics. After that the chapter 
+will introduce different types of reviews available at Rubyric and how reviewing 
+submissions works.
+
+Start creating or editing your rubric by choosing the exercise and clicking rubric under assignment name at the menu on the left. Rubrics on Rubyric have *pages*, *criteria* and *phrases*. The feedback is constructed out of phrases. Phrases are related to one specific criterion and criteria are located on pages. Pages can be used for separating criteria from each other, e.g. criteria related to style are located at one page and criteria related to content are on another. 
+
+Rubric editor starts at "Settings" tab. There you can set *grading mode*, 
+*feedback categories*, *languages*, *final comment* and, if your grading mode 
+is set as "Mean", *grades*. 
+
+*Grading mode* has four options: "No grade", "Mean", "Sum" and "Always pass". "No grade" mode does not give any grade or points to the submission but gives purely textual feedback. "Mean" mode allows instructor to define set of *grades* which can be associated with phrases. When reviewing submission, Rubyric calculates the mean of grades of chosen phrases for each page and suggests it to the reviewer. However the reviewer is also allowed choose some other value. Final grade of review is set in the same fashion except that the suggested value is calculated as a mean of grades of the pages. "Sum" mode allows instructor to set grades/points for each phrase and final grade is the sum of these grades. "Always pass" mode is available only for course instances with Submission policy "LTI integration". "Always pass" mode does not associate phrases with any points and, like "No grade", it gives purely textual feedback. When sending points to other services "Always pass" sends feedback as full points.
+
+*Feedback categories* are associated with phrases and are used in reviews to collect selected phrases into groups. In final feedback text the phrases associated with same category will be collected together under the feedback category's name. Feedback categories could be for example: "Strengths", "Weaknesses" and "Other".
+
+Rubyric allows instructor to create multilingual rubrics so that every page, criterion and phrase has versions in all languages the instructor has chosen for the rubric. *Languages* are added to the language list on the "Settings" tab. By default rubrics are not multilingual and have only one language with name "default" defined. Adding a new language is done by pressing "Add language" button after which the instructor is asked to name the language. Instructor should translate all phrases, criteria, pages etc. to available languages. Deleting a language deletes all texts associated with the language. When reviewing assignment with multilingual rubric, only the translations in the language of the review are shown to the reviewer. If rubric is multilingual, a new review's language defaults to the first language in the languages list. However the reviewer can change the language of the review.
+
+*Final comment* is a text that is automatically added to the end of every 
+review.
+
+Each *page* is shown as its own tab. New pages are added by pressing "Create new page" button. New pages always have two criteria both if which have two default phrases as an example. Pages can be renamed by clicking their name and confirming the new name by pressing "OK" button. Instructor can set minimum and maximum points the students can acquire from pages and add grading instructions for the reviewers. Min and max point fields and button for adding grading instructions can be seen by hovering over the page name. Page can be deleted by pressing trash can icon next to page name.
+
+*Criteria*, just like pages, can be renamed and can be associated with minimum and maximum points and grading instructions. New criterion is created to the page by pressing "Create new criterion" button. Criteria can be rearranged within the page by dragging them to a new position.
+
+*Phrases* have text fields for their content, one text field for each available language. They can be edited by clicking the text in them and changes are confirmed by pressing "OK" button. The feedback categories (if there is any) are selected per phrase. If the grading mode of rubric is "Mean", the phrase is associated with a grade chosen from list of defined grades. If the grading mode is "Sum", the instructor can type the grade to the field left from phrase's content. New phrases are added to existing criterion by pressing "Create new phrase" button. Phrases can be moved within criterion and between criteria by dragging them to the desired position.
+
+After you have finished editing rubric press "Save" button and click on the 
+exercise name at top of the view to return to exercise page.
+
+Rubyric has two types of reviews "Plain text" and "Annotation". The type of 
+review is set in exercise settings. "Plain text" is, as the name suggests, review constructed of plain text. "Annotation" review opens the submission and allows reviewer to drag phrases on the submission to point at the exact point the phrase is referring at. 
+
+To start reviewing a submission hover over it at exercise page and press "Create review" button. The review editor loads the rubric on the default language if the review is new or review's language is not set. Otherwise the rubric is loaded on the review's language. The editor shows pages as tabs and criteria and phrases associated with them in similar fashion as when editing rubrics. "Overview" tab shows basic information about the review. The reviewer can view information about when the review has been created and last updated and the group that has made the submission. Reviewer can also download the submission file and change the language of the review at "Overview" tab.
+
+"Plain text" reviews are done by clicking suitable phrases. After clicking on a phrase, its contents appear on text field on the right side of the editor. If the rubric has feedback categories there are separate text fields for each category and phrases appear on the text field of its associated category. The phrases can be edited in the text fields and reviewer can add their own comments in between phrases. 
+
+"Annotation" reviews are done by dragging phrases to the submission. Phrases can be deleted by clicking X-button at them. They can be edited by clicking on their content, changing the content and pressing "OK". The reviewer can add their own comments to the review by clicking the point where they want to add it to. It opens text field where reviewer can freely write what they want.
+
+Reviews have a few different statuses:
+
+  * "started": The review has been started but not yet finished
+  * "finished": The review has been finished and ready to be delivered to 
+  students
+  * "mailing": The review is about to be delivered to students
+  * "mailed": The review has been delivered to students
+  
+The review reaches "finished" status if reviewer has chosen a phrase from each criteria and moved to "Finalize" tab. "Plain text" reviews allow reviewer to view and edit the final feedback at "Finalize" tab. After moving to "Finalize" review can no longer be edited on other tabs. Finalization can be cancelled but doing so will destroy all changes reviewer has done at "Finalize".
 
 ### A+ connected courses and exercises
 This chapter explains how to configure A+ connected courses and exercises.
@@ -516,16 +560,16 @@ To configure the course you have two choices.
 (Recommended) The first option:
 
   1. Add Rubyric to menu at A+
-    * Open "Edit course"
-    * Go to "Menu" tab
-    * Click "Add new menu item"
-    * Choose settings and submit the form
+     * Open "Edit course"
+     * Go to "Menu" tab
+     * Click "Add new menu item"
+     * Choose settings and submit the form
   2. Click the menu item you created
   3. Click "Continue to the service"
-    * You should be directed to create course form at Rubyric.
+     * You should be directed to create course form at Rubyric.
   4. Fill in the course and course instance names
-    * Form already has LTI consumer ID and LTI context ID filled in, do not
-      touch them.
+     * Form already has LTI consumer ID and LTI context ID filled in, do not
+     touch them.
   5. Click "Create"
   
 Alternatively you can:
@@ -560,27 +604,27 @@ is two choices for exercise configuration: automatic (recommended) and manual.
 (Recommended) Automatic exercise configuration through A+:
 
   1. Create new A+ exercise using Rubyric as Lti service, use:
-    * Service url: /aplus_exercise
-    * Aplus get and post: True
-    * Open in iframe: True
+     * Service url: /aplus_exercise
+     * Aplus get and post: True
+     * Open in iframe: True
   2. Open the exercise at A+
-    * Opening the exercise configures it at Rubyric if it has not yet been done
+     * Opening the exercise configures it at Rubyric if it has not yet been done
   3. (Optional) Login to Rubyric and change exercises setting to your liking
-    * Do not touch LTI resource link ID
+     * Do not touch LTI resource link ID
 
 Manual exercise configuration:
 
   1. Login to Rubyric
   2. Choose the course instence and click "Create new assignment"
   3. Fill in the exercise form and click "Save"
-    * Choose some unique `LTI resource link ID`: e.g. 
+     * Choose some unique `LTI resource link ID`: e.g. 
       [course_code]-[course_name]-[instance]-[exercise_name]
   4. Get `service url` from the exercise page
   5. Create new A+ exercise using Rubyric as Lti service, use:
-    * Service url: `service url` from Rubyric exercise
-    * Resource link id: `LTI resource link ID` from Rubyric exercise
-    * Aplus get and post: True
-    * Open in iframe: True
+     * Service url: `service url` from Rubyric exercise
+     * Resource link id: `LTI resource link ID` from Rubyric exercise
+     * Aplus get and post: True
+     * Open in iframe: True
   6. (Optional) Test configuration by opening the exercise at A+, if you see
      submit button it should be done
      
