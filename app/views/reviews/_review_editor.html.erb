@@ -342,6 +342,24 @@
           </tr>
         </tfoot>
       </table>
+      
+      <div class="final-grade-editor">
+        <h3>
+          Final Grade
+        </h3>
+        <!-- ko if: editingFinalGrade() -->
+          <input data-bind="value: finalGrade"></input>
+          <span class="btn btn-default" data-bind="click: toggleEditGrade">OK</span>
+        <!-- /ko -->
+        <!-- ko if: !editingFinalGrade() -->
+          <p class="final-grade-title">
+            <span data-bind="text: finalGrade, click: toggleEditGrade"></span> 
+            <span class="edit-grade-button">
+              <span class="glyphicon glyphicon-pencil" title="Edit final grade" data-bind="click: toggleEditGrade" aria-hidden="true"></span>
+            </span>
+          </p>
+        <!-- /ko -->
+      </div>
     <!-- /ko -->
 
     <% unless @exercise.new_record? %>

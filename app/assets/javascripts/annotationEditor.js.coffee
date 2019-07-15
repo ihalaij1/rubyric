@@ -448,6 +448,7 @@ class @AnnotationEditor extends Rubric
     @saved = true
     @finalizing = ko.observable(false)
     @changedLanguage = ko.observable(false)
+    @editingFinalGrade = ko.observable(false)
     
     @language.subscribe => @saved = false
     @language.subscribe => @changedLanguage(true)
@@ -470,6 +471,8 @@ class @AnnotationEditor extends Rubric
     @finishedText(@finalComment) if @finishedText().length < 1 && @finalComment? && @finalComment.length > 0
 
     this.parseReview(review)
+    
+    @finalGrade.subscribe => @saved = false
 
     ko.applyBindings(this)
 
@@ -600,8 +603,11 @@ class @AnnotationEditor extends Rubric
     # Calculate grade
     grades = @pages.map (page) -> page.grade()
     grade = this.calculateGrade(grades)
-    @finalGrade(grade)
-
+    @finalGrade(grade)            if @gradingMode != "sum"
+    @finalGrade(@averageGrade())  if @gradingMode == "sum"
+        
+  toggleEditGrade: ->
+    @editingFinalGrade(!@editingFinalGrade())
 
   clickGrade: (phrase) =>
     if @gradingMode != 'sum' && !phrase.criterion.annotationsHaveGrades()
@@ -663,10 +669,8 @@ class @AnnotationEditor extends Rubric
     $('#review_payload').val(JSON.stringify(@commandBuffer.as_json()))
 
     # Set grade
-    if @gradingMode == 'average'
+    if @gradingMode == 'average' || @gradingMode == 'sum'
       finalGrade = @finalGrade()
-    else if @gradingMode == 'sum'
-      finalGrade = @averageGrade()
     else
       finalGrade = undefined
 

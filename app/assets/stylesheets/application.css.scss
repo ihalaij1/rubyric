@@ -420,6 +420,18 @@ p.feedback-preview {
   font-family: monospace;
 }
 
+.final-grade-editor {
+  .edit-grade-button {
+    visibility: hidden;
+  }
+  
+  .final-grade-title {
+    &:hover .edit-grade-button {
+      visibility: visible;
+    }
+  }
+}
+
 /**************************************************************************
  * Rubric editor (teacher view)
  **************************************************************************/

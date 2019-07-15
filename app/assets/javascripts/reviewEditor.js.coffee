@@ -394,6 +394,7 @@ class @ReviewEditor extends @Rubric
     @finalizing = ko.observable(false)
     @busySaving = ko.observable(false)
     @changedLanguage = ko.observable(false)
+    @editingFinalGrade = ko.observable(false)
     
     element = $('#review-editor')
     @role = $('#role').val()
@@ -501,10 +502,8 @@ class @ReviewEditor extends @Rubric
     $('#review_payload').val(this.encodeJSON())
     
     # Set grade
-    if @gradingMode == 'average'
+    if @gradingMode == 'average' || @gradingMode == 'sum'
       finalGrade = @finalGrade()
-    else if @gradingMode == 'sum'
-      finalGrade = @averageGrade()
     else
       finalGrade = undefined
     
@@ -551,6 +550,9 @@ class @ReviewEditor extends @Rubric
   clickInvalidate: ->
     this.save({invalidate: true})
     
+  toggleEditGrade: ->
+    @editingFinalGrade(!@editingFinalGrade())
+    
   clickGrade: (phrase) =>
     phrase.page.addPhrase(phrase.content, phrase.categoryId) # unless phrase.criterion.selectedPhrase()?
     phrase.criterion.setSelectedPhrase(phrase) if phrase.grade?
@@ -584,7 +586,8 @@ class @ReviewEditor extends @Rubric
     # Calculate grade
     grades = @pages.map (page) -> page.grade()
     grade = this.calculateGrade(grades)
-    @finalGrade(grade)
+    @finalGrade(grade)            if @gradingMode != "sum"
+    @finalGrade(@averageGrade())  if @gradingMode == "sum"
   
   collectFeedbackTexts: ->
     finalText = ''
