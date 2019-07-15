@@ -589,6 +589,20 @@ class @ReviewEditor extends @Rubric
   collectFeedbackTexts: ->
     finalText = ''
     
+    # Lists grades from all pages
+    if @gradingMode == "sum"
+      pointsText = "Points\n"
+      for page in @pages
+        pointsText += "  - #{page.name}: #{page.averageGrade()}\n"
+      pointsText += "Sum: #{@averageGrade()}\n"
+      finalText += "#{pointsText}\n"
+    else if @gradingMode == "average"
+      pointsText = "Grades\n"
+      for page in @pages
+        pointsText += "  - #{page.name}: #{page.grade()}\n"
+      pointsText += "Mean: #{@averageGrade()}\n"
+      finalText += "#{pointsText}\n"
+    
     if @feedbackCategories.length > 1
       # Group feedback by category
       

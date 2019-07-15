@@ -2,7 +2,8 @@
 
 <% if !@exercise.anonymous_graders && @grader %><%=t :Reviewer %>: <%= @grader.firstname %> <%= @grader.lastname %> (<%= @grader.email %>)
 <% end -%>
-<% unless @review.grade.blank? %><%=t :Grade %>: <%= @review.grade %>
+<% unless @review.grade.blank? %><%=t :Grade %>: <%= @review.grade %><% unless @exercise.max_grade.blank? %> / <%= @exercise.max_grade %>
+<% end %>
 <% end -%>
 
 <% if @review.feedback && !@review.feedback.strip.empty? -%>

@@ -3,7 +3,7 @@
 <p>
 <% if !@exercise.anonymous_graders && review.user %><%=t :Reviewer %>: <%= review.user.firstname %> <%= review.user.lastname %> <a href="mailto:<%= review.user.email %>">(<%= review.user.email %>)</a><% end -%>
 
-<% unless review.grade.blank? %><br /><%=t :Grade %>: <%= review.grade %><% end -%>
+<% unless review.grade.blank? %><br /><%=t :Grade %>: <%= review.grade %><% unless @exercise.max_grade.blank? %> / <%= @exercise.max_grade %><% end %><% end -%>
 </p>
 
 <% if review.feedback -%>
