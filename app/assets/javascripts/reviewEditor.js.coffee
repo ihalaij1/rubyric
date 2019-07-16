@@ -395,6 +395,7 @@ class @ReviewEditor extends @Rubric
     @busySaving = ko.observable(false)
     @changedLanguage = ko.observable(false)
     @editingFinalGrade = ko.observable(false)
+    @editedBy = []
     
     element = $('#review-editor')
     @role = $('#role').val()
@@ -437,7 +438,21 @@ class @ReviewEditor extends @Rubric
       this.parseReview($.parseJSON(payload))
     else
       this.parseReview()
-  
+      
+    # Check if review is being edited by someone else than the original reviewer
+    # and add them to the editedBy list
+    currentUser = $('#current_user').val()
+    currentUser = $.parseJSON(currentUser) if currentUser && currentUser.length > 0
+    reviewer = $('#review_user').val()
+    reviewer = $.parseJSON(reviewer) if reviewer && reviewer.length > 0
+    if currentUser && reviewer && currentUser['id'] != reviewer['id']
+      already_listed = false
+      for editor in @editedBy
+        if editor['id'] == currentUser['id']
+          already_listed = true
+          editor['name'] = currentUser['name']
+      if !already_listed
+        @editedBy.push({'id': currentUser['id'], 'name': currentUser['name']})
 
   #
   # Parses the JSON data returned by the server. See loadRubric.
@@ -455,6 +470,8 @@ class @ReviewEditor extends @Rubric
     
         for category in page.feedback
           category.value.subscribe((newValue) => @saved = false )
+          
+        @editedBy = data['editors'] || []
     
     if (@gradingMode == 'average' && @grades.length > 0)
       @averageGrade = ko.computed((=>
@@ -490,7 +507,8 @@ class @ReviewEditor extends @Rubric
   # Returns the review as JSON
   encodeJSON: ->
     pages_json = @pages.map (page) -> page.to_json()
-    return JSON.stringify({version: '2', pages: pages_json})
+    editors_json = @editedBy
+    return JSON.stringify({version: '2', pages: pages_json, editors: editors_json})
   
   # Populates the HTML-form from the model. This is called just before submitting.
   save: (options) ->
@@ -605,6 +623,18 @@ class @ReviewEditor extends @Rubric
         pointsText += "  - #{page.name}: #{page.grade()}\n"
       pointsText += "Mean: #{@averageGrade()}\n"
       finalText += "#{pointsText}\n"
+      
+    # List users that are not the original reviewer and have edited the review
+    if @editedBy.length > 0
+      finalText += "Edited by: "
+      i = 0; len = @editedBy.length
+      for editor in @editedBy
+        if i < len - 1
+          finalText += "#{editor['name']}, "
+        else
+          finalText += "#{editor['name']}\n"
+        i += 1
+      finalText += "\n"
     
     if @feedbackCategories.length > 1
       # Group feedback by category

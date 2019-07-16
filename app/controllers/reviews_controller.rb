@@ -53,6 +53,8 @@ class ReviewsController < ApplicationController
     @exercise = @review.submission.exercise
     @submission = @review.submission
     @tab_id = params[:tab_id]
+    @current_user_json = {id: current_user.id, name: "#{current_user.name} (#{current_user.email})"}.to_json
+    @reviewer_json = {id: @review.user.id, name: "#{@review.user.name} (#{@review.user.email})"}.to_json
     load_course
     I18n.locale = @course_instance.locale || I18n.locale
 

@@ -11,6 +11,8 @@
     <%= f.hidden_field :language %>
     <%= hidden_field_tag :rubric_payload, @exercise.rubric %>
     <%= hidden_field_tag :send_review %>
+    <%= hidden_field_tag :current_user, @current_user_json %>
+    <%= hidden_field_tag :review_user, @reviewer_json %>
     <% if @exercise.collaborative_mode == 'review' && !@is_assistant && !@is_teacher %>
       <%= hidden_field_tag :role, 'collaborator' %>
     <% end %>
