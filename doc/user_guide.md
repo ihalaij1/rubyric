@@ -382,17 +382,106 @@ TODO: Peer review configuration
 
 ## Results
 This chapter will explain how exercise view works, how to send reviews
-to students and how results page works. 
+to students and how the "Results" page works. 
 
-As an instructor the user can view list of all submissions and reviews for each exercise (or assignment) by going to the exercise view. To do this click on the course instance name and after this click on the exercise name. The view shows deadline, allowed group size for submissions and submit url or sevice url (in LTI course instances). The view also has two tables: *Completed reviews* and *Submissions*. 
+As an instructor the user can view list of all submissions and reviews for each 
+exercise (or assignment) by going to the exercise view. To do this click on the 
+course instance name and after this click on the exercise name. The view shows 
+deadline, allowed group size for submissions and submit url or sevice url 
+(in LTI course instances). The view also has two tables: *Completed reviews* and 
+*Submissions*. 
 
-To see an summary of grades each student has gotten from an exercise, you need to go to "Results" page. To do this go to the exercise view and click on "Results" at the menu on the left. "Results" page lists grades for each student and allows instructor to download the list as CSV.
+*Completed reviews* table lists all graders for the exercise. That is: users who 
+are either instructors, reviewers or have at least one review at the exercise. 
+For each grader the table shows how many reviews they have *Not started*, 
+*Started*, *Completed* and *Mailed*. *Not started* refers to submissions of 
+groups that have been assigned to the reviewer but which reviewer has not yet 
+reviewed. *Started* refers to reviews with status "started" or "". *Completed* 
+refers to reviews with status "finished", "mailing" and "mailed" and *Mailed* 
+shows how many of Completed reviews have status "mailed". Reviews with status 
+"invalidated" are not considered to be Started nor Completed. Thus "invalidated" 
+reviews do not reduce Not started count.
 
-*Completed reviews* table lists all graders for the exercise. That is: users who are either instructors, reviewers or have at least one review at the exercise. For each grader the table shows how many reviews they have *Not started*, *Started*, *Completed* and *Mailed*. *Not started* refers to submissions of groups that have been assigned to the reviewer but which reviewer has not yet reviewed. *Started* refers to reviews with status "started" or "". *Completed* refers to reviews with status "finished", "mailing" and "mailed" and *Mailed* shows how many of Completed reviews have status "mailed". Reviews with status "invalidated" are not considered to be *Started* nor *Completed*. Thus "invalidated" reviews do not reduce *Not started* count.
+**Completed reviews**
+
+| Reviewer    | Not started | Started | Completed(Mailed) |
+|:------------|:------------|:--------|:------------------|
+| Teacher 1   | 0           | 1       | 2 ( 2 )           |
+| Assistant 1 | 3           | 0       | 3 ( 1 )           |
+
+From the example table above we can see that "Teacher 1" has one review they 
+have started but not yet finished and two reviews they have finished and mailed 
+to the students. "Assistant 1" has been assigned to review three submissions 
+which they have yet to start reviewing. They have also finished three reviews 
+out of which one has been mailed to the students.
 
 Completed reviews table can be used to monitor assistants and to keep track on 
 how many reviews each of them has completed. 
 
-*Submissions* table lists all groups who have submitted to the exercise, their submissions and reviews done to them.  
+*Submissions* table lists all groups who have submitted to the exercise, their 
+submissions and reviews done to them. The table has columns *Submission*, 
+*Review*, *Status* and *Grade*. The submissions are grouped together by their 
+submitter groups. Each group is shown as a row with grey background. The row 
+shows group's name and, if the group has been assigned to a reviewer, the name 
+of reviewer is also shown. Group's submissions are listed below the group name, 
+each submissions as their own row (in case the group has more than one 
+submission). 
+
+*Submission* column contains the submission times and links to download the 
+submissions. There is also a dropdown (tiny down pointing arrow next to 
+submission download link) containing options: 
+
+  * "Create new review": Creates new review for the submission
+  * "New submission...": Create new submission for the group
+  * "Move submissions...": Moves submissions to another exercise
+  * "Delete submission...": Deletes the submission and its reviews
+  
+*Review* column has link to the review and a checkbox. The review link is shown 
+as the name of the reviewer and hovering over the link shows the time it was 
+last updated. While the review has not been mailed or invalidated, the link 
+directs the instructor to edit the review. After the review has been mailed or 
+invalidated, the link directs the instructor to view the review. The checkbox 
+is used to choose the reviews the instructor wants to send to students. *Status* 
+column states the status of the review. *Grade* column shows the grade of the 
+review. In case the submission has several reviews (for example when using peer 
+review), the row containing the submission is divided into several rows, one 
+for each review, who all share the same Submission block. 
+
+Once review has been finished, it can be sent to students. Instructor can sent 
+multiple reviews at once by checking them at Submissions table and pressing 
+"Deliver selected reviews" button. "Select all" button selects automatically 
+all reviews, "Select finished" button selects only the reviews which have status 
+"finished" and "Select none" cancels all selections. Regular submissions will 
+be delivered to students' email. A+ submissions will be sent to A+. Note that 
+A+ scales the points it receives from Rubyric to fit the maximum points of the 
+exercise there. E.g. When Rubyric sends 2 points out of maximum 10 and A+ 
+exercise has maximum points of 100, the points will scaled to 20 points.   
+
+If sending reviews to A+ the instructor should pay attention to option "If 
+sending several reviews for one submission set points equal to:". "Best grade" 
+sets the points at A+ equal to the points of the best review of the submission. 
+"Average grade" calculates average of the chosen reviews for the submissions 
+and sets points at A+ equal to that value.
+
+Another thing to note is that Rubyric cannot sent non-numerical grades 
+(e.g. "Failed" or "Boomerang") to A+ and warns the instructor when trying to do 
+so. Non-numerical grades won't be taken into account when calculating the 
+points sent to A+ but the feedback text will still be included in the sent 
+review. 
+
+To see an summary of grades each student has gotten from an exercise, you need 
+to go to "Results" page. To do this go to the exercise view and click on 
+"Results" at the menu on the left. "Results" page lists grades for each student 
+and allows instructor to download the list as CSV.
+
+"Results" page has two options for listing grades: "All reviews" and "Combined 
+grade". "All reviews" option lists students whose submissions has been reviewed 
+(and review has been completed) with the grade of the review. If student's 
+submission has several reviews, each one is listed separately. "Combined grade" 
+options lists all students who have submitted to the exercise. The grade shown 
+in "Combined grade" option is average grade of reviews. The tables can be sorted 
+by their column values by clicking the arrow next to the column names. The 
+tables can be downloaded from Rubyric by choosing the table and clicking 
+"Download CSV spreadsheet" button. 
 
 [<- Previous part](technical_documentation.md) |

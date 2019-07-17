@@ -22,7 +22,7 @@ developer as well as end user.
    * [Install environment](#install-environment)
    * [Install Rubyric](#install-rubyric)
    * [Connect local Rubyric to A+ course in docker](#connect-local-rubyric-to-a-course-in-docker-optional) (optional for testing)
-2. [Technical documentation](technical-documentation.md)
+2. [Technical documentation](technical_documentation.md)
 3. [User Guide](user_guide.md)
 
 # Installation
@@ -129,4 +129,4 @@ rails server -p [port] -b [docker ip]
 
 With this your local Rubyric should allow your A+ course to connect to it.
 
-| [Next part ->](technical-documentation.md)
+| [Next part ->](technical_documentation.md)
