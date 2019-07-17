@@ -378,7 +378,35 @@ Manual exercise configuration:
   6. (Optional) Test configuration by opening the exercise at A+, if you see
      submit button it should be done
      
-TODO: Peer review configuration
+Rubyric's peer review can be used in A+ courses by instructing students to 
+login to Rubyric and to create new peer reviews in the exercise. First you need 
+to allow peer reviews in the exercise:
+
+  1. Login to Rubyric
+  2. Go to the exercise settings and set:
+     * LTI resourse link ID for peer review: Choose some unique value, e.g. 
+       [Your LTI resourse link ID]-peer-review
+     * Peer review: Number of peer reviews for each student
+  3. (Optional) Add a new menu item to A+ course for peer review
+     * Open "Edit course"
+     * Go to "Menu" tab
+     * Click "Add new menu item"
+     * Choose settings and submit the form with values
+       * Access: All students, assistants and teacher can access
+       * Menu url: `?resource_link_id=[Your LTI resource link ID for peer 
+         review]`
+
+Students can login through the menu item and they will be directed to the 
+exercise view. At the exercise view students have button "Create new peer 
+review" for starting peer review. You can also choose not to add a new menu 
+item for peer review and instruct students how to find their way to the exercise 
+themselves. If students have made their submission through A+, they should login 
+with LTI in order to do the peer review. 
+
+If you want that students cannot see names of the submitters of the submissions 
+they will review, remember to toggle on anonymous students at exercise settings. 
+Likewise if you wish that students cannot see names of people who reviewed their 
+submission, toggle on anonymous reviewers.
 
 ## Results
 This chapter will explain how exercise view works, how to send reviews
