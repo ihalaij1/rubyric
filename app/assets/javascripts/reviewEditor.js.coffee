@@ -471,7 +471,7 @@ class @ReviewEditor extends @Rubric
         for category in page.feedback
           category.value.subscribe((newValue) => @saved = false )
           
-        @editedBy = data['editors'] || []
+      @editedBy = data['editors'] || []
     
     if (@gradingMode == 'average' && @grades.length > 0)
       @averageGrade = ko.computed((=>

@@ -53,8 +53,6 @@ class ReviewsController < ApplicationController
     @exercise = @review.submission.exercise
     @submission = @review.submission
     @tab_id = params[:tab_id]
-    @current_user_json = {id: current_user.id, name: "#{current_user.name} (#{current_user.email})"}.to_json
-    @reviewer_json = {id: @review.user.id, name: "#{@review.user.name} (#{@review.user.email})"}.to_json
     load_course
     I18n.locale = @course_instance.locale || I18n.locale
 
@@ -63,6 +61,13 @@ class ReviewsController < ApplicationController
         @course.has_teacher(current_user) ||
         is_admin?(current_user) ||
         (@exercise.collaborative_mode == 'review' && @course_instance.has_student(current_user))
+        
+    @current_user_json = nil
+    @reviewer_json = nil
+    if !@exercise.anonymous_graders
+      @current_user_json = {id: current_user.id, name: "#{current_user.name} (#{current_user.email})"}.to_json if current_user
+      @reviewer_json = {id: @review.user.id, name: "#{@review.user.name} (#{@review.user.email})"}.to_json     if @review.user
+    end
 
     if @review.type == 'AnnotationAssessment'
       render action: 'annotation', layout: 'annotation'
