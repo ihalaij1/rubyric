@@ -1,6 +1,11 @@
 <!-- reviews/edit.html.erb -->
 <% content_for :javascript do %>
   <%= javascript_include_tag 'views/reviews/edit' %>
+  <script>
+    $(function () {
+      $('[data-toggle="tooltip"]').popover({'trigger': 'hover', 'placement': 'top'})
+    })
+  </script>
 <% end %>
 
 <div class="container-fluid">

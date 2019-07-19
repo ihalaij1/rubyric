@@ -51,6 +51,15 @@
   <p><b>Reviewer:</b> <%= @grader.name %></p>
 <% end %>
 
+<% if !@exercise.anonymous_graders && @editors && @editors.size > 0 %>
+  <p>
+    <b>Edited by:</b> 
+    <% @editors.each_with_index do |editor, index| %>
+      <%= editor.name %><% if index < @editors.size - 1 %>,<% end %>
+    <% end %>
+  </p>
+<% end %>
+
 <% unless @review.grade.blank? %>
   <p>Grade: <%= @review.grade %></p>
 <% end %>

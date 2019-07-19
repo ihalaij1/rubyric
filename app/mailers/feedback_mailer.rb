@@ -10,6 +10,14 @@ class FeedbackMailer < ActionMailer::Base
     @course = @course_instance.course
     @grader = @review.user
     group = review.submission.group
+    
+    payload = @review.payload ? JSON.parse(@review.payload) : nil
+    if payload && payload['editors']
+      editor_ids = payload['editors'].select { |editor| editor['show'] == '1'}.map{ |editor| editor['id'] }
+      @editors = User.where(id: editor_ids)
+    else
+      @editors = []
+    end 
 
     if !@course.email.blank?
       headers["Reply-to"] = @course.email

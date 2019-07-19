@@ -305,6 +305,21 @@
     <% else %>
       <%= text_area_tag :review_feedback, '', :style => "width: 600px; height: 600px;", 'data-bind' => "value: finishedText" %>
     <% end %>
+    
+    <!-- ko if: editedBy().length > 0 -->
+      <h3>
+        Show editors 
+        <i id="tooltip-editors" class="tooltip-help glyphicon glyphicon-question-sign" 
+           data-toggle="tooltip" data-content="<%= t('reviews.edit.editors_hint') %>">
+        </i>
+      </h3>
+      <!-- ko foreach: editedBy -->
+        <p>
+          <input type="checkbox" data-bind="checked: show"></input>
+          <span data-bind="text: name" ></span>
+        </p>
+      <!-- /ko -->
+    <!-- /ko -->
 
     <!-- ko if: gradingMode == 'average' && $root.grades.length > 0 -->
       <h3>Grades</h3>

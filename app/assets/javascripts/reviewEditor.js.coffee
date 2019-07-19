@@ -205,6 +205,27 @@ class Phrase
     @escaped_content = @content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br />')
     
     @criterion.gradeRequired = true if @grade?
+    
+class Editor
+  constructor: (data) ->
+    @name = ''
+    @id = undefined
+    @show = ko.observable(true)
+    
+    this.load_json(data)
+    
+  load_json: (data) ->
+    if data
+      @name = data['name']
+      @id = data['id']
+      if data['show'] == '1'
+        @show(true)
+      else
+        @show(false)
+      
+  to_json: ->
+    show = if @show() then '1' else '0'
+    return { id: @id, name: @name, show: show}
 
 
 class @Rubric
@@ -395,7 +416,7 @@ class @ReviewEditor extends @Rubric
     @busySaving = ko.observable(false)
     @changedLanguage = ko.observable(false)
     @editingFinalGrade = ko.observable(false)
-    @editedBy = []
+    @editedBy = ko.observableArray()
     
     element = $('#review-editor')
     @role = $('#role').val()
@@ -447,12 +468,14 @@ class @ReviewEditor extends @Rubric
     reviewer = $.parseJSON(reviewer) if reviewer && reviewer.length > 0
     if currentUser && reviewer && currentUser['id'] != reviewer['id']
       already_listed = false
-      for editor in @editedBy
-        if editor['id'] == currentUser['id']
+      for editor in @editedBy()
+        if editor.id == currentUser['id']
           already_listed = true
-          editor['name'] = currentUser['name']
+          editor.name = currentUser['name']
       if !already_listed
-        @editedBy.push({'id': currentUser['id'], 'name': currentUser['name']})
+        new_editor = new Editor({ id: currentUser['id'], name: currentUser['name'], show: '1'})
+        @editedBy.push(new_editor)
+            
 
   #
   # Parses the JSON data returned by the server. See loadRubric.
@@ -470,8 +493,11 @@ class @ReviewEditor extends @Rubric
     
         for category in page.feedback
           category.value.subscribe((newValue) => @saved = false )
-          
-      @editedBy = data['editors'] || []
+      
+      @editedBy([])    
+      editors = data['editors'] || []
+      for editor in editors
+        @editedBy.push(new Editor(editor))
     
     if (@gradingMode == 'average' && @grades.length > 0)
       @averageGrade = ko.computed((=>
@@ -507,7 +533,7 @@ class @ReviewEditor extends @Rubric
   # Returns the review as JSON
   encodeJSON: ->
     pages_json = @pages.map (page) -> page.to_json()
-    editors_json = @editedBy
+    editors_json = @editedBy().map (editor) -> editor.to_json()
     return JSON.stringify({version: '2', pages: pages_json, editors: editors_json})
   
   # Populates the HTML-form from the model. This is called just before submitting.
@@ -623,18 +649,6 @@ class @ReviewEditor extends @Rubric
         pointsText += "  - #{page.name}: #{page.grade()}\n"
       pointsText += "Mean: #{@averageGrade()}\n"
       finalText += "#{pointsText}\n"
-      
-    # List users that are not the original reviewer and have edited the review
-    if @editedBy.length > 0
-      finalText += "Edited by: "
-      i = 0; len = @editedBy.length
-      for editor in @editedBy
-        if i < len - 1
-          finalText += "#{editor['name']}, "
-        else
-          finalText += "#{editor['name']}\n"
-        i += 1
-      finalText += "\n"
     
     if @feedbackCategories.length > 1
       # Group feedback by category

@@ -16,6 +16,14 @@ class ReviewsController < ApplicationController
     @can_view_review_raters = (@group.has_member? current_user) or (@review.user == current_user) or (@course.has_teacher current_user)
     @can_rate_review = @group.has_member? current_user
     @rating_item = ReviewRating.where(user: current_user, review_id: @review.id).first_or_initialize
+    
+    payload = @review.payload ? JSON.parse(@review.payload) : nil
+    if payload && payload['editors']
+      editor_ids = payload['editors'].select { |editor| editor['show'] == '1'}.map{ |editor| editor['id'] }
+      @editors = User.where(id: editor_ids)
+    else
+      @editors = []
+    end 
 
     if @review.type == 'AnnotationAssessment'
       @submission = @review.submission
