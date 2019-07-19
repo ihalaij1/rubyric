@@ -5,3 +5,4 @@ en:
       final_feedback_hint: 'This is the final feedback text that will be sent to the students.'
       finalize_hint: 'Grade all pages to access finalize.'
       editors_hint: 'Chosen editors will be listed in the final review in style "Edited by: First Editor, Another Editor"'
+      anonymous_editors_hint: 'Exercise is using anonymous reviewers. The editors will not be shown to the students.'

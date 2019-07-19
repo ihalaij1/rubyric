@@ -72,10 +72,8 @@ class ReviewsController < ApplicationController
         
     @current_user_json = nil
     @reviewer_json = nil
-    if !@exercise.anonymous_graders
-      @current_user_json = {id: current_user.id, name: "#{current_user.name} (#{current_user.email})"}.to_json if current_user
-      @reviewer_json = {id: @review.user.id, name: "#{@review.user.name} (#{@review.user.email})"}.to_json     if @review.user
-    end
+    @current_user_json = {id: current_user.id, name: "#{current_user.name}"}.to_json if current_user
+    @reviewer_json = {id: @review.user.id, name: "#{@review.user.name}"}.to_json     if @review.user
 
     if @review.type == 'AnnotationAssessment'
       render action: 'annotation', layout: 'annotation'

@@ -281,6 +281,43 @@
         <% else %>
             <%= text_area_tag :review_feedback, '', :style => "width: 95%; height: 400px;", 'data-bind' => "value: finishedText" %>
         <% end %>
+        
+        
+        <% if !@exercise.anonymous_graders %>
+          <!-- ko if: editedBy().length > 0 -->
+            <h3>
+              Show editors 
+              <p class="hint">
+                <%= t('reviews.edit.editors_hint') %>
+              </p>
+            </h3>
+            <!-- ko foreach: editedBy -->
+              <p>
+                <input type="checkbox" data-bind="checked: show"></input>
+                <span data-bind="text: name" ></span>
+                <!-- ko if: firstEdit() -->
+                  <span class="hint">(new)</span>
+                <!-- /ko -->
+              </p>
+            <!-- /ko -->
+          <!-- /ko -->
+        <% end %>
+        <% if @exercise.anonymous_graders && ( @course.has_teacher(current_user) || is_admin?(current_user) || (@review.user && @review.user == current_user) ) %>
+          <!-- ko if: editedBy().length > 0 -->
+            <h3>
+              Editors 
+            </h3>
+            <p class="hint"><%= t('reviews.edit.anonymous_editors_hint') %></p>
+            <!-- ko foreach: editedBy -->
+              <p>
+                <span data-bind="text: name" ></span>
+                <!-- ko if: firstEdit() -->
+                  <span class="hint">(new)</span>
+                <!-- /ko -->
+              </p>
+            <!-- /ko -->
+          <!-- /ko -->
+        <% end %>
 
         <!-- ko if: gradingMode == 'average' && $root.grades.length > 0 -->
         <h3>Grades</h3>

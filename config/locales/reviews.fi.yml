@@ -5,3 +5,4 @@ fi:
       final_feedback_hint: 'Voit muokata lopullista palautetekstiä, joka lähetetään opiskelijoille.'
       finalize_hint: 'Arvostele kaikki sivut päästäksesi viimeistelemään.'
       editors_hint: 'Valitut muokkaajat listataan lopulliseen arvosteluun tyylillä "Muokkaajat: Arvostelija Yksi, Arvostelija Kaksi"'
+      anonymous_editors_hint: 'Tehtävässä käytetään anonyymejä arvostelijoita. Muokkaajia ei näytetä opiskelijoille.'

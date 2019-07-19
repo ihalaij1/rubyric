@@ -207,6 +207,36 @@ class ModifyAnnotationCommand
     @change['command'] = 'modify_annotation'
     @change['id'] = @annotation.id
     return @change
+    
+class CreateEditorCommand
+  constructor: (@editor) ->
+
+  undo: ->
+
+  as_json: ->
+    return if !@editor
+    show = if @editor.show() then '1' else '0'
+    return {
+      command: 'create_editor',
+      id: @editor.id, 
+      name: @editor.name, 
+      show: show
+    }
+      
+class ModifyEditorCommand
+  constructor: (@editor) ->
+
+  undo: ->
+
+  as_json: ->
+    return if !@editor
+    show = if @editor.show() then '1' else '0'
+    return {
+      command: 'modify_editor',
+      id: @editor.id, 
+      name: @editor.name, 
+      show: show
+    }
 
 
 class CommandBuffer
@@ -472,6 +502,11 @@ class @AnnotationEditor extends Rubric
 
     this.parseReview(review)
     
+    new_editor = this.addEditor()
+    if new_editor
+      this.addCommand(new CreateEditorCommand(new_editor))
+      new_editor.show.subscribe => this.addCommand(new ModifyEditorCommand(new_editor))
+    
     @finalGrade.subscribe => @saved = false
 
     ko.applyBindings(this)
@@ -532,6 +567,14 @@ class @AnnotationEditor extends Rubric
       annotation = new Annotation(options)
       submission_page.annotations().push(annotation)
       this.subscribeToAnnotation(annotation)
+    
+    @editedBy([])    
+    editors = data['editors'] || []
+    for editor in editors
+      new_editor = new Editor(editor)
+      new_editor.show.subscribe(=> @saved = false)
+      new_editor.show.subscribe => this.addCommand(new ModifyEditorCommand(new_editor))
+      @editedBy.push(new_editor)
 
     for page_data in (data['pages'] || [])
       page = @pagesById[page_data['id']]
@@ -706,7 +749,9 @@ class @AnnotationEditor extends Rubric
       $('#rubric_page_preference').val(page_id) if !isNaN(page_id)
 
     @saved = true
-
+    
+    for editor in @editedBy()
+      editor.firstEdit(false)
     return true
 
   saveAndSend: ->

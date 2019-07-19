@@ -19,6 +19,8 @@
     <%= hidden_field_tag :zoom_preference %>
     <%= hidden_field_tag :rubric_page_preference %>
     <%= hidden_field_tag :page_sizes, @submission.page_sizes %>
+    <%= hidden_field_tag :current_user, @current_user_json %>
+    <%= hidden_field_tag :review_user, @reviewer_json %>
   
     <% if @exercise.collaborative_mode == 'review' && !@is_assistant && !@is_teacher %>
       <%= hidden_field_tag :role, 'collaborator' %>

@@ -206,10 +206,11 @@ class Phrase
     
     @criterion.gradeRequired = true if @grade?
     
-class Editor
+class @Editor
   constructor: (data) ->
     @name = ''
     @id = undefined
+    @firstEdit = ko.observable(true)
     @show = ko.observable(true)
     
     this.load_json(data)
@@ -222,6 +223,10 @@ class Editor
         @show(true)
       else
         @show(false)
+      if data['new'] == '1'
+        @firstEdit(true)
+      else
+        @firstEdit(false)
       
   to_json: ->
     show = if @show() then '1' else '0'
@@ -243,8 +248,14 @@ class @Rubric
     @numericGrading = false
     @gradingMode = 'none'
     
+    @editedBy = ko.observableArray()
     @language = ko.observable('')
     @language($('#review_language').val())
+    
+    currentUser = $('#current_user').val()
+    @currentUser = $.parseJSON(currentUser) if currentUser && currentUser.length > 0
+    reviewer = $('#review_user').val()
+    @reviewer = $.parseJSON(reviewer) if reviewer && reviewer.length > 0
     
   #
   # Loads the rubric by AJAX
@@ -402,6 +413,22 @@ class @Rubric
       gradeSum += parseFloat(grade) if $.isNumeric(grade)
     
     return gradeSum
+    
+  # Check if review is being edited by someone other than the original reviewer
+  # and add them to the editedBy list if they are not there yet, returns the new editor
+  addEditor: () ->
+    if @currentUser && ((@reviewer && @currentUser['id'] != @reviewer['id']) || !@reviewer )
+      already_listed = false
+      for editor in @editedBy()
+        if editor.id == @currentUser['id']
+          already_listed = true
+          editor.name = @currentUser['name']
+      if !already_listed
+        new_editor = new Editor({ id: @currentUser['id'], name: @currentUser['name'], show: '1', new: '1'})
+        new_editor.show.subscribe(=> @saved = false)
+        @editedBy.push(new_editor)
+        return new_editor
+    return null
 
 
 
@@ -416,7 +443,6 @@ class @ReviewEditor extends @Rubric
     @busySaving = ko.observable(false)
     @changedLanguage = ko.observable(false)
     @editingFinalGrade = ko.observable(false)
-    @editedBy = ko.observableArray()
     
     element = $('#review-editor')
     @role = $('#role').val()
@@ -459,23 +485,8 @@ class @ReviewEditor extends @Rubric
       this.parseReview($.parseJSON(payload))
     else
       this.parseReview()
-      
-    # Check if review is being edited by someone else than the original reviewer
-    # and add them to the editedBy list
-    currentUser = $('#current_user').val()
-    currentUser = $.parseJSON(currentUser) if currentUser && currentUser.length > 0
-    reviewer = $('#review_user').val()
-    reviewer = $.parseJSON(reviewer) if reviewer && reviewer.length > 0
-    if currentUser && reviewer && currentUser['id'] != reviewer['id']
-      already_listed = false
-      for editor in @editedBy()
-        if editor.id == currentUser['id']
-          already_listed = true
-          editor.name = currentUser['name']
-      if !already_listed
-        new_editor = new Editor({ id: currentUser['id'], name: currentUser['name'], show: '1'})
-        @editedBy.push(new_editor)
             
+    this.addEditor()
 
   #
   # Parses the JSON data returned by the server. See loadRubric.
@@ -497,7 +508,9 @@ class @ReviewEditor extends @Rubric
       @editedBy([])    
       editors = data['editors'] || []
       for editor in editors
-        @editedBy.push(new Editor(editor))
+        new_editor = new Editor(editor)
+        new_editor.show.subscribe(=> @saved = false)
+        @editedBy.push(new_editor)
     
     if (@gradingMode == 'average' && @grades.length > 0)
       @averageGrade = ko.computed((=>
@@ -576,6 +589,8 @@ class @ReviewEditor extends @Rubric
     
     @saved = true
     @busySaving(false) 
+    for editor in @editedBy()
+      editor.firstEdit(false)
     return true
     
     # AJAX call
