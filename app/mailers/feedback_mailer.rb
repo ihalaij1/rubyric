@@ -12,7 +12,7 @@ class FeedbackMailer < ActionMailer::Base
     group = review.submission.group
     
     payload = @review.payload ? JSON.parse(@review.payload) : nil
-    if payload && payload['editors']
+    if !@exercise.anonymous_graders && payload && payload['editors']
       editor_ids = payload['editors'].select { |editor| editor['show'] == '1'}.map{ |editor| editor['id'] }
       @editors = User.where(id: editor_ids)
     else
@@ -78,6 +78,7 @@ class FeedbackMailer < ActionMailer::Base
     @exercise_grades = exercise_grades
     @course_instance = course_instance
     @course = @course_instance.course
+    @editors = {}
 
     from = @course.email
     from = RUBYRIC_EMAIL if from.blank?
@@ -87,6 +88,14 @@ class FeedbackMailer < ActionMailer::Base
     # Attachments
     @reviews.each do |review|
       attachments[review.filename] = File.read(review.full_filename) unless review.filename.blank?
+      # Find editors for the review
+      payload = review.payload ? JSON.parse(review.payload) : nil
+      if !review.submission.exercise.anonymous_graders && payload && payload['editors']
+        editor_ids = payload['editors'].select { |editor| editor['show'] == '1'}.map{ |editor| editor['id'] }
+        @editors[review.id] = User.where(id: editor_ids)
+      else
+        @editors[review.id] = []
+      end 
     end
 
     I18n.with_locale(@course_instance.locale || I18n.locale) do
@@ -114,6 +123,7 @@ class FeedbackMailer < ActionMailer::Base
     peer_reviews_required = @exercise.peer_review?
     always_pass = @exercise.rubric_grading_mode == 'always_pass'
     @reviews = Review.where(id: review_ids, status: ["finished", "mailing", "mailed"])
+    @editors = {}
     
     # Calculate grade to be sent to A+
     # Ignores non-numerical grades
@@ -129,6 +139,14 @@ class FeedbackMailer < ActionMailer::Base
       elsif best_grade && !cast.is_a?(String) && grade < cast
         grade = cast
       end
+      # Find editors for the review
+      payload = review.payload ? JSON.parse(review.payload) : nil
+      if !@exercise.anonymous_graders && payload && payload['editors']
+        editor_ids = payload['editors'].select { |editor| editor['show'] == '1'}.map{ |editor| editor['id'] }
+        @editors[review.id] = User.where(id: editor_ids)
+      else
+        @editors[review.id] = []
+      end 
     end
     grade = 1.0 * grade / count if average && count > 0
     logger.debug "GRADE: #{grade}"
