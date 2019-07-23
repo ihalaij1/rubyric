@@ -1,4 +1,10 @@
-# Install environment
+# Rubyric
+
+Rubyric is an online tool in which you can create courses and assignments, 
+receive submissions and assess them by using rubrics. More information about 
+Rubyric and how to use it can be found [here](doc/rubyric.md).
+
+## Install environment
 Install ruby version 2.3.1 or higher, for example with rvm or rbenv. Then
 install rails:
 ```sh
@@ -18,7 +24,7 @@ Rubyric requires pdfinfo, ghostscript and libpq-dev to work
 sudo apt-get install poppler-utils ghostscript libpq-dev
 ```
 
-# Install Rubyric
+## Install Rubyric
 
 ### Install gems
 ```sh
@@ -47,6 +53,8 @@ rails db:setup
 bin/delayed_job start
 rails server
 ```
+
+You can now access Rubyric at http://localhost:3000.
 
 ### Make user Rubyric admin
 Open rails console
