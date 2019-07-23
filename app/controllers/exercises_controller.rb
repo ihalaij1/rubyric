@@ -39,27 +39,33 @@ class ExercisesController < ApplicationController
       @mailed = []
       @started = []
       @not_started =[]
+      @graders = []
       # List graders (= teachers, assistants and all users who have done a review to submission on the exercise)
       grader_ids = Review.where(submission_id: @exercise.submissions).map { |r| r.user_id } + @course.teacher_ids + @course_instance.assistant_ids
-      @graders = User.where(id: grader_ids)
+      graders = User.where(id: grader_ids)
       
-      @graders.each do |g|
+      i = 0
+      graders.each do |g|
         all_reviews = g.reviews.where(submission_id: @exercise.submissions)
         assigned_submissions = g.assigned_groups.where(id: @groups.ids).map{ |group| group.submissions.where(id: @exercise.submissions).ids}.flatten
         f = 0; m = 0; s = 0; n = assigned_submissions.size
         all_reviews.each do |review|
           f = f + 1 if ["finished", "mailing"].include?(review.status)
           m = m + 1 if review.status == "mailed"
-          s = s + 1 if review.status == "started"
+          s = s + 1 if review.status == "started" || review.status.blank?
           if review.status != "invalidated" && assigned_submissions.include?(review.submission.id)
             n = n - 1
             assigned_submissions -= [review.submission.id]
           end
         end
+        all_review_group_ids = all_reviews.map{|review| review.submission.group.id}
+        grader_groups = @groups.select{|group| all_review_group_ids.include?(group.id) || group.reviewer_ids.include?(g.id) }
         @finished << f
         @mailed << m
         @started << s
         @not_started << n
+        @graders << {id: i, grader: g, groups: grader_groups}
+        i = i + 1
       end
 
       # TODO: should we remove this?

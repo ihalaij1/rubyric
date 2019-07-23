@@ -76,6 +76,7 @@
   <p><strong>Service url: </strong><%= link_to root_url + "aplus/#{@exercise.id}", root_url + "aplus/#{@exercise.id}" %></p>
 <% end %>
 
+<% if params[:view] != 'thumbnails' %>
 <div>
   <h2>
     Completed reviews
@@ -103,7 +104,11 @@
         <tbody>
           <% (0..@graders.size - 1).each do |i| %>
             <tr>
-              <td><%= @graders[i].firstname %> <%= @graders[i].lastname %></td>
+              <td>
+                <a class="grader-link" href="#grader-submissions-<%= @graders[i][:id] %>" title="Show reviews by <%=@graders[i][:grader].name %>">
+                  <%= @graders[i][:grader].name %>
+                </a>
+              </td>
               <td><%= @not_started[i] %></td>
               <td><%= @started[i] %></td>
               <td><%= @finished[i] + @mailed[i] %> (<%= @mailed[i] %>)</td>
@@ -117,7 +122,9 @@
     </div>
   </div>
 </div>
+<% end %>
 
+<div class="grader-submissions-content" id="all-submissions">
 <% unless @groups.empty? %>
   <h2>
     Submissions
@@ -199,7 +206,7 @@
 <% if current_user.tester == 'alpha' %>
   <%= link_to 'Batch upload submissions', batch_upload_exercise_submissions_path(:exercise_id => @exercise.id) %>
 <% end %>
-
+</div>
 
 <!-- Modal for sending reviews -->
 <div id="modal-send-reviews" class="modal fade">
@@ -227,6 +234,10 @@
     </div>
   </div>
 </div>
+
+<% if params[:view] != 'thumbnails' %>
+  <%= render :partial => 'grader_submissions', :collection => @graders %>
+<% end %>
 
 <script type="text/javascript">
   $('.modal').on('shown.bs.modal', function(e) {

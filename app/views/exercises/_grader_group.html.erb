@@ -1,0 +1,68 @@
+<tr class="group" id="group<%= grader_group.id %>">
+  <td colspan="4">
+    <!-- Reviewers -->
+    <div class="pull-right hint">
+      <%= 
+      (grader_group.reviewers.collect do |user| "#{user.name}" end).join(', ')
+      %>
+    </div>
+    
+    <!-- Students -->
+    <%= grader_group.names_with_studentnumbers %>
+  </td>
+</tr>
+<% grader_group.submissions.each do |submission| %>
+  <tr class="submission" id="submission<%= submission.id %>">
+    <% visible_reviews = submission.reviews.select{|review| review.user_id == grader.id} %>
+    <td rowspan="<%= [visible_reviews.size,1].max %>">
+      <div class="dropdown pull-right">
+        <a id="dropdown-<%= submission.id %>" class="dropdown-toggle" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false" role="button"><b class="caret"></b></a>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown-<%= submission.id %>">
+          <li><%= link_to 'Create new review', review_submission_path(submission.id) %></li>
+          <li><%= link_to 'New submission...', submit_path(:exercise => @exercise.id, :group => grader_group.id) %></li>
+          <% if @course_instance_exercise_count > 1 %>
+            <li><%= link_to 'Move submission...', move_submission_path(submission) %></li>
+          <% end %>
+          <!-- if visible_reviews.empty? -->
+            <li><%= link_to 'Delete submission...', confirm_delete_submission_path(submission) %></li>
+          <!-- end -->
+        </ul>
+      </div>
+      
+      <!-- Submission -->
+      <span <%= submission.late?(@exercise) ? 'class="late"'.html_safe : nil %>><%=l submission.created_at %></span>
+      <% unless submission.filename.blank? %>
+        (<%= link_to submission.extension || submission.filename, submission_path(submission.id), :title => submission.filename %>)
+      <% end %>
+    </td>
+
+    <!-- Reviews -->
+    <% if visible_reviews.empty? %>
+      <td>
+        <small>No reviews by this grader yet</small>
+      </td>
+      <td></td>
+      <td></td>
+      </tr>
+    <% else %>
+      <% row = 0; visible_reviews.each do |review| %>
+          <% if (row > 0) %>
+            <tr class="submission">
+          <% end; row += 1 %>
+          <td>
+            <% if ['mailed','invalidated'].include?(review.status) %>
+              <%= link_to review.user ? review.user.name : t('collaborative_review'), review_path(review.id, :ref => 'exercises'), title: "Last updated: #{l review.updated_at}" %>
+            <% else %>
+              <%= link_to review.user ? review.user.name : t('collaborative_review'), edit_review_path(review.id), title: "Last updated: #{l review.updated_at}" %>
+            <% end %>
+          </td>
+          <td><%= review.status %></td>
+          <td class="grade"><%= review.grade %></td>
+        </tr>
+      <% end # each
+      %>
+    <% end # if
+    %>
+<% end %>
+
+<tr class="spacer"><td colspan="4"></td></tr>

@@ -1,0 +1,45 @@
+<div class="grader-submissions-content" id="grader-submissions-<%= grader_submissions[:id] %>">
+  
+  <h2>
+    Submissions - Reviews by 
+    <%= grader_submissions[:grader].name %>
+  </h2>
+
+<% if grader_submissions[:groups].empty? %>
+  <!-- No groups warning -->
+  <div class="alert alert-info">
+    <p>
+      Grader has no reviews.
+    </p>
+  </div>
+<% end %>
+
+<% unless grader_submissions[:groups].empty? %>
+  <table class="assignments hover-buttons">
+    <thead>
+      <tr>
+        <td>Submission</td>
+        <td>Review</td>
+        <td>Status</td>
+        <td>Grade</td>
+      </tr>
+    </thead>
+    <tbody id="submissions_table">
+      <%= render :partial => 'grader_group', :collection => grader_submissions[:groups], locals: {grader: grader_submissions[:grader]} %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><%= grader_submissions[:groups].size %> groups</td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+<% end %>
+<a class="grader-link" href="#all-submissions">
+  <span class="glyphicon glyphicon-circle-arrow-left" aria-hidden="true"></span>
+  Back to all submissions
+</a>
+
+</div>
