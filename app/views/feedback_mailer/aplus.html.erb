@@ -2,8 +2,9 @@
 <% if @reviews.size > 1 %><h1>Review <%= index + 1 %></h1><% end %>
 <p>
 <% if !@exercise.anonymous_graders && review.user %><%=t :Reviewer %>: <%= review.user.firstname %> <%= review.user.lastname %> <a href="mailto:<%= review.user.email %>">(<%= review.user.email %>)</a><% end -%>
+<% if !@exercise.anonymous_graders && @editors[review.id] && @editors[review.id].size > 0 %><br /><%=t :Editor %>: <% @editors[review.id].each_with_index do |editor, i|%><%= editor.firstname %> <%= editor.lastname %> <a href="mailto:<%= editor.email %>">(<%= editor.email %>)</a><% if i < @editors[review.id].size - 1 %>, <% end %><% end %><% end -%>
 
-<% unless review.grade.blank? %><br /><%=t :Grade %>: <%= review.grade %><% end -%>
+<% unless review.grade.blank? %><br /><%=t :Grade %>: <%= review.grade %><% unless @exercise.max_grade.blank? %> / <%= @exercise.max_grade %><% end %><% end -%>
 </p>
 
 <% if review.feedback -%>

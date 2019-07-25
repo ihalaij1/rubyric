@@ -119,7 +119,27 @@ grader_mailable:
   grader_can_email: true
 
 submit_without_login:
-  course_instance: active
+  course_instance: no_login_needed
   name: Can submit without login
   deadline: <%= 10.days.from_now.to_s(:db) %>
   submit_without_login: true
+  submission_type: text
+
+authenticated_submit:
+  course_instance: active
+  name: Only authenticated can submit
+  deadline: <%= 10.days.from_now.to_s(:db) %>
+  submission_type: text
+
+lti_exercise:
+  course_instance: lti_instance
+  name: LTI exercise
+  deadline: <%= 10.days.from_now.to_s(:db) %>
+  submission_type: text
+  lti_resource_link_id: 12345
+  
+review_all_exercise:
+  course_instance: active
+  name: Allows reviewers to see all submissions
+  deadline: <%= 10.days.from_now.to_s(:db) %>
+  reviewers_see_all_submissions: true

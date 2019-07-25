@@ -17,7 +17,7 @@
   <input type="text" id="price" class="input-mini"> €
 </p>
 
-<%= form_for @order do |f| %>
+<%= form_for @order, url: course_instance_orders_path(@course_instance) do |f| %>
   <form class="form-horizontal">
     <div class="control-group">
       <%= f.label :amount %>
@@ -25,14 +25,14 @@
         <%= f.text_field :amount %>
       </div>
     </div>
-    
+
     <div class="control-group">
       <%= f.label :description %>
       <div class="controls">
         <%= @order.description %>
       </div>
     </div>
-    
+
     <div class="form-actions">
       <%= f.button "Place Order", :type=>:submit, :class => "btn btn-primary" %>
     </div>

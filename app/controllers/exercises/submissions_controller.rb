@@ -4,7 +4,7 @@ class Exercises::SubmissionsController < ExercisesController
 
   layout 'narrow-new'
 
-  before_filter :authorize
+  before_action :authorize
   
   def authorize
     @exercise = Exercise.find(params[:exercise_id])

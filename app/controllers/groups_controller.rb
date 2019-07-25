@@ -1,5 +1,5 @@
 class GroupsController < ApplicationController
-  before_filter :login_required, :only => [:index]
+  before_action :login_required, :only => [:index]
 
   layout 'narrow'
 #
@@ -18,7 +18,7 @@ class GroupsController < ApplicationController
     load_course
 
     if @course.has_teacher(current_user)
-      @available_groups = Group.where('course_instance_id=?', @course_instance.id).joins(:users).order(:name).all.select { |group| group.users.size <= @exercise.groupsizemax }
+      @available_groups = Group.where('course_instance_id=?', @course_instance.id).includes(:users).order(:name).all.select { |group| group.users.size <= @exercise.groupsizemax }
     else
       @available_groups = Group.where('course_instance_id=? AND user_id=?', @course_instance.id, current_user.id).joins(:users).order(:name).all.select { |group| group.users.size <= @exercise.groupsizemax }
     end
@@ -72,8 +72,7 @@ class GroupsController < ApplicationController
 
     return access_denied unless group_membership_validated(@group) || (@course && @course.has_teacher(current_user))
 
-    @group_members = @group.group_members.all
-    @group_members.sort! { |a, b| b.user ? 1 : 0 }  # Authenticated users first
+    @group_members = @group.group_members.all.sort { |a, b| b.user ? 1 : 0 }  # Authenticated users first
 
     # Add empty slots
     (@group.max_size - @group_members.size).times do |i|

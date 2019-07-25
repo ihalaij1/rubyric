@@ -3,14 +3,14 @@
   <div class="span12">
     <ul id="tabs" class="nav nav-tabs">
       <li class="active">
-        <a id="tab-settings-link" href="#tab-settings" data-toggle="tab"><i class="icon-wrench"></i> <strong>Settings</strong></a>
+        <a id="tab-settings-link" href="#tab-settings" data-toggle="tab"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <strong>Settings</strong></a>
       </li>
       <!-- ko foreach: pages -->
-        <li><a data-toggle='tab' data-bind="text: name, attr: { href: tabUrl, id: tabLinkId }"></a></li>
+        <li><a data-toggle='tab' data-bind="text: fullName(), attr: { href: tabUrl, id: tabLinkId }"></a></li>
       <!-- /ko -->
       
       <li id="create-page-tab">
-        <a href="#" class="" data-bind="click: clickCreatePage"><i class="icon-plus"></i> Create new page</a>
+        <a href="#" class="" data-bind="click: clickCreatePage"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create new page</a>
       </li>
     </ul>
   </div>
@@ -45,16 +45,16 @@
                   <td data-bind="editable: {value: value, editorActive: editorActive, placeholder: '<grade missing>'}"></td>
                   <td class="buttons-column">
                     <div class="buttons">
-                      <i class="icon-pencil edit-grade-button" title="Edit grade" data-bind="click: activateEditor"></i>
-                      <i class="icon-trash delete-phrase-button" title="Delete grade" data-bind="click: deleteGrade"></i>
-                      <i class="icon-resize-vertical move-phrase-button" title="Drag to move grade"></i>
+                      <span class="glyphicon glyphicon-pencil edit-grade-button" title="Edit grade" data-bind="click: activateEditor" aria-hidden="true"></span>
+                      <span class="glyphicon glyphicon-trash delete-phrase-button" title="Delete grade" data-bind="click: deleteGrade" aria-hidden="true"></span>
+                      <span class="glyphicon glyphicon-vertical move-phrase-button" title="Drag to move grade" aria-hidden="true"></span>
                     </div>
                   </td>
                 </tr>
               </tbody>
             </table>
             <p>
-              <button class="btn btn-small create-grade-button" data-bind="click: createGrade"><i class="icon-plus"></i> Add grade</button>
+              <button class="btn btn-sm create-grade-button" data-bind="click: createGrade"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add grade</button>
             </p>
           </div>
         </div>
@@ -62,19 +62,32 @@
       </div>
       
       <div class="span4 well">
-        <i id="tooltip-categories" class="tooltip-help pull-right icon icon-question-sign" data-content="<%=t 'rubrics.edit.tooltip_categories' %>"></i>
+        <i id="tooltip-categories" class="tooltip-help pull-right glyphicon glyphicon-question-sign" data-content="<%=t 'rubrics.edit.tooltip_categories' %>"></i>
         <h3>Feedback categories</h3>
         
         <!-- ko if: feedbackCategories().length > 1 -->
           <table>
             <tbody id="feedback-categories" data-bind="sortable: {data: feedbackCategories, options: {containment: '#feedback-categories', axis: 'y', distance: 5}}">
               <tr class="category">
-                <td class="category" data-bind="editable: {value: name, editorActive: editorActive, placeholder: '<no name>'}"></td>
+                <!-- ko if: textFields().length > 1 -->
+                  <!-- ko foreach: textFields -->
+                    <td class="category">
+                      (<span data-bind="text: language.name"></span>)
+                      <span data-bind="editable: {value: text, editorActive: editorActive, placeholder: '<no name>'}"></span>
+                      <span class="pull-right">|</span> 
+                    </td>
+                  <!-- /ko -->
+                <!-- /ko -->
+                <!-- ko if: textFields().length <= 1 -->
+                  <!-- ko foreach: textFields -->
+                    <td class="category" data-bind="editable: {value: text, editorActive: editorActive, placeholder: '<no name>'}"></td>
+                  <!-- /ko -->
+                <!-- /ko -->
                 <td class="buttons-column">
                   <div class="buttons">
-                    <i class="icon-pencil edit-button" title="Edit" data-bind="click: activateEditor"></i>
-                    <i class="icon-trash delete-button" title="Delete" data-bind="click: deleteCategory"></i>
-                    <i class="icon-resize-vertical move-button" title="Drag to move"></i>
+                    <span class="glyphicon glyphicon-pencil edit-button" title="Edit" data-bind="click: activateEditor" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-trash delete-button" title="Delete" data-bind="click: deleteCategory" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-resize-vertical move-button" title="Drag to move" aria-hidden="true"></span>
                   </div>
                 </td>
               </tr>
@@ -86,22 +99,63 @@
         <!-- /ko -->
 
         <!-- ko if: $root.feedbackCategories().length < 3 -->
-          <div id="create-category-button" class="btn btn-small" data-bind="click: clickCreateCategory"><i class="icon-plus"></i> Create category</div>
+          <div id="create-category-button" class="btn btn-sm" data-bind="click: clickCreateCategory"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create category</div>
         <!-- /ko -->
       </div>
+      
+      <div class="span4 well">
+        <i id="tooltip-multilanguge" class="tooltip-help pull-right glyphicon glyphicon-question-sign" data-content="<%=t 'rubrics.edit.tooltip_languages' %>"></i>
+        <h3>Languages</h3>
+        <!-- ko if: languages().length <= 1 -->
+          <p class="hint"><%=t 'rubrics.edit.one_language' %></p>
+        <!-- /ko -->
+        <!-- ko if: languages().length > 1 -->
+          <table>
+            <tbody id="languages-list" data-bind="sortable: {data: languages, options: {containment: '#languages-list', axis: 'y', distance: 5}}">
+              <tr>
+                <td data-bind="editable: {value: name, editorActive: editorActive, placeholder: '<no name>'}"></td>
+                <td class="buttons-column">
+                  <div class="buttons">
+                    <span class="glyphicon glyphicon-pencil edit-button" title="Edit" data-bind="click: activateEditor" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-trash delete-button" title="Delete" data-bind="click: deleteLanguage" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-resize-vertical move-button" title="Drag to move" aria-hidden="true"></span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        <!-- /ko -->
+        
+        <p>
+          <button class="btn btn-sm" data-bind="click: clickAddLanguage"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add language</button>
+        </p>
+      </div>
+      
       <div class="span4 well">
         <h3>Feedback email</h3>
-
-        <p>
-          Final comment
-          <i id="tooltip-final-comment" class="tooltip-help pull-right icon icon-question-sign" data-content="<%=t 'rubrics.edit.tooltip_final_comment' %>"></i>
-        </p>
-        <textarea data-bind="value: finalComment"></textarea>
+        <i id="tooltip-final-comment" class="tooltip-help pull-right glyphicon glyphicon-question-sign" data-content="<%=t 'rubrics.edit.tooltip_final_comment' %>"></i>
+        
+        <!-- ko if: finalComment().length > 1 -->
+          <!-- ko foreach: finalComment() -->
+            <p>
+              Final comment (<span data-bind="text: language.name"></span>)
+            </p>
+            <textarea data-bind="value: text"></textarea>
+          <!-- /ko -->
+        <!-- /ko -->
+        <!-- ko if: finalComment().length <= 1 -->
+          <!-- ko foreach: finalComment() -->
+            <p>
+              Final comment
+            </p>
+            <textarea data-bind="value: text"></textarea>
+          <!-- /ko -->
+        <!-- /ko -->
         
       </div>
     </div>
     <% unless @exercise.new_record? %>
-      <%= link_to @exercise do %><i class="icon-circle-arrow-left"></i> Back to <%= @exercise.name %><% end %>
+      <%= link_to @exercise do %><span class="glyphicon glyphicon-circle-arrow-left" aria-hidden="true"></span> Back to <%= @exercise.name %><% end %>
     <% end %>
   </div>
   
@@ -110,7 +164,18 @@
     <div class="tab-pane page" data-bind="attr: { id: tabId }">
       <div class="page-title">
         <h2 title="Page title">
-          <span class="title" data-bind="editable: {value: name, editorActive: editorActive, placeholder: 'Untitled page', inputPlaceholder: 'Page title'}"></span>
+          <!-- ko if: textFields().length > 1 -->
+            <!-- ko foreach: textFields -->
+              (<span data-bind="text: language.name"></span>)
+              <span class="title" data-bind="editable: {value: text, editorActive: editorActive, placeholder: 'Untitled page', inputPlaceholder: 'Page title'}"></span> | 
+            <!-- /ko -->
+          <!-- /ko -->
+          
+          <!-- ko if: textFields().length <= 1 -->
+            <!-- ko foreach: textFields -->
+              <span class="title" data-bind="editable: {value: text, editorActive: editorActive, placeholder: 'Untitled page', inputPlaceholder: 'Page title'}"></span>
+            <!-- /ko -->
+          <!-- /ko -->
           <span class="sumRangeSummary" data-bind="html: sumRangeHtml"></span>
         </h2>
         
@@ -118,22 +183,36 @@
           <input placeholder="min" type="text" data-bind="value: minSum, valueUpdate: 'input'" />&ndash;<input placeholder="max" class="sumRange" type="text" data-bind="value: maxSum, valueUpdate: 'input'" />
         </span>
         
-        <!-- ko if: !instructions() || instructions().length == 0 -->
+        <!-- ko if: instructions -->
           <span class="buttons addInstructions">
             <a data-bind="click: addInstructions">Add grading instructions</a>
           </span>
         <!-- /ko -->
           
         <span class="buttons">
-          <i class="icon-pencil edit-page-button" title="Edit title" data-bind="click: activateEditor"></i>
-          <i class="icon-trash delete-page-button" title="Delete page" data-bind="click: deletePage"></i>
+          <span class="glyphicon glyphicon-pencil edit-page-button" title="Edit title" data-bind="click: activateEditor" aria-hidden="true"></span>
+          <span class="glyphicon glyphicon-trash delete-page-button" title="Delete page" data-bind="click: deletePage" aria-hidden="true"></span>
         </span>
         
         <div class="clear"></div>
         
         <!-- Grading instructions (page) -->
-        <!-- ko if: (instructions() && instructions().length > 0) || instructionsEditorActive() -->
-          <p class="grading-instructions" title="Instructions for reviewer (click to edit)" data-bind="editable: {value: instructions, editorActive: instructionsEditorActive, type: 'textarea', inputPlaceholder: 'Instructions for reviewer'}"></p>
+        <!-- ko if: instructions -->
+          <!-- ko if: instructions().textFields().length > 1 && instructions().showInstructions() -->
+            <!-- ko foreach: instructions().textFields -->
+              <p class="grading-instructions">
+                (<span data-bind="text: language.name()"></span>)
+                <span title="Instructions for reviewer (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'Add grading instructions', inputPlaceholder: 'Instructions for reviewer'}"></span>
+              </p>
+            <!-- /ko -->
+          <!-- /ko -->
+          <!-- ko if: instructions().textFields().length <= 1 && instructions().showInstructions() -->
+            <!-- ko foreach: instructions().textFields -->
+              <p class="grading-instructions">
+                <span title="Instructions for reviewer (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'Add grading instructions', inputPlaceholder: 'Instructions for reviewer'}"></span>
+              </p>
+            <!-- /ko -->
+          <!-- /ko -->
         <!-- /ko -->
       </div>
       
@@ -142,7 +221,17 @@
           <!-- Heading -->
           <div class="criterion-title">
             <h3>
-              <span class="title" title="Criterion title (click to edit)" data-bind="editable: {value: name, editorActive: editorActive, placeholder: 'Untitled Criterion', inputPlaceholder: 'Criterion title' }"></span>
+              <!-- ko if: textFields().length > 1 -->
+                <!-- ko foreach: textFields -->
+                  (<span data-bind="text: language.name"></span>)
+                  <span class="title" title="Criterion title (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, placeholder: 'Untitled Criterion', inputPlaceholder: 'Criterion title' }"></span> |
+                <!-- /ko -->
+              <!-- /ko -->
+              <!-- ko if: textFields().length <= 1 -->
+                <!-- ko foreach: textFields -->
+                  <span class="title" title="Criterion title (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, placeholder: 'Untitled Criterion', inputPlaceholder: 'Criterion title' }"></span>
+                <!-- /ko -->
+              <!-- /ko -->
               <span class="sumRangeSummary" data-bind="html: sumRangeHtml"></span>
             </h3>
             
@@ -150,24 +239,38 @@
               <input placeholder="min" type="text" data-bind="value: minSum, valueUpdate: 'input'" />&ndash;<input placeholder="max" class="sumRange" type="text" data-bind="value: maxSum, valueUpdate: 'input'" />
             </span>
             
-            <!-- ko if: !instructions() || instructions().length == 0 -->
+            <!-- ko if: instructions-->
               <span class="buttons addInstructions">
                 <a data-bind="click: addInstructions">Add grading instructions</a>
               </span>
             <!-- /ko -->
             
             <span class="buttons">
-              <i class="icon-pencil edit-criterion-button" title="Edit criterion title" data-bind="click: activateEditor"></i>
-              <i class="icon-trash delete-criterion-button" title="Delete criterion" data-bind="click: deleteCriterion"></i>
-              <i class="icon-resize-vertical move-criterion-button" title="Drag to move criterion"></i>
+              <span class="glyphicon glyphicon-pencil edit-criterion-button" title="Edit criterion title" data-bind="click: activateEditor" aria-hidden="true"></span>
+              <span class="glyphicon glyphicon-trash delete-criterion-button" title="Delete criterion" data-bind="click: deleteCriterion" aria-hidden="true"></span>
+              <span class="glyphicon glyphicon-resize-vertical move-criterion-button" title="Drag to move criterion" aria-hidden="true"></span>
             </span>
               
             <div class="clear"></div>
           </div>
 
           <!-- Grading instructions (criterion) -->
-          <!-- ko if: (instructions() && instructions().length > 0) || instructionsEditorActive() -->
-            <p class="grading-instructions" title="Instructions for reviewer (click to edit)" data-bind="editable: {value: instructions, editorActive: instructionsEditorActive, type: 'textarea', inputPlaceholder: 'Instructions for reviewer'}"></p>
+          <!-- ko if: instructions -->
+            <!-- ko if: instructions().textFields().length > 1 && instructions().showInstructions() -->
+              <!-- ko foreach: instructions().textFields -->
+                <p class="grading-instructions">
+                  (<span data-bind="text: language.name()"></span>)
+                  <span title="Instructions for reviewer (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'Add grading instructions', inputPlaceholder: 'Instructions for reviewer'}"></span>
+                </p>
+              <!-- /ko -->
+            <!-- /ko -->
+            <!-- ko if: instructions().textFields().length <= 1 && instructions().showInstructions() -->
+              <!-- ko foreach: instructions().textFields -->
+                <p class="grading-instructions">
+                  <span title="Instructions for reviewer (click to edit)" data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'Add grading instructions', inputPlaceholder: 'Instructions for reviewer'}"></span>
+                </p>
+              <!-- /ko -->
+            <!-- /ko -->
           <!-- /ko -->
 
           <!-- Phrases -->
@@ -177,7 +280,7 @@
                 <tr class="phrase">
                   <!-- ko if: $root.feedbackCategories().length > 1 -->
                     <td class="phraseType">
-                      <select class="phraseType" data-bind="options: $root.feedbackCategories, optionsText: 'name', value: category">
+                      <select class="phraseType" data-bind="options: $root.feedbackCategories, optionsText: function(item) {return item.fullName()}, value: category">
                       </select>
                     </td>
                   <!-- /ko -->
@@ -192,12 +295,28 @@
                       <input title="Points (optional)" class="phraseType" type="text" data-bind="value: gradeValue" />
                     </td>
                   <!-- /ko -->
-                  <td class="phrase" data-bind="editable: {value: content, editorActive: editorActive, type: 'textarea', placeholder: 'click to edit', inputPlaceholder: 'Feedback phrase'}"></td>
+                  <td class="phrase">
+                    <!-- ko if: textFields().length > 1 -->
+                      <!-- ko foreach: textFields -->
+                        <p>
+                          (<span data-bind="text: language.name"></span>)
+                          <span data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'click to edit', inputPlaceholder: 'Feedback phrase'}"></span>
+                        </p>
+                      <!-- /ko -->
+                    <!-- /ko -->
+                    <!-- ko if: textFields().length <= 1 -->
+                      <!-- ko foreach: textFields -->
+                        <p>
+                          <span data-bind="editable: {value: text, editorActive: editorActive, type: 'textarea', placeholder: 'click to edit', inputPlaceholder: 'Feedback phrase'}"></span>
+                        </p>
+                      <!-- /ko -->
+                    <!-- /ko -->
+                  </td>
                   <td class="buttons-column">
                     <div class="buttons">
-                      <i class="icon-pencil edit-phrase-button" title="Edit phrase" data-bind="click: activateEditor"></i>
-                      <i class="icon-trash delete-phrase-button" title="Delete phrase" data-bind="click: deletePhrase"></i>
-                      <i class="icon-resize-vertical move-phrase-button" title="Drag to move phrase"></i>
+                      <span class="glyphicon glyphicon-pencil edit-phrase-button" title="Edit phrase" data-bind="click: activateEditor" aria-hidden="true"></span>
+                      <span class="glyphicon glyphicon-trash delete-phrase-button" title="Delete phrase" data-bind="click: deletePhrase" aria-hidden="true"></span>
+                      <span class="glyphicon glyphicon-resize-vertical move-phrase-button" title="Drag to move phrase" aria-hidden="true"></span>
                     </div>
                   </td>
                 </tr>
@@ -206,7 +325,7 @@
 
             <!-- Create phrase -->
             <div class="btn create-phrase-button buttons" data-bind="click: clickCreatePhrase">
-              <i class="icon-plus"></i> Create new phrase
+              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create new phrase
             </div>
           </div>
         </div>
@@ -214,7 +333,7 @@
 
       <!-- Create criterion -->
       <div class="btn create-criterion-button" data-bind="click: clickCreateCriterion">
-        <i class="icon-plus"></i> Create new criterion
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create new criterion
       </div>
     </div>
   <!-- /ko -->

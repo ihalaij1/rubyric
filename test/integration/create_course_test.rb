@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class CreateCourseTest < ActionController::IntegrationTest
+class CreateCourseTest < ActionDispatch::IntegrationTest
   fixtures :all
 
 #   test "Create course" do

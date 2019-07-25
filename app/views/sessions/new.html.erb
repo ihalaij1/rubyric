@@ -9,7 +9,7 @@
         <%= form_tag password_resets_path, :class => 'form-inline' do %>
           <%= hidden_field_tag :email, params['session']['email'] %>
           <%=t '.login_failed' %>
-          <%= submit_tag t('.forgot_password_button'), :class => 'btn btn-default btn-small' %>
+          <%= submit_tag t('.forgot_password_button'), :class => 'btn btn-default btn-sm' %>
         <% end %>
       </div>
     </div>

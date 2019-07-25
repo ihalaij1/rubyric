@@ -12,5 +12,9 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require bootstrap-css
+//= require knockout
+//= require knockout-sortable
+//= require knockout-validation
 
 // require_tree .

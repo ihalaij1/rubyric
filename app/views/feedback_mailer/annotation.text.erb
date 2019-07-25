@@ -2,7 +2,10 @@
 
 <% if !@exercise.anonymous_graders && @grader %><%=t :Reviewer %>: <%= @grader.firstname %> <%= @grader.lastname %> (<%= @grader.email %>)
 <% end -%>
-<% unless @review.grade.blank? %><%=t :Grade %>: <%= @review.grade %>
+<% if !@exercise.anonymous_graders && @editors && @editors.size > 0 %><%=t :Editor %>: <% @editors.each_with_index do |editor, i|%><%= editor.firstname %> <%= editor.lastname %> (<%= editor.email %>)<% if i < @editors.size - 1 %>, <% end %><% end %>
+<% end -%>
+<% unless @review.grade.blank? %><%=t :Grade %>: <%= @review.grade %><% unless @exercise.max_grade.blank? %> / <%= @exercise.max_grade %>
+<% end %>
 <% end -%>
 
 <% if @review.feedback && !@review.feedback.strip.empty? -%>

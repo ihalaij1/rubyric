@@ -1,5 +1,5 @@
 class Courses::TeachersController < CoursesController
-  before_filter :login_required
+  before_action :login_required
 
   def index
     @course = Course.find(params[:course_id])

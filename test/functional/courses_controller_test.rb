@@ -1,46 +1,52 @@
 require 'test_helper'
 
-class CoursesControllerTest < ActionController::TestCase
-
+class CoursesControllerTest < ActionDispatch::IntegrationTest
   fixtures :users, :courses
-  
-  context "not logged in" do
+
+  def setup
+    @course = courses(:course)
+  end
+
+  # Tests for not logged in
+  context "when not logged in" do
     should "not get index" do
-      get :index
+      get courses_path
       assert_redirected_to new_session_path
     end
-    
+
     should "not get course" do
-      get :show, :id => courses(:course).id
+      get course_path(@course)
       assert_redirected_to new_session_path
     end
-    
-    should "not get new" do
-      get :new
-      assert_redirected_to new_session_path
-    end
-    
+
+    # Courses do not have their own new path thus cannot be tested
+    # Test shall be carried out at course_instances_controller_test.rb
+    #should "not get new" do
+    #  get new_course_path
+    #  assert_redirected_to new_session_path
+    #end
+
     should "not get edit" do
-      get :edit, :id => courses(:course).id
+      get edit_course_path(@course)
       assert_redirected_to new_session_path
     end
-    
-    should "not be able to create course" do
-      assert_difference('Course.count', 0) do 
-        post :create, :course => {:code => '93765', :name => 'New course' }
-      end
-      
-      assert_redirected_to new_session_path
-    end
-    
+
+    # Courses do not have their own create path thus cannot be tested
+    # Test shall be carried out at course_instances_controller_test.rb
+    #should "not be able to create course" do
+    #  assert_no_difference 'Course.count' do
+    #    post courses_path, params: { course: { code: '93765', name: 'New course' } }
+    #  end
+    #end
+
     should "not be able to update course" do
-      put :update, :id => courses(:course).id, :course => { :code => '93777', :name => 'New name' }
+      patch course_path(@course), params: {course: { code: '39777', name: 'New name' } }
       assert_redirected_to new_session_path
     end
-    
+
     should "not be able to delete course" do
-      assert_difference('Course.count', 0) do 
-        delete :destroy, :id => courses(:course).id
+      assert_no_difference 'Course.count' do
+        delete course_path(@course)
       end
       assert_redirected_to new_session_path
     end
@@ -53,115 +59,119 @@ class CoursesControllerTest < ActionController::TestCase
     # TODO: add/remove teachers
   end
   
-  context "student" do
+   # Tests for user that has been logged in as a student
+  context "when logged in as a student" do
     setup do
-      login_as :student1
+      post session_path, params: { session: { email: 'student1@example.com', password: 'student1'} }
     end
-    
+
     should "get index" do
-      get :index
-      
-      assert_not_nil assigns(:courses)
+      get courses_path
+      assert_not_nil :courses
       assert_response :success
-      assert_template :index
+      #assert_template :index
     end
-    
+
     should "get course" do
-      get :show, :id => courses(:course).id
-      
-      assert_not_nil assigns(:course)
+      get course_path(@course)
+      assert_not_nil :course
       assert_response :success
-      assert_template :show
+      #assert_template :show
     end
-    
-    should "get new" do
-      get :new
-      
-      assert_response :success
-      assert_template :new
-    end
-    
+
+    # Courses do not have their own new path thus cannot be tested
+    # Test shall be carried out at course_instances_controller_test.rb
+    #should "get new" do
+    #  get new_course_path
+    #  assert_response :success
+    #  #assert_template :new
+    #end
+
     should "not get edit" do
-      get :edit, :id => courses(:course).id
+      get edit_course_path(@course)
       assert_forbidden
     end
-    
-    should "be able to create course" do
-      assert_difference('Course.count', 1) do 
-        post :create, :course => {:code => '93765', :name => 'New course' }
-      end
-      
-      assert_redirected_to new_course_course_instance_path(:course_id => assigns(:course).id)
-    end
-    
+
+    # Courses do not have their own create path thus cannot be tested
+    # Test shall be carried out at course_instances_controller_test.rb
+    #should "be able to create course" do
+    #  assert_difference('Course.count', 1) do 
+    #    post courses_path, params: { course: { code: '9765', name: 'New course' } }
+    #  end
+    #  
+    #  #assert_redirected_to new_course_course_instance_path(:course)
+    #end
+
     should "not be able to update course" do
-      put :update, :id => courses(:course).id, :course => { :code => '93777', :name => 'New name' }
+      old_code = @course.code
+      patch course_path(@course), params: { course: { code: '93777', name: 'New name' } }
       assert_forbidden
+      assert @course.code, old_code
     end
     
     should "not be able to delete course" do
-      assert_difference('Course.count', 0) do 
-        delete :destroy, :id => courses(:course).id
+      assert_no_difference 'Course.count' do
+        delete course_path(@course)
       end
       assert_forbidden
     end
+
   end
  
-  context 'teacher' do
+  # Tests for a user that has been logged in as a teacher (assigned to @course)
+  context 'when logged in as a teacher' do
     setup do
-      login_as :teacher1
+      post session_path, params: { session: { email: 'teacher1@example.com', password: 'teacher1'} }
     end
     
     should "get index" do
-      get :index
-      
-      assert_not_nil assigns(:courses)
+      get courses_path
+      assert_not_nil :courses
       assert_response :success
-      assert_template :index
+      #assert_template :index
     end
-    
+
     should "get course" do
-      get :show, :id => courses(:course).id
-      
-      assert_not_nil assigns(:course)
+      get course_path(@course)
+      assert_not_nil :course
       assert_response :success
-      assert_template :show
+      #assert_template :show
     end
     
-    should "get new" do
-      get :new
-      
-      assert_response :success
-      assert_template :new
-    end
-    
+    # Courses do not have their own new path thus cannot be tested
+    # Test shall be carried out at course_instances_controller_test.rb
+    #should "get new" do
+    #  get new_course_path
+    #  
+    #  assert_response :success
+    #  assert_template :new
+    #end
+
     should "get edit" do
-      get :edit, :id => courses(:course).id
-      
+      get edit_course_path(@course)
       assert_response :success
-      assert_template :edit
+      #assert_template :edit
     end
     
-    should "be able to create course" do
-      assert_difference('Course.count') do 
-        post :create, :course => {:code => '93765', :name => 'New course' }
-      end
-      
-      assert_redirected_to new_course_course_instance_path(:course_id => assigns(:course).id)
-    end
-    
+    # Courses do not have their own create path thus cannot be tested
+    # Test shall be carried out at course_instances_controller_test.rb
+    #should "be able to create course" do
+    #  assert_difference('Course.count', 1) do 
+    #    post courses_path, params: { course: { code: '93765', name: 'New course' } }
+    #  end
+    #  assert_redirected_to new_course_course_instance_path(:course)
+    #end
+
     should "be able to update course" do
-      put :update, :id => courses(:course).id, :course => { :code => '93777', :name => 'New name' }
-      
-      assert_redirected_to course_path(assigns(:course))
+      patch course_path(@course), params: { course: { code: '93777', name: 'New name' } }
+      assert_redirected_to course_path(@course)
     end
     
-    should "be able to delete course" do
-      assert_difference('Course.count', -1) do 
-        delete :destroy, :id => courses(:course).id
+    should "not be able to delete course" do
+      assert_no_difference 'Course.count' do 
+        delete course_path(@course)
       end
-      
-      assert_redirected_to courses_path
+      assert_forbidden
     end
     
 #     should "get teachers" do
@@ -171,5 +181,40 @@ class CoursesControllerTest < ActionController::TestCase
 #       assert_template :teachers
 #     end
   end
-  
+
+  context "When logged in as an admin" do
+    setup do
+      post session_path, params: { session: { email: 'admin@example.com', password: 'admin'} }
+    end
+
+    should "get index" do
+      get courses_path
+      assert_not_nil :courses
+      assert_response :success
+    end
+
+    should "get course" do
+      get course_path(@course)
+      assert_not_nil :course
+      assert_response :success
+    end
+
+    should "get edit" do
+      get edit_course_path(@course)
+      assert_response :success
+    end
+
+    should "be able to update course" do
+      patch course_path(@course), params: { course: { code: '93777', name: 'New name' } }
+      assert_redirected_to course_path(@course)
+    end
+    
+    should "be able to delete course" do
+      assert_difference 'Course.count', -1 do 
+        delete course_path(@course)
+      end
+      assert_redirected_to courses_path
+    end
+
+  end
 end
