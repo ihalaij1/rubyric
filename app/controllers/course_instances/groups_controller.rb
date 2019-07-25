@@ -53,7 +53,6 @@ class CourseInstances::GroupsController < GroupsController
     authorize! :update, @course_instance
     
     @course_instance.set_assignments(params[:assignments])
-    @groups = filter(params[:exercise_id])
     
     respond_to do |format|
       format.html { redirect_to @course_instance }
