@@ -28,13 +28,18 @@
   <!-- No groups warning -->
   <div class="alert alert-info">
     <p>
-      No submissions have been received yet. 
-      Give the following link to students for submitting:
-      <%= link_to submit_url(@exercise.id), submit_url(@exercise.id) %>
+      No submissions have been received yet.
+      <% if @course_instance.submission_policy != 'lti' %>
+        Give the following link to students for submitting:
+        <%= link_to submit_url(@exercise.id), submit_url(@exercise.id) %>
+      <% end %>
     </p>
-  
+
     <p>
-      or <%= link_to 'Generate example submissions', exercise_create_example_submissions_path(@exercise), :class => 'btn btn-default' %>
+      <% if @course_instance.submission_policy != 'lti' %>
+        or
+      <% end %>
+      <%= link_to 'Generate example submissions', exercise_create_example_submissions_path(@exercise), :class => 'btn btn-default' %>
     </p>
   </div>
 <% end %>
@@ -67,8 +72,59 @@
 
 <% if @course_instance.submission_policy != 'lti' %>
   <p><strong>Submit url: </strong><%= link_to submit_url(@exercise.id), submit_url(@exercise.id) %> <span class="hint">- Give this link to students.</span></p>
+<% else %>
+  <p><strong>Service url: </strong><%= link_to root_url + "aplus/#{@exercise.id}", root_url + "aplus/#{@exercise.id}" %></p>
 <% end %>
-  
+
+<% if params[:view] != 'thumbnails' %>
+<div>
+  <h2>
+    Completed reviews
+    <a data-toggle="collapse" href="#reviews-table-content" role="button" aria-expanded="true" aria-controls="reviews-table-content">
+      <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true" style="font-size:50%"></span>
+    </a>
+  </h2>
+</div>
+<div class="col-md-12">
+  <div class="col-md-5 collapse in" id="reviews-table-content">
+    <div class="well">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Reviewer</th>
+            <th>Not started</th>
+            <th>Started</th>
+            <th>
+              Completed (Mailed)
+              <i id="tooltip-completed" class="glyphicon glyphicon-question-sign" 
+                 data-toggle="tooltip" data-content="Completed refers to reviews with status finished, mailing or mailed"></i>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (0..@graders.size - 1).each do |i| %>
+            <tr>
+              <td>
+                <a class="grader-link" href="#grader-submissions-<%= @graders[i][:id] %>" title="Show reviews by <%=@graders[i][:grader].name %>">
+                  <%= @graders[i][:grader].name %>
+                </a>
+              </td>
+              <td><%= @not_started[i] %></td>
+              <td><%= @started[i] %></td>
+              <td><%= @finished[i] + @mailed[i] %> (<%= @mailed[i] %>)</td>
+            </tr>
+          <% end %>
+        </tbody>      
+      </table>
+        
+      <p>Completed reviews: <%= @finished.sum + @mailed.sum %></p>
+      <p>Total submissions: <%= @groups.map{|g| g.submissions.size}.sum %></p>
+    </div>
+  </div>
+</div>
+<% end %>
+
+<div class="grader-submissions-content" id="all-submissions">
 <% unless @groups.empty? %>
   <h2>
     Submissions
@@ -79,13 +135,13 @@
       </div>
     <% end %>
   </h2>
-  
+
   <% if params[:view] == 'thumbnails' %>
     <div class="collaborative-assignments">
       <%= render :partial => 'collaborative_group', :collection => @groups %>
     </div>
   <% else %>
-    <%= form_tag exercise_send_reviews_path(@exercise) do %>
+    <%= form_tag exercise_send_reviews_path(@exercise), id: "send-reviews-form" do %>
       <table class="assignments hover-buttons">
         <thead>
           <tr>
@@ -100,8 +156,20 @@
         </tbody>
         <tfoot>
           <tr>
-            <td><%= @groups.size %> groups
+            <td><%= @groups.size %> groups</td>
+            <td colspan="3">If sending several reviews for one submission set sent points equal to:</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>
+              <%= radio_button_tag "send_grade_mode", "best_grade", true %> Best grade
+              <%= radio_button_tag "send_grade_mode", "average" %> Average grade
             </td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td></td>
             <td>
               <button class="btn btn-default" id="reviews-select-all" onclick="return false;"> Select all</button>
               <button class="btn btn-default" id="reviews-select-finished" onclick="return false;">Select finished</button>
@@ -122,11 +190,9 @@
             <td>
             </td>
             <td>
-              <p>
-                  <button type="submit" class='btn btn-default'>
-                    <span class="glyphicon glyphicon-envelop" aria-hidden="true"></span> Deliver selected reviews
-                  </button>
-              </p>
+              <div class="btn btn-default" id="send-reviews">
+                <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Deliver selected reviews
+              </div>
             </td>
             <td></td>
             <td></td>
@@ -140,3 +206,46 @@
 <% if current_user.tester == 'alpha' %>
   <%= link_to 'Batch upload submissions', batch_upload_exercise_submissions_path(:exercise_id => @exercise.id) %>
 <% end %>
+</div>
+
+<!-- Modal for sending reviews -->
+<div id="modal-send-reviews" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Sending non-numerical grades</h3>
+      </div>
+      <div class="modal-body">
+        <p>
+          You are trying to send review with non-numerical grade to A+. Non-numerical grades 
+          cannot be sent to A+ as it requires numerical grade. Non-numerical grades can be 
+          for example "Failed" or "Boomerang".
+        </p>
+        <p>
+          Non-numerical grades will not be taken into account when calculating points 
+          to be sent to A+ but the feedback will still be sent to A+.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+        <a href="#" id="submit-send-reviews-modal" class="btn btn-primary">OK</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if params[:view] != 'thumbnails' %>
+  <%= render :partial => 'grader_submissions', :collection => @graders %>
+<% end %>
+
+<script type="text/javascript">
+  $('.modal').on('shown.bs.modal', function(e) {
+    var reviewModal = $(e.target);
+    var url = reviewModal.data("url");
+    $(".modal").children().children().load(url);
+    $(this).find('.modal-content').css( {
+      'overflow-x': 'scroll'
+    });
+  });
+</script>

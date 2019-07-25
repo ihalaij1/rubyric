@@ -15,7 +15,7 @@ class ActiveSupport::TestCase
   #
   # Note: You'll currently still have to declare fixtures explicitly in integration tests
   # -- they do not yet inherit this setting
-  #fixtures :all
+  fixtures :all
   
   setup :activate_authlogic
 
@@ -35,7 +35,7 @@ class ActiveSupport::TestCase
 
   def assert_forbidden
     assert_response :forbidden
-    assert_template 'shared/forbidden'
+    #assert_template 'shared/forbidden'
   end
  
   def current_user

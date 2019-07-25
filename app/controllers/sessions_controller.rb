@@ -1,11 +1,12 @@
 require 'cgi'
 require 'ims/lti'
-require 'oauth/request_proxy/rack_request'
+require 'oauth/request_proxy/action_controller_request'
 
 # Rubyric
 class SessionsController < ApplicationController
   #before_filter :require_no_user, :only => [:new, :create]
   #before_filter :require_user, :only => :destroy
+  skip_before_action :verify_authenticity_token, only: [:lti]
 
   layout 'narrow-new'
 
@@ -52,6 +53,7 @@ class SessionsController < ApplicationController
 
 
   def shibboleth
+    @session = Session.new
     if defined?(SHIB_ATTRIBUTES)
       shibinfo = {
         :login => request.env[SHIB_ATTRIBUTES[:id]],
@@ -98,7 +100,8 @@ class SessionsController < ApplicationController
     if !user && !shibinfo[:studentnumber].blank?
       logger.debug "Trying to find by studentnumber #{shibinfo[:studentnumber]}"
       # TODO: user organization ID
-      user = User.find_by_studentnumber(shibinfo[:studentnumber], :conditions => "login IS NULL")
+      #user = User.find_by_studentnumber(shibinfo[:studentnumber], :conditions => "login IS NULL")
+      user = User.find_by(studentnumber: shibinfo[:studentnumber], login: nil)
     end
 
     if !user && !shibinfo[:email].blank?
@@ -210,8 +213,11 @@ class SessionsController < ApplicationController
       else # if lti_view == :review || lti_view == :feedback
         redirect_to exercise_path(:id => @exercise.id)
       end
-    else
+    elsif @course_instance
       redirect_to course_instance_path(:id => @course_instance.id)
+    else
+      flash[:warning] = "Course has not yet been configured."
+      redirect_to new_course_instance_path(submission_policy: 'lti', lti_context_id: params[:context_id], lti_consumer: params[:oauth_consumer_key])
     end
   end
 

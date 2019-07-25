@@ -1,5 +1,6 @@
 class SubmissionsController < ApplicationController
-  before_filter :load_submission, except: [:new, :create, :aplus_get, :aplus_submit, :receive_email]
+  before_action :load_submission, except: [:new, :create, :aplus_get, :aplus_submit, :receive_email]
+  skip_before_action :verify_authenticity_token, only: [:aplus_submit]
 
   layout 'narrow'
 
@@ -11,7 +12,7 @@ class SubmissionsController < ApplicationController
 
   # Download submission
   def show
-    return access_denied unless group_membership_validated(@submission.group) || @submission.has_reviewer?(current_user) || @course.has_teacher(current_user) || (@exercise.collaborative_mode != '' && @course_instance.has_student(current_user))
+    return access_denied unless group_membership_validated(@submission.group) || @submission.has_reviewer?(current_user) || @course.has_teacher(current_user) || @exercise.show_all_submissions_to?(current_user) || (@exercise.collaborative_mode != '' && @course_instance.has_student(current_user))
 
     # logger.info("mime type: #{Mime::Type.lookup_by_extension(@submission.extension)}")
     filename = @submission.filename || "#{@submission.id}.#{@submission.extension}"
@@ -41,7 +42,7 @@ class SubmissionsController < ApplicationController
   end
 
   def thumbnail
-    return access_denied unless group_membership_validated(@submission.group) || @submission.has_reviewer?(current_user) || @course.has_teacher(current_user) || (@exercise.collaborative_mode != '' && @course_instance.has_student(current_user))
+    return access_denied unless group_membership_validated(@submission.group) || @submission.has_reviewer?(current_user) || @exercise.show_all_submissions_to?(current_user) || @course.has_teacher(current_user) || (@exercise.collaborative_mode != '' && @course_instance.has_student(current_user))
 
     response.headers['Expires'] = 1.year.from_now.httpdate
     if File.exists? @submission.thumbnail_path
@@ -297,7 +298,7 @@ class SubmissionsController < ApplicationController
 
   # Assign to current user and start review
   def review
-    return access_denied unless @course.has_teacher(current_user) || @submission.group.has_reviewer?(current_user) || (@exercise.collaborative_mode == 'review' && (@course_instance.has_student(current_user) || @course_instance.has_assistant(current_user)))
+    return access_denied unless @course.has_teacher(current_user) || @submission.group.has_reviewer?(current_user) || @exercise.show_all_submissions_to?(current_user) || (@exercise.collaborative_mode == 'review' && (@course_instance.has_student(current_user) || @course_instance.has_assistant(current_user)))
 
     review = @submission.assign_to(current_user, session[:lti_launch_params])
 
@@ -414,6 +415,7 @@ class SubmissionsController < ApplicationController
       @user.save(validate: false)
     else
       @user = lti_create_user(params['oauth_consumer_key'], params[:user_id], organization, @exercise.course_instance, params[:custom_student_id], params['lis_person_name_family'], params['lis_person_name_given'], params['lis_person_contact_email_primary'])
+      add_user_to_course_instance(@user, @exercise.course_instance)
     end
     @is_teacher = @course.has_teacher(current_user)
 

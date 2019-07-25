@@ -2,6 +2,8 @@
   <%= javascript_include_tag 'views/reviews/annotation' %>
 <% end %>
 
+<%= hidden_field_tag :show_review, true %>
+
 <div class="container-fluid">
   <div class="page-header">
     <h1><%= "#{@course.full_name} (#{@course_instance.name}) - #{@exercise.name}" %> </h1>
@@ -43,10 +45,10 @@
               <div class="content" data-bind="html: escaped_content">
               </div>
               <div class="statusbar">
-                <button class="btn btn-mini pull-right minimize-button" title="Minimize" data-bind="click: $parent.minimizeAnnotation, clickBubble: false">
+                <button class="btn btn-xs pull-right minimize-button" title="Minimize" data-bind="click: $parent.minimizeAnnotation, clickBubble: false">
                   <span class="glyphicon glyphicon-chevron-down"></span>
                 </button>
-                <button class="btn btn-mini pull-right maximize-button" title="Maximize" data-bind="click: $parent.maximizeAnnotation, clickBubble: false">
+                <button class="btn btn-xs pull-right maximize-button" title="Maximize" data-bind="click: $parent.maximizeAnnotation, clickBubble: false">
                   <span class="glyphicon glyphicon-chevron-up"></span>
                 </button>
                 <!-- ko if: phrase -->
@@ -65,14 +67,15 @@
 <%= render 'rate_review' %>
 
 <% if params[:ref] == 'exercises' %>
-  <div class="row-fluid">
-    <div class="col-sm-12">
-      <p><%= link_to t('Back'), @exercise %></p>
-    </div>
-  </div>
+  <% if params[:mode] == 'modal' %>
+    <p><a href="#" data-dismiss="modal"><%= t('Back') %></a></p>
+  <% else %>
+    <p><%= link_to t('Back'), @exercise %></p>
+  <% end %>
 <% else %>
+  <p><%= link_to 'Back', submit_url(@exercise.id, group: @group, member_token: params[:member_token], group_token: params[:group_token]) %></p>
   <!-- Promotion -->
-  <div class="footer">
+  <!--div class="footer">
     <div class="container">
       <div class="row intro">
         <div class="col-sm-12">
@@ -97,7 +100,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </div-->
 <% end %>
 
 <%= hidden_field_tag :rubric_payload, @exercise.rubric %>

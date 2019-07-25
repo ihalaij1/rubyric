@@ -1,6 +1,6 @@
 #require "ftools"
 require 'open3.rb'
-require 'rest_client'
+require 'rest-client'
 
 # http://wiki.rubyonrails.org/rails/pages/HowtoUploadFiles
 
@@ -320,8 +320,8 @@ class Submission < ApplicationRecord
     unless submission.filename.blank?
       Open3.popen3('file', submission.full_filename()) do |stdin, stdout, stderr, wait_thr|
         line = stdout.gets
-        parts = line.strip.split(':')
-        logger.debug "File type: (#{parts[1]})"
+        parts = (line || "").strip.split(':')
+        logger.debug "File type: (#{parts[1]})" if parts.size > 1
 
         if parts.size < 1
           logger.error "file command failed: #{line}"
@@ -351,9 +351,9 @@ class Submission < ApplicationRecord
     end
 
     # FIXME: this is a temporary hack for Koodiaapinen
-    if submission.is_a?(AplusSubmission) && submission.exercise.rubric_grading_mode == 'always_pass'
-      FeedbackMailer.aplus_feedback(submission.id)
-    end
+    #if submission.is_a?(AplusSubmission) && submission.exercise.rubric_grading_mode == 'always_pass'
+    #  FeedbackMailer.aplus_feedback(submission.id)
+    #end
   end
 
   def postprocess_pdf
@@ -415,7 +415,7 @@ class Submission < ApplicationRecord
     # Get size
     Open3.popen3("identify -format \"%wx%h\" #{self.full_filename()}") do |stdin, stdout, stderr, wait_thr|
       line = stdout.gets
-      parts = line.split('x')
+      parts = (line || "").split('x')
 
       if parts.size < 1
         logger.error "failed to determine image size: #{line}"
@@ -437,7 +437,7 @@ class Submission < ApplicationRecord
   end
 
   def convert_ascii_to_html(file_type)
-    parts = file_type.split(',')
+    parts = (file_type || "").split(',')
 
     enable_syntax_highlight = !parts[0].include?('text')
 
@@ -456,9 +456,27 @@ class Submission < ApplicationRecord
     end
 
     unless enable_syntax_highlight
+      
+      # Tries to find file encoding from file_type so that file can be read and converted
+      # Assumes that file_type where ISO-8859 appears is ISO-8859-1 encoded which is not 
+      # always the case
+      # If encoding is not ISO-8859, UTF-8 or ASCII returns as reading file would fail
+      # TODO: Do something about assumption that ISO-8859 means ISO-8859-1
+      #       Possibly add support for more encodings
+      file_encoding = file_type ? file_type.split(' ').first.strip : ""
+      if file_encoding.include?("ISO-8859")
+        file_encoding = "ISO-8859-1:UTF-8"
+      elsif file_encoding.include?("UTF-8") || file_encoding.include?("ASCII")
+        file_encoding = "UTF-8"
+      else
+        logger.error "failed to recognize file type: #{file_type}"
+        return
+      end
+      
+      # Opens the file, reads and rewrites it
       File.open(converted_html_filename, "w") do |file|
         width = 80
-        content = IO.read(self.full_filename).gsub('<', '&lt;').gsub('>', '&gt;')
+        content = IO.read(self.full_filename, encoding: file_encoding).gsub('<', '&lt;').gsub('>', '&gt;')
         content = content.scan(/\S.{0,#{width}}\S(?=\s|$)|\S+/)
         content = '<div class="highlight"><pre>' + content.join("\n") + '</pre></div>'
 

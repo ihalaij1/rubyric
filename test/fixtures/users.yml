@@ -1,8 +1,10 @@
 admin:
   login: admin
   studentnumber: '12345'
-  crypted_password: 0ea6550e8ec14a9d8f6a717040e2e9de552b9b95 # admin
-  salt: 94319306a3a7ca836f22f385fb0591707c4e8548
+  #crypted_password: 0ea6550e8ec14a9d8f6a717040e2e9de552b9b95 # admin
+  #salt: 94319306a3a7ca836f22f385fb0591707c4e8548
+  salt: <%= salt = Authlogic::Random.hex_token %>
+  crypted_password: <%= Authlogic::CryptoProviders::Sha512.encrypt("admin" + salt) %>
   firstname: Admin
   lastname: User
   email: admin@example.com
@@ -12,12 +14,15 @@ admin:
 teacher1:
   login: teacher1
   studentnumber: '10001'
-  crypted_password: de50a0ab674f20463c89436a642b85e89a309728 # teacher1
-  salt: b55a469cee60fdb2f968233f426ca27781eda0af
+  #salt: b55a469cee60fdb2f968233f426ca27781eda0af
+  salt: <%= salt = Authlogic::Random.hex_token %>
+  crypted_password: <%= Authlogic::CryptoProviders::Sha512.encrypt("teacher1" + salt) %> # de50a0ab674f20463c89436a642b85e89a309728 # teacher1
   firstname: Teacher
   lastname: 1
   email: teacher1@example.com
   persistence_token: 6cde0674657a8a313ce952df979de2830309aa4c11ca65805dd00bfdc65dbcc2f5e36718660a1d2e68c1a08c276d996763985d2f06fd3d076eb7bc4d97b1e317
+  lti_user_id: 9357059
+  lti_consumer: testi
 
 teacher2:
   login: teacher2
@@ -64,8 +69,10 @@ student3:
 assistant1:
   login: assistant1
   studentnumber: '00011'
-  crypted_password: e0c593ab71d84d5c2054a571224bda31f91c25e7 # assistant1
-  salt: 95b4c6de166de5d53d3250836fea471eb7bfc59f
+  #crypted_password: e0c593ab71d84d5c2054a571224bda31f91c25e7 # assistant1
+  #salt: 95b4c6de166de5d53d3250836fea471eb7bfc59f
+  salt: <%= salt = Authlogic::Random.hex_token %>
+  crypted_password: <%= Authlogic::CryptoProviders::Sha512.encrypt("assistant1" + salt) %>
   firstname: Assistant
   lastname: 1
   email: assistant1@example.com
@@ -110,9 +117,36 @@ shibuser:
   lastname: 21
   email: student21@example.com
 
+lti_student1:
+  login: 'student11'
+  studentnumber: '00011'
+  firstname: Student
+  lastname: 1
+  email: student11@example.com
+  lti_user_id: 9357054
+  lti_consumer: testi
+  persistence_token: 6cde0674657a8a313ce952df979de2830309aa4c11ca65805dd00bfdc65dbcc2f5e36718660a1d2e68c1a08c276d996763985d2f06fd3d076eb7bc4d97b1e317
+
+lti_student2:
+  login: 'student22'
+  studentnumber: '00022'
+  firstname: Student
+  lastname: 2
+  email: student22@example.com
+  lti_user_id: 9482579
+  lti_consumer: testi
+
+lti_student3:
+  login: 'student33'
+  studentnumber: '00033'
+  firstname: Student
+  lastname: 3
+  email: student33@example.com
+  lti_user_id: 8564760
+  lti_consumer: testi
+
 ghost:
   studentnumber: '00022'
-
 
 # quentin:
 #   login: quentin

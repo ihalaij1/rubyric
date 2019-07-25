@@ -83,4 +83,8 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  # Custom configuration whether or not to ask agree terms in create course instance
+  # Default for all environments is defined in application.rb as true
+  config.ask_agree_terms = false
 end

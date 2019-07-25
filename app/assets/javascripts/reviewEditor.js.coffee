@@ -1,6 +1,3 @@
-#= require knockout-3.1.0
-#= require bootstrap
-
 class Page
   constructor: (@rubricEditor, @rubric) ->
     @nextPage = undefined
@@ -38,28 +35,51 @@ class Page
       ), this)
 
   load_rubric: (data) ->
-    @name = data['name']
+    name = if @rubricEditor.multilingual && data['name'] then data['name'][@rubricEditor.language()] else data['name']
+    @name = name || ''
     @id = data['id']
     @minSum = if data['minSum']? then parseFloat(data['minSum']) else undefined
     @maxSum = if data['maxSum']? then parseFloat(data['maxSum']) else undefined
-    @instructions = data['instructions']
-    
-    # Prepare feedback containers
-    for category in @rubric.feedbackCategories
-      feedbackHeight = Math.floor(100.0 / @rubric.feedbackCategories.length) + "%"
-      feedback = {
-        id: category.id
-        title: category.name
-        value: ko.observable('')
-        height: feedbackHeight
-      }
-      @feedback.push(feedback)
-      @feedbackByCategory[category.id] = feedback
+    @instructions = if @rubricEditor.multilingual && data['instructions'] then data['instructions'][@rubricEditor.language()] else data['instructions']
 
     for criterion_data in data['criteria']
       criterion = new Criterion(@rubricEditor, this, criterion_data)
       @criteria.push(criterion)
       @criteriaById[criterion.id] = criterion
+
+    # Prepare feedback containers
+    included_categories = []                      # ids of categories present in the page
+    # Gather ids of categories present in the page
+    for category in @rubric.feedbackCategories
+      for criterion in @criteria()
+        for phrase in criterion.phrases
+          if category.id == phrase.categoryId && category.id not in included_categories
+            included_categories.push(category.id)
+
+    # Add categories to @feedback
+    if included_categories.length == 0           # if there is no categories present, include all
+      for category in @rubric.feedbackCategories
+        feedbackHeight = Math.floor(100.0 / @rubric.feedbackCategories.length) + "%"
+        feedback = {
+          id: category.id
+          title: category.name
+          value: ko.observable('')
+          height: feedbackHeight
+        }
+        @feedback.push(feedback)
+        @feedbackByCategory[category.id] = feedback
+    else
+      for category in @rubric.feedbackCategories
+        if category.id in included_categories
+          feedbackHeight = Math.floor(100.0 / included_categories.length) + "%"
+          feedback = {
+            id: category.id
+            title: category.name
+            value: ko.observable('')
+            height: feedbackHeight
+          }
+          @feedback.push(feedback)
+          @feedbackByCategory[category.id] = feedback
       
     for grade in @rubricEditor.grades || []
       numeric_grade = parseFloat(grade)
@@ -112,10 +132,11 @@ class Page
 class Criterion
   constructor: (@rubricEditor, @page, data) ->
     @id = data['id']
-    @name = data['name']
+    name = if @rubricEditor.multilingual && data['name'] then data['name'][@rubricEditor.language()] else data['name']
+    @name = name || ''
     @minSum = if data['minSum']? then parseFloat(data['minSum']) else undefined
     @maxSum = if data['maxSum']? then parseFloat(data['maxSum']) else undefined
-    @instructions = data['instructions']
+    @instructions = if @rubricEditor.multilingual && data['instructions'] then data['instructions'][@rubricEditor.language()] else data['instructions']
     @phrases = []
     @phrasesById = {} # id => Phrase
     @selectedPhrase = ko.observable()  # Phrase object which is selected as the grade
@@ -179,10 +200,37 @@ class Phrase
     @id = data['id']
     @categoryId = data['category']
     @grade = data['grade']
-    @content = data['text']
+    content = if @page.rubricEditor.multilingual && data['text'] then data['text'][@page.rubricEditor.language()] else data['text']
+    @content = content || ''
     @escaped_content = @content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br />')
     
     @criterion.gradeRequired = true if @grade?
+    
+class @Editor
+  constructor: (data) ->
+    @name = ''
+    @id = undefined
+    @firstEdit = ko.observable(true)
+    @show = ko.observable(true)
+    
+    this.load_json(data)
+    
+  load_json: (data) ->
+    if data
+      @name = data['name']
+      @id = data['id']
+      if data['show'] == '1'
+        @show(true)
+      else
+        @show(false)
+      if data['new'] == '1'
+        @firstEdit(true)
+      else
+        @firstEdit(false)
+      
+  to_json: ->
+    show = if @show() then '1' else '0'
+    return { id: @id, name: @name, show: show}
 
 
 class @Rubric
@@ -199,6 +247,15 @@ class @Rubric
     @phrasesById = {}
     @numericGrading = false
     @gradingMode = 'none'
+    
+    @editedBy = ko.observableArray()
+    @language = ko.observable('')
+    @language($('#review_language').val())
+    
+    currentUser = $('#current_user').val()
+    @currentUser = $.parseJSON(currentUser) if currentUser && currentUser.length > 0
+    reviewer = $('#review_user').val()
+    @reviewer = $.parseJSON(reviewer) if reviewer && reviewer.length > 0
     
   #
   # Loads the rubric by AJAX
@@ -220,6 +277,16 @@ class @Rubric
     data ||= {}
     
     @gradingMode = data['gradingMode'] || 'no'
+    @multilingual = data['version'] == '3'
+    
+    # Load available languages
+    @available_languages = data['languages'] || []
+    # If given language is not one of available languages use the first language
+    if !@language() || @language() not in @available_languages
+      if @available_languages.length > 0
+        @language(@available_languages[0])
+      else
+        @language('')
 
     # Parse feedback categories
     raw_categories = data['feedbackCategories']
@@ -231,8 +298,16 @@ class @Rubric
     raw_categories[0].name = '' if raw_categories.length == 1
     
     for category in raw_categories
-      @feedbackCategories.push(category)
-      @feedbackCategoriesById[category.id] = category
+      if @multilingual
+        categoryItem = {}
+        categoryItem['id'] = category.id
+        name = if category['name'] then category['name'][@language()] else ''
+        categoryItem['name'] = name || ''
+        @feedbackCategories.push(categoryItem)
+        @feedbackCategoriesById[category.id] = categoryItem
+      else
+        @feedbackCategories.push(category)
+        @feedbackCategoriesById[category.id] = category
 
 
     if data['grades']
@@ -253,7 +328,12 @@ class @Rubric
       
       previousPage = page
 
-    @finalComment = data['finalComment']
+    if @multilingual
+      @finalComment = ''
+      if data['finalComment']
+        @finalComment = data['finalComment'][@language()]
+    else 
+      @finalComment = data['finalComment']
 
     if @role? && @role == 'collaborator'
       @finishable = ko.observable(false)
@@ -333,6 +413,22 @@ class @Rubric
       gradeSum += parseFloat(grade) if $.isNumeric(grade)
     
     return gradeSum
+    
+  # Check if review is being edited by someone other than the original reviewer
+  # and add them to the editedBy list if they are not there yet, returns the new editor
+  addEditor: () ->
+    if @currentUser && ((@reviewer && @currentUser['id'] != @reviewer['id']) || !@reviewer )
+      already_listed = false
+      for editor in @editedBy()
+        if editor.id == @currentUser['id']
+          already_listed = true
+          editor.name = @currentUser['name']
+      if !already_listed
+        new_editor = new Editor({ id: @currentUser['id'], name: @currentUser['name'], show: '1', new: '1'})
+        new_editor.show.subscribe(=> @saved = false)
+        @editedBy.push(new_editor)
+        return new_editor
+    return null
 
 
 
@@ -344,6 +440,9 @@ class @ReviewEditor extends @Rubric
     @finalGrade = ko.observable()
     @finishedText = ko.observable('')
     @finalizing = ko.observable(false)
+    @busySaving = ko.observable(false)
+    @changedLanguage = ko.observable(false)
+    @editingFinalGrade = ko.observable(false)
     
     element = $('#review-editor')
     @role = $('#role').val()
@@ -355,7 +454,10 @@ class @ReviewEditor extends @Rubric
     
     this.parseRubric(rubric)
     
-    @initialPage = @pagesById[parseInt(initialPageId)] if initialPageId? && initialPageId.length > 0
+    @language.subscribe => @saved = false
+    @language.subscribe => @changedLanguage(true)
+    
+    @initialPage = @pagesById[initialPageId] if initialPageId?
     @initialPage = @pages[0] unless @initialPage?
 
   #
@@ -383,7 +485,8 @@ class @ReviewEditor extends @Rubric
       this.parseReview($.parseJSON(payload))
     else
       this.parseReview()
-  
+            
+    this.addEditor()
 
   #
   # Parses the JSON data returned by the server. See loadRubric.
@@ -401,6 +504,13 @@ class @ReviewEditor extends @Rubric
     
         for category in page.feedback
           category.value.subscribe((newValue) => @saved = false )
+      
+      @editedBy([])    
+      editors = data['editors'] || []
+      for editor in editors
+        new_editor = new Editor(editor)
+        new_editor.show.subscribe(=> @saved = false)
+        @editedBy.push(new_editor)
     
     if (@gradingMode == 'average' && @grades.length > 0)
       @averageGrade = ko.computed((=>
@@ -436,20 +546,21 @@ class @ReviewEditor extends @Rubric
   # Returns the review as JSON
   encodeJSON: ->
     pages_json = @pages.map (page) -> page.to_json()
-    return JSON.stringify({version: '2', pages: pages_json})
+    editors_json = @editedBy().map (editor) -> editor.to_json()
+    return JSON.stringify({version: '2', pages: pages_json, editors: editors_json})
   
   # Populates the HTML-form from the model. This is called just before submitting.
   save: (options) ->
     options ||= {}
     
+    @busySaving(true)  
+    $('#save-message').css('opacity', 0).removeClass('success').removeClass('error')
     # Encode review as JSON
     $('#review_payload').val(this.encodeJSON())
     
     # Set grade
-    if @gradingMode == 'average'
+    if @gradingMode == 'average' || @gradingMode == 'sum'
       finalGrade = @finalGrade()
-    else if @gradingMode == 'sum'
-      finalGrade = @averageGrade()
     else
       finalGrade = undefined
     
@@ -470,12 +581,16 @@ class @ReviewEditor extends @Rubric
       status = 'started'
     
     $('#review_status').val(status)
+    lang = @language()
+    $('#review_language').val(lang)
     
     # Send immediately?
     $('#send_review').val('true') if status == 'finished' && options['send']?
     
     @saved = true
-    
+    @busySaving(false) 
+    for editor in @editedBy()
+      editor.firstEdit(false)
     return true
     
     # AJAX call
@@ -493,6 +608,9 @@ class @ReviewEditor extends @Rubric
   
   clickInvalidate: ->
     this.save({invalidate: true})
+    
+  toggleEditGrade: ->
+    @editingFinalGrade(!@editingFinalGrade())
     
   clickGrade: (phrase) =>
     phrase.page.addPhrase(phrase.content, phrase.categoryId) # unless phrase.criterion.selectedPhrase()?
@@ -527,10 +645,25 @@ class @ReviewEditor extends @Rubric
     # Calculate grade
     grades = @pages.map (page) -> page.grade()
     grade = this.calculateGrade(grades)
-    @finalGrade(grade)
+    @finalGrade(grade)            if @gradingMode != "sum"
+    @finalGrade(@averageGrade())  if @gradingMode == "sum"
   
   collectFeedbackTexts: ->
     finalText = ''
+    
+    # Lists grades from all pages
+    if @gradingMode == "sum"
+      pointsText = "Points\n"
+      for page in @pages
+        pointsText += "  - #{page.name}: #{page.averageGrade()}\n"
+      pointsText += "Sum: #{@averageGrade()}\n"
+      finalText += "#{pointsText}\n"
+    else if @gradingMode == "average"
+      pointsText = "Grades\n"
+      for page in @pages
+        pointsText += "  - #{page.name}: #{page.grade()}\n"
+      pointsText += "Mean: #{@averageGrade()}\n"
+      finalText += "#{pointsText}\n"
     
     if @feedbackCategories.length > 1
       # Group feedback by category
@@ -545,7 +678,7 @@ class @ReviewEditor extends @Rubric
       
       for category in @feedbackCategories
         categoryText = categoryTexts[category.id]
-        continue if categoryText.length < 1
+        continue if !categoryText || categoryText.length < 1
         
         finalText += "= #{category.name} =\n" if category.name.length > 0
         finalText += categoryText + '\n'

@@ -1,5 +1,5 @@
 class GroupsController < ApplicationController
-  before_filter :login_required, :only => [:index]
+  before_action :login_required, :only => [:index]
 
   layout 'narrow'
 #
@@ -18,7 +18,7 @@ class GroupsController < ApplicationController
     load_course
 
     if @course.has_teacher(current_user)
-      @available_groups = Group.where('course_instance_id=?', @course_instance.id).joins(:users).order(:name).all.select { |group| group.users.size <= @exercise.groupsizemax }
+      @available_groups = Group.where('course_instance_id=?', @course_instance.id).includes(:users).order(:name).all.select { |group| group.users.size <= @exercise.groupsizemax }
     else
       @available_groups = Group.where('course_instance_id=? AND user_id=?', @course_instance.id, current_user.id).joins(:users).order(:name).all.select { |group| group.users.size <= @exercise.groupsizemax }
     end

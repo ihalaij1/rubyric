@@ -1,5 +1,5 @@
 class CourseInstancesController < ApplicationController
-  before_filter :login_required, :except => [:show]
+  before_action :login_required, except: [:show]
 
   # GET /course_instances/1
   def show
@@ -35,9 +35,12 @@ class CourseInstancesController < ApplicationController
 
     @pricing = current_user.get_pricing
     @pricing.planned_students = 20
-    @course_instance = CourseInstance.new(:submission_policy => 'unauthenticated')
+    policy = ['unauthenticated', 'authenticated', 'enrolled', 'lti'].include?(params[:submission_policy]) ? params[:submission_policy] : 'unauthenticated'
+    @course_instance = CourseInstance.new(submission_policy: policy, lti_consumer: params[:lti_consumer], lti_context_id: params[:lti_context_id])
     @course_instance.course = @course
     # :name => Time.now.year
+
+    @ask_agree_terms = Rails.configuration.ask_agree_terms    # whether or not it is needed to ask user to agree to the terms
 
     render :action => 'new', :layout => 'narrow-new'
     log "create_course_instance #{@pricing.shortname} #{@course.id}"
@@ -53,25 +56,30 @@ class CourseInstancesController < ApplicationController
 
     @pricing = @course_instance.pricing
 
-    render :action => 'edit', :layout => 'narrow-new'
+    render action: 'edit', layout: 'narrow-new'
     log "edit_course_instance #{@course_instance.id}"
   end
 
   # POST /course_instances
   # POST /course_instances.xml
   def create
+    @ask_agree_terms = Rails.configuration.ask_agree_terms
     @pricing = current_user.get_pricing
     @pricing.planned_students = params[:planned_students].to_i
 
     @course_instance = CourseInstance.new(course_instance_params)
+
+    # If configurations say it is not needed to ask user to agree to terms
+    # set course instances agree_terms attribute to true ('1')
+    @course_instance.agree_terms = '1' unless @ask_agree_terms
     course_instance_valid = @course_instance.valid?
 
-    if @course_instance.course_id
-      @course = Course.find(@course_instance.course_id)
+    if !params[:course_instance][:course_id].blank?
+      @course = Course.find(params[:course_instance][:course_id])
       return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
       course_valid = true
     else
-      @course = Course.new(:name => params[:course_name])
+      @course = Course.new(name: params[:course_name])
       course_valid = @course.valid?
     end
 
@@ -80,8 +88,8 @@ class CourseInstancesController < ApplicationController
 
       if @course.new_record?
         @course.organization_id = current_user.organization_id
-        @course.teachers << current_user
         @course.save
+        @course.teachers << current_user
       end
 
       @course_instance.pricing_id = @pricing.id
@@ -94,7 +102,8 @@ class CourseInstancesController < ApplicationController
       redirect_to @course_instance
       log "create_course_instance success #{@course_instance.id}"
     else
-      render :action => 'new', :layout => 'narrow-new'
+      @course_instance.course = @course
+      render action: 'new', layout: 'narrow-new'
       log "create_course_instance invalid #{@course_instance.id} #{@course_instance.errors.full_messages.join('. ')}"
     end
   end
@@ -104,6 +113,7 @@ class CourseInstancesController < ApplicationController
     @course_instance = CourseInstance.find(params[:id])
     load_course
 
+    # Authorize
     return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
 
     @pricing = @course_instance.pricing
@@ -118,7 +128,7 @@ class CourseInstancesController < ApplicationController
       redirect_to @course_instance
       log "edit_course_instance success #{@course_instance.id}"
     else
-      render :action => "edit", :layout => 'narrow-new'
+      render action: "edit", layout: 'narrow-new'
       log "edit_course_instance fail #{@course_instance.id} #{@course_instance.errors.full_messages.join('. ')}"
     end
   end
@@ -128,8 +138,8 @@ class CourseInstancesController < ApplicationController
     @course_instance = CourseInstance.find(params[:id])
     load_course
 
-    # Authorize
-    return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
+    return access_denied unless is_admin?(current_user)
+
     log "delete_course_instance #{@course_instance.id}"
 
     #Destroy
@@ -149,7 +159,7 @@ class CourseInstancesController < ApplicationController
 #       @course_instance.add_students_csv(params[:paste])
 #     end
 #
-#     render :partial => 'user', :collection => @course_instance.students, :locals => { :iid => @course_instance.id }
+#     render partial: 'user', collection: @course_instance.students, locals: { iid: @course_instance.id }
 #   end
 #
 #
@@ -164,7 +174,7 @@ class CourseInstancesController < ApplicationController
 #       @course_instance.add_assistants_csv(params[:paste])
 #     end
 #
-#     render :partial => 'user', :collection => @course_instance.assistants, :locals => { :iid => @course_instance.id }
+#     render partial: 'user', collection: @course_instance.assistants, locals: { iid: @course_instance.id }
 #   end
 #
 
@@ -190,11 +200,12 @@ class CourseInstancesController < ApplicationController
     redirect_to @course_instance
     log "send_feedback_bundle #{@course_instance.id}"
   end
+  
 
   private
 
-  def course_instance_params
-    params.require(:course_instance).permit(:name, :locale, :submission_policy, :agree_terms)
-  end
+    def course_instance_params
+      params.require(:course_instance).permit(:name, :locale, :submission_policy, :agree_terms, :active, :lti_consumer, :lti_context_id)
+    end
 
 end

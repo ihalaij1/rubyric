@@ -1,6 +1,3 @@
-#= require knockout-2.2.1
-#= require bootstrap
-
 class User
   constructor: (data) ->
     @id = data['id']
@@ -21,6 +18,7 @@ class Group
     @id = data['id']
     @selected = ko.observable(false)
     @url = data['url']
+    @visible = ko.observable(true)
 
     # Set students
     groupname = []
@@ -57,16 +55,40 @@ class Group
     modal.data('group', this)
     modal.modal()
 
+  setVisible: () ->
+    @visible(true)
+
+  setInvisible: () ->
+    @visible(false)
+    @selected(false)
+
+  visible: () ->
+    @visible
+
+
+class Exercise
+  constructor: (data) ->
+    @id = data['id']
+    @name = data['name'] || ''
+    
+class Submission
+  constructor: (data) ->
+    @id = data['id']
+    @group_id = data['group_id']
+    @exercise_id = data['exercise_id']
 
 class AssignmentEditor
   constructor: (data) ->
     @currentReviewer = ko.observable()
+    @filterBy = ko.observable()
     
     @users_by_id = {}
     @teachers = []
     @assistants = []
     @reviewers = []  # = @teachers + @assistants
     @groups = []
+    @submissions = []
+    @exercises = []
     
     for user in data['users']
       @users_by_id[user.id] = new User(user)
@@ -81,20 +103,39 @@ class AssignmentEditor
     
     for group in data['groups']
       @groups.push(new Group(group, @users_by_id))
+
+    for submission in data['submissions']
+      @submissions.push(new Submission(submission))
+    
+    for exercise in data['exercises']
+      @exercises.push(new Exercise(exercise))
   
     # Event handlers
     $(document).on('click', '.removeAssignment', @removeAssignment)
     #$(window).bind 'beforeunload', => return "You have unsaved changes. Leave anyway?" unless @saved
   
   
+  clickFilter: ->
+    if @filterBy() == 'all'
+      for group in @groups
+        group.setVisible()
+    else
+      for group in @groups
+        group.setInvisible()
+        for submission in @submissions
+          if group.id == submission.group_id and @filterBy() == submission.exercise_id
+            group.setVisible()
+
   clickSelectAll: ->
     for group in @groups
-      group.selected(true)
+      if group.visible()
+        group.selected(true)
   
   
   clickSelectNone: ->
     for group in @groups
-      group.selected(false)
+      if group.visible()
+        group.selected(false)
   
   clickAssign: ->
     if @currentReviewer() == 'assistants'

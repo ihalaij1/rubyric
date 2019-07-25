@@ -3,3 +3,27 @@ submission:
   group: group1
   filename: test.txt
   extension: txt
+
+another_submission:
+  exercise: active_exercise
+  group: group2
+  filename: test.txt
+  extension: txt
+
+third_submission:
+  exercise: inactive_exercise
+  group: group3
+  filename: test.txt
+  extension: txt
+
+fourth_submission:
+  exercise: submit_without_login
+  group: group3
+  filename: test.txt
+  extension: txt
+  
+fifth_submission:
+  exercise: review_all_exercise
+  group: group2
+  filename: test.txt
+  extension: txt

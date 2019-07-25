@@ -1,4 +1,3 @@
-# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -11,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170119212115) do
+ActiveRecord::Schema.define(version: 20190703065509) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -44,9 +43,8 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.string   "lti_consumer",           limit: 255
     t.string   "lti_context_id",         limit: 255
     t.string   "lti_resource_link_id",   limit: 255
+    t.index ["lti_consumer", "lti_context_id"], name: "index_course_instances_on_lti_consumer_and_lti_context_id", using: :btree
   end
-
-  add_index "course_instances", ["lti_consumer", "lti_context_id"], name: "index_course_instances_on_lti_consumer_and_lti_context_id", using: :btree
 
   create_table "course_instances_students", id: false, force: :cascade do |t|
     t.integer "user_id"
@@ -81,9 +79,8 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.datetime "created_at",                         null: false
     t.datetime "updated_at",                         null: false
     t.string   "queue",      limit: 255
+    t.index ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
   end
-
-  add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
 
   create_table "delayed_jobs_edge", force: :cascade do |t|
     t.integer  "priority",               default: 0
@@ -97,9 +94,8 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.string   "queue",      limit: 255
     t.datetime "created_at",                         null: false
     t.datetime "updated_at",                         null: false
+    t.index ["priority", "run_at"], name: "delayed_jobs_edge_priority", using: :btree
   end
-
-  add_index "delayed_jobs_edge", ["priority", "run_at"], name: "delayed_jobs_edge_priority", using: :btree
 
   create_table "exercises", force: :cascade do |t|
     t.string   "name",                          limit: 255
@@ -139,9 +135,9 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.string   "lti_resource_link_id_review",   limit: 255
     t.string   "lti_resource_link_id_feedback", limit: 255
     t.string   "allowed_extensions",            limit: 255, default: "",         null: false
+    t.boolean  "reviewers_see_all_submissions",             default: false
+    t.index ["lti_consumer", "lti_context_id"], name: "index_exercises_on_lti_consumer_and_lti_context_id", using: :btree
   end
-
-  add_index "exercises", ["lti_consumer", "lti_context_id"], name: "index_exercises_on_lti_consumer_and_lti_context_id", using: :btree
 
   create_table "feedbacks", force: :cascade do |t|
     t.integer  "review_id"
@@ -161,9 +157,8 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.string  "token",       limit: 255
     t.string  "email",       limit: 255
     t.date    "expires_at"
+    t.index ["group_id", "token"], name: "index_group_invitations_on_group_id_and_token", using: :btree
   end
-
-  add_index "group_invitations", ["group_id", "token"], name: "index_group_invitations_on_group_id_and_token", using: :btree
 
   create_table "group_members", force: :cascade do |t|
     t.integer  "group_id",                        null: false
@@ -174,19 +169,17 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.string   "access_token",        limit: 255
     t.datetime "created_at",                      null: false
     t.datetime "updated_at",                      null: false
+    t.index ["access_token"], name: "index_group_members_on_access_token", using: :btree
+    t.index ["group_id"], name: "index_group_members_on_group_id", using: :btree
+    t.index ["user_id"], name: "index_group_members_on_user_id", using: :btree
   end
-
-  add_index "group_members", ["access_token"], name: "index_group_members_on_access_token", using: :btree
-  add_index "group_members", ["group_id"], name: "index_group_members_on_group_id", using: :btree
-  add_index "group_members", ["user_id"], name: "index_group_members_on_user_id", using: :btree
 
   create_table "group_reviewers", force: :cascade do |t|
     t.integer "group_id", null: false
     t.integer "user_id",  null: false
+    t.index ["group_id"], name: "index_group_reviewers_on_group_id", using: :btree
+    t.index ["user_id"], name: "index_group_reviewers_on_user_id", using: :btree
   end
-
-  add_index "group_reviewers", ["group_id"], name: "index_group_reviewers_on_group_id", using: :btree
-  add_index "group_reviewers", ["user_id"], name: "index_group_reviewers_on_user_id", using: :btree
 
   create_table "groups", force: :cascade do |t|
     t.integer  "exercise_id"
@@ -197,9 +190,8 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.string   "access_token",       limit: 255
     t.integer  "min_size",                       default: 1, null: false
     t.integer  "max_size",                       default: 1, null: false
+    t.index ["access_token"], name: "index_groups_on_access_token", using: :btree
   end
-
-  add_index "groups", ["access_token"], name: "index_groups_on_access_token", using: :btree
 
   create_table "groups_users", id: false, force: :cascade do |t|
     t.integer "group_id"
@@ -212,9 +204,8 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.integer "exercise_id"
     t.string  "studentnumber", limit: 255
     t.text    "content"
+    t.index ["exercise_id", "studentnumber"], name: "index_infos_on_exercise_id_and_studentnumber", using: :btree
   end
-
-  add_index "infos", ["exercise_id", "studentnumber"], name: "index_infos_on_exercise_id_and_studentnumber", using: :btree
 
   create_table "invitations", force: :cascade do |t|
     t.string  "token",      limit: 255, null: false
@@ -223,9 +214,8 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.integer "target_id"
     t.integer "inviter_id"
     t.date    "expires_at"
+    t.index ["token"], name: "index_invitations_on_token", using: :btree
   end
-
-  add_index "invitations", ["token"], name: "index_invitations_on_token", using: :btree
 
   create_table "item_grades", id: false, force: :cascade do |t|
     t.integer "feedback_id"
@@ -256,9 +246,8 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.string   "description", limit: 255
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
+    t.index ["user_id"], name: "index_orders_on_user_id", using: :btree
   end
-
-  add_index "orders", ["user_id"], name: "index_orders_on_user_id", using: :btree
 
   create_table "organizations", force: :cascade do |t|
     t.string "domain", limit: 255
@@ -287,11 +276,10 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.integer  "rating",     limit: 2, null: false
     t.datetime "created_at",           null: false
     t.datetime "updated_at",           null: false
+    t.index ["review_id", "user_id"], name: "index_review_ratings_on_review_id_and_user_id", unique: true, using: :btree
+    t.index ["review_id"], name: "index_review_ratings_on_review_id", using: :btree
+    t.index ["user_id"], name: "index_review_ratings_on_user_id", using: :btree
   end
-
-  add_index "review_ratings", ["review_id", "user_id"], name: "index_review_ratings_on_review_id_and_user_id", unique: true, using: :btree
-  add_index "review_ratings", ["review_id"], name: "index_review_ratings_on_review_id", using: :btree
-  add_index "review_ratings", ["user_id"], name: "index_review_ratings_on_user_id", using: :btree
 
   create_table "reviews", force: :cascade do |t|
     t.integer  "user_id"
@@ -310,6 +298,7 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.string   "extension",         limit: 255
     t.string   "type",              limit: 255, default: "Review", null: false
     t.text     "lti_launch_params"
+    t.string   "language"
   end
 
   create_table "roles", id: false, force: :cascade do |t|
@@ -345,10 +334,9 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.text     "data"
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
+    t.index ["session_id"], name: "index_sessions_on_session_id", using: :btree
+    t.index ["updated_at"], name: "index_sessions_on_updated_at", using: :btree
   end
-
-  add_index "sessions", ["session_id"], name: "index_sessions_on_session_id", using: :btree
-  add_index "sessions", ["updated_at"], name: "index_sessions_on_updated_at", using: :btree
 
   create_table "submissions", force: :cascade do |t|
     t.integer  "exercise_id"
@@ -369,9 +357,8 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.text     "page_sizes"
     t.text     "payload"
     t.text     "lti_launch_params"
+    t.index ["group_id"], name: "index_submissions_on_group_id", using: :btree
   end
-
-  add_index "submissions", ["group_id"], name: "index_submissions_on_group_id", using: :btree
 
   create_table "submissions_users", id: false, force: :cascade do |t|
     t.integer "user_id"
@@ -406,11 +393,10 @@ ActiveRecord::Schema.define(version: 20170119212115) do
     t.string   "lti_consumer",               limit: 255
     t.string   "lti_user_id",                limit: 255
     t.text     "knowledge"
+    t.index ["last_request_at"], name: "index_users_on_last_request_at", using: :btree
+    t.index ["login"], name: "index_users_on_login", using: :btree
+    t.index ["lti_consumer", "lti_user_id"], name: "index_users_on_lti_consumer_and_lti_user_id", using: :btree
+    t.index ["persistence_token"], name: "index_users_on_persistence_token", using: :btree
   end
-
-  add_index "users", ["last_request_at"], name: "index_users_on_last_request_at", using: :btree
-  add_index "users", ["login"], name: "index_users_on_login", using: :btree
-  add_index "users", ["lti_consumer", "lti_user_id"], name: "index_users_on_lti_consumer_and_lti_user_id", using: :btree
-  add_index "users", ["persistence_token"], name: "index_users_on_persistence_token", using: :btree
 
 end

@@ -51,12 +51,12 @@
             <tr class="submission">
           <% end; row += 1 %>
           <td>
-            <%= check_box 'reviews_checkboxes', review.id, {:class => 'review_check ' + (review.status == 'finished' ? ' review_check_finished' : '')} %>
+            <%= check_box 'reviews_checkboxes', review.id, {:class => 'review_check ' + (review.status == 'finished' ? ' review_check_finished' : '') + (submission.is_a?(AplusSubmission) && Review.cast_grade(review.grade).is_a?(String) ? ' review_textual_grade' : '')} %>
             
             <% if ['mailed','invalidated'].include?(review.status) %>
-              <%= link_to review.user ? review.user.name : t('collaborative_review'), review_path(review.id, :ref => 'exercises') %>
+              <%= link_to review.user ? review.user.name : t('collaborative_review'), review_path(review.id, :ref => 'exercises'), title: "Last updated: #{l review.updated_at}" %>
             <% else %>
-              <%= link_to review.user ? review.user.name : t('collaborative_review'), edit_review_path(review.id) %>
+              <%= link_to review.user ? review.user.name : t('collaborative_review'), edit_review_path(review.id), title: "Last updated: #{l review.updated_at}" %>
             <% end %>
           </td>
           <td><%= review.status %></td>

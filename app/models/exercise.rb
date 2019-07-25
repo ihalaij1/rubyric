@@ -59,6 +59,10 @@ class Exercise < ApplicationRecord
   def peer_review_active?
     peer_review_goal && peer_review_goal != 0 && (peer_review_timing != 'after_deadline' || Time.now > deadline)
   end
+  
+  def show_all_submissions_to?(user)
+    user && course_instance.has_assistant(user) && reviewers_see_all_submissions
+  end
 
   # Returns a relation representing groups who have submitted this exercise. Users and submissions are eager loaded.
   def groups_with_submissions
@@ -451,7 +455,12 @@ class Exercise < ApplicationRecord
 
   # Creates example submissions for existing groups.
   def create_example_submissions
-    self.course_instance(true).groups.each do |group|
+    create_example_submissions_for(self.course_instance.reload.groups)
+  end
+
+  # Creates example submissions for given groups.
+  def create_example_submissions_for(groups)
+    groups.each do |group|
       submission = ExampleSubmission.create(:exercise_id => self.id, :group_id => group.id, :extension => 'pdf', :filename => 'example.pdf')
     end
   end
@@ -464,13 +473,13 @@ class Exercise < ApplicationRecord
 
   # Schedules review mails to be sent.
   # review_ids: array of ids or a singular id
-  def deliver_reviews(review_ids)
+  def deliver_reviews(review_ids, send_grade_mode = nil)
     # Send a warning to admin if delayed_job queue is long
     ErrorMailer.long_mail_queue.deliver if Delayed::Job.count > 1
 
     Review.where(:id => review_ids, :status => 'finished').update_all(:status => 'mailing')
 
-    Review.delay.deliver_reviews(review_ids)
+    Review.delay.deliver_reviews(review_ids, send_grade_mode)
   end
 
   def initialize_example_rubric

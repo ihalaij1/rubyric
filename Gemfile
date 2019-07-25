@@ -3,7 +3,7 @@ Encoding.default_internal = Encoding::UTF_8
 
 source 'https://rubygems.org'
 
-ruby '2.4.0'
+ruby '>=2.3.1'
 
 gem 'rails', '5.0.2'
 
@@ -28,7 +28,7 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'shoulda'
   gem 'capybara'
-  gem 'capybara-webkit'
+  #gem 'capybara-webkit'
 
   gem 'byebug', platform: :mri
   #gem 'sqlite3'
@@ -66,12 +66,15 @@ gem 'cancan'
 gem 'delayed_job_active_record', '~> 4.1.0'
 
 gem 'daemons'
-gem 'rest_client', '1.8.0'
+gem 'rest-client'
 
 #gem 'paypal-sdk-core' # , :git => 'https://github.com/paypal/sdk-core-ruby.git'
 gem 'paypal-sdk-rest'
-gem 'ims-lti'
+gem 'ims-lti', '1.1.13'
 
 source 'https://rails-assets.org' do
   gem 'rails-assets-bootstrap-css'
+  gem 'rails-assets-knockout'
+  gem 'rails-assets-knockout-sortable'
+  gem 'rails-assets-knockout-validation'
 end

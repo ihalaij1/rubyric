@@ -11,16 +11,16 @@
 </div>
 
 <script type="text/javascript">
-    $('#review-rating li').each(function () {
-        var li = $(this)
-        var btn = li.find('button')
-        btn.click(function () {
-            var rateValue = btn.data('rating');
-            $.post('<%= rate_review_path(@review) %>?rating=' + rateValue)
-                .done(function () {
-                    $('#review-rating li').removeClass('selected');
-                    li.addClass('selected');
-                });
+  $('#review-rating li').each(function() {
+    var li = $(this)
+    var btn = li.find('button')
+    btn.click(function() {
+      var rateValue = btn.data('rating');
+      $.post('<%= rate_review_path(@review) %>?rating=' + rateValue)
+        .done(function () {
+          $('#review-rating li').removeClass('selected');
+          li.addClass('selected');
         });
     });
+  });
 </script>

@@ -1,12 +1,30 @@
-# Install Ruby environment
+# Rubyric
+
+Rubyric is an online tool in which you can create courses and assignments, 
+receive submissions and assess them by using rubrics. More information about 
+Rubyric and how to use it can be found [here](doc/rubyric.md).
+
+## Install environment
+Install ruby version 2.3.1 or higher, for example with rvm or rbenv. Then
+install rails:
 ```sh
-sudo aptitude install ruby2.1.9
-sudo gem install rake
-sudo gem install bundler
+gem install rails -v 5.0.2
+```
+or
+```sh
+sudo gem install rails -v 5.0.2
+```
+Rubyric uses postgresql as database. Install postgresql and create user.
+```sh
+sudo apt-get install postgresql
+sudo -u postgres createuser --interactive
+```
+Rubyric requires pdfinfo, ghostscript and libpq-dev to work
+```sh
+sudo apt-get install poppler-utils ghostscript libpq-dev
 ```
 
-
-# Install Rubyric
+## Install Rubyric
 
 ### Install gems
 ```sh
@@ -27,10 +45,28 @@ sudo -u postgres createdb -O my_username rubyric
 
 ### Initialize database
 ```sh
-rake db:setup
+rails db:setup
 ```
 
 ### Start server
 ```sh
-bundle exec rails server
+bin/delayed_job start
+rails server
+```
+
+You can now access Rubyric at http://localhost:3000.
+
+### Make user Rubyric admin
+Open rails console
+```sh
+rails c
+```
+Find user and update admin attribute. You can find user by their user id with
+User.find(id) or by some other attributes with User.find_by(attribute: value).
+```sh
+User.find(id).update_attributes(admin: '1')
+```
+or you can create a new user as admin
+```sh
+User.create(email: email, password: password, admin: '1')
 ```

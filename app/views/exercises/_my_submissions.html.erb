@@ -54,5 +54,5 @@
 <% end %>
 
 <% unless @course_instance.submission_policy == 'lti' %>
-  <p><%= link_to t('.new_submission_button'), submit_url(@exercise.id, ref: 'exercises'), class: 'btn btn-primary btn-large' %></p>
+  <p><%= link_to t('.new_submission_button'), submit_url(@exercise.id, ref: 'exercises'), class: 'btn btn-primary btn-lg' %></p>
 <% end %>

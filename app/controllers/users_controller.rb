@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
 
-  before_filter :login_required, :only => [:edit, :update]
+  before_action :login_required, :only => [:edit, :update]
   layout 'narrow'
 
   def new
@@ -14,11 +14,11 @@ class UsersController < ApplicationController
   end
 
   def create
-    @user = User.new(params[:user])
+    @user = User.new(user_params)
 
     if !@user.email.blank? && User.exists?(email: @user.email)
       # User exists, try to log in
-      @session = Session.new(params[:user])
+      @session = Session.new(user_params)
       session[:logout_url] = nil
 
       if @session.save
@@ -72,7 +72,7 @@ class UsersController < ApplicationController
 
     return access_denied unless is_admin?(current_user) || @user == current_user
 
-    if @user.update_attributes(params[:user])
+    if @user.update_attributes(user_params)
       flash[:success] = 'Preferences saved'
       redirect_to preferences_path
       log "edit_user success"
@@ -100,4 +100,9 @@ class UsersController < ApplicationController
       format.json { render :json => users.as_json(:only => [ :id, :firstname, :lastname ]) }
     end
   end
+
+  private
+    def user_params
+      params.require(:user).permit(:email, :password, :firstname, :lastname)
+    end
 end

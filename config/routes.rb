@@ -17,7 +17,7 @@ Rails.application.routes.draw do
 
   get 'preferences' => 'users#edit'
 
-  resources :courses, only: [:index, :show, :edit, :update] do
+  resources :courses, only: [:index, :show, :edit, :update, :destroy] do
     resources :course_instances, only: [:new]
     resources :teachers, only: [:index, :create, :destroy], controller: 'courses/teachers'
   end
@@ -131,7 +131,9 @@ Rails.application.routes.draw do
   post 'submit/:exercise' => 'submissions#create'
   post '/receive_email', to: 'submissions#receive_email'
 
-  get 'aplus/:exercise' => 'submissions#aplus_get'
+  get 'aplus/:exercise' => 'submissions#aplus_get', as: :aplus_get
+  get 'aplus_exercise' => 'exercises#aplus_exercise'
+  post 'aplus_exercise' => 'submissions#aplus_submit'
   post 'aplus/:exercise' => 'submissions#aplus_submit'
 
   get '/login' => 'sessions#new', as: :login

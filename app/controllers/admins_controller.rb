@@ -1,6 +1,6 @@
 class AdminsController < ApplicationController
-  before_filter :login_required
-  before_filter :authorize
+  before_action :login_required
+  before_action :authorize
   
   layout 'narrow-new'
   

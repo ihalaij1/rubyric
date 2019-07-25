@@ -35,6 +35,24 @@
   </div>
 <% end %>
 
+<div class="row form-inline">
+  <div class="col-md-6">
+    <p>
+      Filter groups by
+
+      <select data-bind="value: filterBy">
+        <option value="all">All</option>
+        <!-- ko foreach: exercises -->
+        <option data-bind="text: name, value: id"></option>
+        <!-- /ko -->
+      </select>
+      
+      <button class="btn" data-bind="click: clickFilter">Filter</button>
+    </p>
+  </div>
+</div>
+    
+
 <div class="row-fluid busy" id="assign-groups">
   <table class="table table-hover table-condensed hover-buttons">
     <thead>
@@ -46,7 +64,7 @@
       </tr>
     </thead>
     <tbody data-bind="foreach: { data: groups, as: 'group' }">
-      <tr>
+      <tr data-bind="visible: visible">
         <td>
           <input type="checkbox" data-bind="checked: selected" />
         </td>
@@ -61,7 +79,7 @@
         </td>
         <td>
           <div class="hover-buttons">
-            <button class="btn btn-small" data-bind="click: clickAssign">Add reviewer...</button>
+            <button class="btn btn-sm" data-bind="click: clickAssign">Add reviewer...</button>
           </div>
         </td>
       </tr>
@@ -81,6 +99,7 @@
       Assign selected groups to
       
       <select data-bind="value: currentReviewer">
+        <option style="display:none">Choose here</option>
         <option value="assistants">Assistants evenly</option>
         <option value="evenly">All staff evenly</option>
         <!-- ko foreach: reviewers -->
@@ -91,7 +110,7 @@
       <button class="btn" data-bind="click: clickAssign">Assign</button>
     </p>
     
-    <p><button id="save-button" class="btn btn-success btn-large" data-bind="click: clickSave">Save</button></p>
+    <p><button id="save-button" class="btn btn-success btn-lg" data-bind="click: clickSave">Save</button></p>
   </div>
   
   <!-- Workload -->
@@ -118,18 +137,22 @@
 </div>
 
 <!-- Assign modal -->
-<div id="modalAssign" class="modal hide">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>Assign group to reviewer</h3>
-  </div>
-  <div class="modal-body">
-    <p>Assign group to</p>
-    <ul data-bind="foreach: reviewers">
-      <li><a href="#" data-bind="click: $root.clickModalAssign"><span data-bind="text: name" /></a></li>
-    </ul>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+<div id="modalAssign" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Assign group to reviewer</h3>
+      </div>
+      <div class="modal-body">
+        <p>Assign group to</p>
+        <ul data-bind="foreach: reviewers">
+          <li><a href="#" data-bind="click: $root.clickModalAssign"><span data-bind="text: name" /></a></li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      </div>
+    </div>
   </div>
 </div>

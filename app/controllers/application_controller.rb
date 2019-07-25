@@ -8,9 +8,9 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_session, :current_user, :logged_in?, :is_admin?
 
-  before_filter :redirect_to_ssl
-  before_filter :set_locale
-  before_filter :require_login?
+  before_action :redirect_to_ssl
+  before_action :set_locale
+  before_action :require_login?
 
   def log_client_event
     ClientEventLogger.info("#{params[:session]} #{params[:events]}")
@@ -100,7 +100,7 @@ class ApplicationController < ActionController::Base
       logger.debug "Existing lti_ids: #{existing_lti_ids}"
 
       # Are the arrays identical, ignoring order?
-      identical = requested_lti_ids.size == existing_lti_ids.size and requested_lti_ids & existing_lti_ids == requested_lti_ids
+      identical = requested_lti_ids.size == existing_lti_ids.size && requested_lti_ids & existing_lti_ids == requested_lti_ids
       logger.debug "Identical: #{identical}"
       identical
     end
@@ -109,18 +109,19 @@ class ApplicationController < ActionController::Base
       logger.debug "No existing group found. Creating."
 
       groupname = payload.collect{|member| member['email']}.join(', ')
-      logger.debug "Groupo name: #{groupname}"
+      logger.debug "Group name: #{groupname}"
       group = Group.new({:course_instance_id => exercise.course_instance_id, :exercise_id => exercise.id, :name => groupname})
       group.save(:validate => false)
 
       # Create group
       payload.each do |member|
         group_user = User.where(:lti_consumer => lti_consumer, :lti_user_id => member['user'].to_s).first || lti_create_user(lti_consumer, member['user'].to_s, organization, exercise.course_instance, member['student_id'].to_s, nil, nil, member['email'])
+        add_user_to_course_instance(group_user, exercise.course_instance)
         logger.debug "Creating member: #{member['user'].to_s} #{member['email']}"
         member = GroupMember.new(:email => member['email'], :studentnumber => member['student_id'].to_s)
         member.group = group
         member.user = group_user
-        member.save
+        member.save(:validate => false)
       end
     else
       logger.debug "Using existing group."
@@ -141,10 +142,9 @@ class ApplicationController < ActionController::Base
     user.studentnumber = studentnumber
     user.lastname = lastname
     user.firstname = firstname
+    user.email = email
     user.reset_persistence_token
     if user.save(:validate => false)
-      course_instance.students << user unless course_instance.students.include?(user)
-
       logger.info("Created new user #{oauth_consumer_key}/#{lti_user_id} (LTI)")
       CustomLogger.info("#{oauth_consumer_key}/#{lti_user_id} create_user_lti success")
     else
@@ -156,6 +156,12 @@ class ApplicationController < ActionController::Base
 
     user
   end
+  
+  def add_user_to_course_instance(user, course_instance)
+    if course_instance && user
+      course_instance.students << user unless course_instance.students.include?(user)
+    end
+  end
 
 
   # Authenticates the LTI signature
@@ -163,6 +169,7 @@ class ApplicationController < ActionController::Base
   # Renders an error message and returns false otherwise.
   def authenticate_lti_signature(options = {})
     #return true if Rails.env == 'development' && request.local?
+    #return true if Rails.env.test? # Allows skipping authetication in test environment
 
     unless params['oauth_consumer_key'] && params[:context_id] && params[:resource_link_id] && params[:user_id]
       @heading =  "Insufficient LTI parameters received"
@@ -221,6 +228,7 @@ class ApplicationController < ActionController::Base
 #       params[:user_id] = '1'
 #     end
 
+    @is_instructor = (params['roles'] || '').split(',').any? {|role| role.strip == 'Instructor'}
     # Load course instance or ensure that the one already loaded matches the LTI headers.
     # (There could be a mismatch if LTI launched with an URL that specifies the exercise or course_instance_id).
     if defined?(@course_instance)
@@ -231,13 +239,13 @@ class ApplicationController < ActionController::Base
     else
       @course_instance = CourseInstance.where(:lti_consumer => params['oauth_consumer_key'], :lti_context_id => params[:context_id]).first
 
-      unless @course_instance
+      unless @course_instance || @is_instructor
         logger.warn "LTI login failed. Could not find a course instance with lti_consumer=#{params['oauth_consumer_key']}, lti_context_id=#{params[:context_id]}"
         render :template => "shared/lti_error"
         return false
       end
     end
-    @course =  @course_instance.course
+    @course =  @course_instance.course if @course_instance
 
     view = :submit
     if defined?(@exercise)
@@ -245,7 +253,7 @@ class ApplicationController < ActionController::Base
         logger.warn "LTI login failed. LTI headers specify exercise #{params['oauth_consumer_key']}/#{params[:context_id]}/#{params[:resource_link_id]} but @exercise (id #{@exercise.id}), which had alreay been loaded, has lti_resource_link_id=#{@exercise.lti_resource_link_id || 'nil'}"
         return false
       end
-    else
+    elsif @course_instance
       @exercise = Exercise.where(:course_instance_id => @course_instance.id, :lti_resource_link_id => params[:resource_link_id]).first
 
       unless @exercise
@@ -269,6 +277,7 @@ class ApplicationController < ActionController::Base
       @user.save(:validate => false)
     else
       @user = lti_create_user(params['oauth_consumer_key'], params[:user_id], @organization, @course_instance, params[:custom_student_id], params['lis_person_name_family'], params['lis_person_name_given'], params['lis_person_contact_email_primary'])
+      add_user_to_course_instance(@user, @course_instance)
     end
 
     unless @user
@@ -278,12 +287,13 @@ class ApplicationController < ActionController::Base
       return false
     end
 
-    # Add student to course
-    @is_instructor = (params['roles'] || '').split(',').any? {|role| role.strip == 'Instructor'}
-    if @is_instructor
-      @course_instance.course.teachers << @user unless @course_instance.course.teachers.include?(@user)
-    else
-      @course_instance.students << @user unless @course_instance.students.include?(@user) || @course_instance.assistants.include?(@user) || @course_instance.course.teachers.include?(@user)
+    # Add student to course if course exists
+    if @course_instance
+      if @is_instructor
+        @course_instance.course.teachers << @user unless @course_instance.course.teachers.include?(@user)
+      else
+        @course_instance.students << @user unless @course_instance.students.include?(@user) || @course_instance.assistants.include?(@user) || @course_instance.course.teachers.include?(@user)
+      end
     end
 
     # Create session

@@ -16,8 +16,8 @@
           <tr>
             <td><%= link_to instance.name, instance %></td>
 
-            <% if @is_teacher %>
-              <td class="trash"><%= link_to instance, :confirm => 'Are you sure?', :method => :delete do image_tag('trash.png', :alt => 'Destroy') end %></td>
+            <% if is_admin?(current_user) %>
+              <td class="trash"><%= link_to image_tag('trash.png', :alt => 'Destroy'), instance, method: :delete, data: { confirm: "Are you sure?" } %></td>
             <% end %>
           </tr>
         <% end %>

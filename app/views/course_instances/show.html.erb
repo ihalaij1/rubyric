@@ -40,7 +40,7 @@
                 <% end %>
               </td>
               <% if can? :update, @course %>
-                <td><%= link_to exercise, :confirm => "Delete #{exercise.name}?", :method => :delete do image_tag('trash.png', :alt => 'Delete', :title => 'Delete') end %></td>
+                <td><%= link_to image_tag('trash.png', :alt => 'Destroy'), exercise, method: :delete, data: { confirm: "Delete #{exercise.name}?" } %></td>
               <% end %>
             </tr>
           <% end %>
@@ -68,6 +68,27 @@
 
 
 <% if @is_teacher %>
+
+  <% if @course_instance.submission_policy == "lti" %>
+    <div class="alert alert-info">
+      <p>
+        You can automatically configure exercises through A+ with steps
+      </p>
+      <ol id="aplus_info">
+        <li>Create A+ exercise using Rubyric as Lti service</li>
+        <li>
+          Use following <strong>service url</strong> in the A+ exercise: <%= link_to root_url + "aplus_exercise", root_url + "aplus_exercise" %>
+        </li>
+        <li>Open exercise at A+</li>
+      </ol>
+      <p>
+        Note that you need to configure Lti course to Rubyric (such as this one) 
+        corresponding to your A+ course before automatic exercise configuration 
+        works.
+      </p>
+    </div>
+  <% end %>
+  
   <hr />
   <div class="row-fluid">
     <!-- Reviewers -->

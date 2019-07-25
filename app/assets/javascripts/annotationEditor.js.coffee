@@ -207,6 +207,36 @@ class ModifyAnnotationCommand
     @change['command'] = 'modify_annotation'
     @change['id'] = @annotation.id
     return @change
+    
+class CreateEditorCommand
+  constructor: (@editor) ->
+
+  undo: ->
+
+  as_json: ->
+    return if !@editor
+    show = if @editor.show() then '1' else '0'
+    return {
+      command: 'create_editor',
+      id: @editor.id, 
+      name: @editor.name, 
+      show: show
+    }
+      
+class ModifyEditorCommand
+  constructor: (@editor) ->
+
+  undo: ->
+
+  as_json: ->
+    return if !@editor
+    show = if @editor.show() then '1' else '0'
+    return {
+      command: 'modify_editor',
+      id: @editor.id, 
+      name: @editor.name, 
+      show: show
+    }
 
 
 class CommandBuffer
@@ -322,7 +352,7 @@ class Annotation
     screenPosition = {x: pagePosition.x * @zoom, y: pagePosition.y * @zoom} if !screenPosition && pagePosition
 
     @pagePosition = ko.observable(pagePosition || {x: 0, y: 0})
-    @minimized(true) if !@submissionPage.pageWidth()? || @pagePosition().x < 1.0 * @submissionPage.pageWidth()
+    @minimized(true) if !@submissionPage.pageWidth()? || @pagePosition().x > 1.0 * @submissionPage.pageWidth()
     @screenPosition = ko.observable(screenPosition || {x: 0, y: 0})
     this.limitCoordinates()
 
@@ -393,6 +423,7 @@ class @AnnotationEditor extends Rubric
 
     @element = $('#annotation-editor')
     @role = $('#role').val()
+    @show_review = $('#show_review').val()     # true if annotation editor is used in show view
     @submission_url = @element.data('submission-url')
     @page_count = @element.data('page-count')
     @page_width = parseFloat(@element.data('page-width'))
@@ -433,6 +464,11 @@ class @AnnotationEditor extends Rubric
 
     @submission_pages = ko.observableArray()
     @phrasesById = {}
+    # Put phrases to phrasesById
+    for page in @pages
+      for criterion in page.criteria()
+        for phrase in criterion.phrases
+          @phrasesById[phrase.id] = phrase
 
     @commandBuffer = new CommandBuffer()
 
@@ -441,6 +477,11 @@ class @AnnotationEditor extends Rubric
     # reviewEditor features
     @saved = true
     @finalizing = ko.observable(false)
+    @changedLanguage = ko.observable(false)
+    @editingFinalGrade = ko.observable(false)
+    
+    @language.subscribe => @saved = false
+    @language.subscribe => @changedLanguage(true)
 
     @finalGrade = ko.observable()
     finalGrade = $('#review_grade').val()
@@ -460,11 +501,18 @@ class @AnnotationEditor extends Rubric
     @finishedText(@finalComment) if @finishedText().length < 1 && @finalComment? && @finalComment.length > 0
 
     this.parseReview(review)
+    
+    new_editor = this.addEditor()
+    if new_editor
+      this.addCommand(new CreateEditorCommand(new_editor))
+      new_editor.show.subscribe => this.addCommand(new ModifyEditorCommand(new_editor))
+    
+    @finalGrade.subscribe => @saved = false
 
     ko.applyBindings(this)
 
     # Select initial rubric page
-    initialPage = @pagesById[parseInt(initialPageId)] if initialPageId? && initialPageId.length > 0
+    initialPage = @pagesById[initialPageId] if initialPageId?
     initialPage = @pages[0] unless initialPage?
 
     if @finalizing()
@@ -482,7 +530,7 @@ class @AnnotationEditor extends Rubric
       new_zoom = 2.0 if new_zoom > 2.0
       @zoom(new_zoom)
 
-    unless @demo_mode
+    unless @demo_mode || @show_review
       $(window).bind 'beforeunload', =>
         return "You have unsaved changes. Leave anyway?" unless @saved
 
@@ -519,6 +567,14 @@ class @AnnotationEditor extends Rubric
       annotation = new Annotation(options)
       submission_page.annotations().push(annotation)
       this.subscribeToAnnotation(annotation)
+    
+    @editedBy([])    
+    editors = data['editors'] || []
+    for editor in editors
+      new_editor = new Editor(editor)
+      new_editor.show.subscribe(=> @saved = false)
+      new_editor.show.subscribe => this.addCommand(new ModifyEditorCommand(new_editor))
+      @editedBy.push(new_editor)
 
     for page_data in (data['pages'] || [])
       page = @pagesById[page_data['id']]
@@ -590,8 +646,11 @@ class @AnnotationEditor extends Rubric
     # Calculate grade
     grades = @pages.map (page) -> page.grade()
     grade = this.calculateGrade(grades)
-    @finalGrade(grade)
-
+    @finalGrade(grade)            if @gradingMode != "sum"
+    @finalGrade(@averageGrade())  if @gradingMode == "sum"
+        
+  toggleEditGrade: ->
+    @editingFinalGrade(!@editingFinalGrade())
 
   clickGrade: (phrase) =>
     if @gradingMode != 'sum' && !phrase.criterion.annotationsHaveGrades()
@@ -646,15 +705,15 @@ class @AnnotationEditor extends Rubric
 # Populates the HTML-form from the model. This is called just before submitting.
   save: (options) ->
     options ||= {}
+    if @show_review
+      return false
 
     # Encode review as JSON
     $('#review_payload').val(JSON.stringify(@commandBuffer.as_json()))
 
     # Set grade
-    if @gradingMode == 'average'
+    if @gradingMode == 'average' || @gradingMode == 'sum'
       finalGrade = @finalGrade()
-    else if @gradingMode == 'sum'
-      finalGrade = @averageGrade()
     else
       finalGrade = undefined
 
@@ -675,6 +734,9 @@ class @AnnotationEditor extends Rubric
       status = 'started'
 
     $('#review_status').val(status)
+    
+    lang = @language()
+    $('#review_language').val(lang)
 
     # Send immediately?
     $('#send_review').val('true') if status == 'finished' && options['send']?
@@ -687,7 +749,9 @@ class @AnnotationEditor extends Rubric
       $('#rubric_page_preference').val(page_id) if !isNaN(page_id)
 
     @saved = true
-
+    
+    for editor in @editedBy()
+      editor.firstEdit(false)
     return true
 
   saveAndSend: ->

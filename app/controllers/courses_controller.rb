@@ -1,14 +1,14 @@
 class CoursesController < ApplicationController
-  before_filter :login_required #, :except => [:index, :show]
+  before_action :login_required #, :except => [:index, :show]
 
   # GET /courses
   def index
     if is_admin?(current_user)
-      @courses = Course.find(:all, :order => "code")
+      @courses = Course.order("code")
       @allow_create = true
     else
       # TODO: show own courses
-      @courses = Course.find(:all, :order => "code")
+      @courses = Course.order("code")
     end
     
     log "courses index"
@@ -66,7 +66,7 @@ class CoursesController < ApplicationController
 
     return access_denied unless @is_teacher
 
-    if @course.update_attributes(params[:course])
+    if @course.update_attributes(course_params)
       flash[:success] = t(:course_updated_flash)
       redirect_to(@course)
       log "edit_course success #{@course.id}"
@@ -79,8 +79,7 @@ class CoursesController < ApplicationController
   # DELETE /courses/1
   def destroy
     @course = Course.find(params[:id])
-
-    return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user)
+    return access_denied unless is_admin?(current_user)
 
     log "delete_course #{@course.id}"
     name = @course.name
@@ -115,4 +114,17 @@ class CoursesController < ApplicationController
 # 
 #     render :partial => 'user', :collection => @course.teachers, :locals => { :cid => @course.id }
 #   end
+
+  private
+
+    def course_params
+      params.require(:course).permit(:code, :name, :email, :time_zone)
+    end
+
+    def correct_user
+      @course = Course.find(params[:id])
+      @is_teacher = @course.has_teacher(current_user) || is_admin?(current_user)
+      return access_denied unless @is_teacher
+    end
+
 end

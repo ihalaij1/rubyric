@@ -5,15 +5,16 @@
 
 <form>
   <%= hidden_field_tag :rubric_payload, @exercise.rubric %>
+  <%= hidden_field_tag :review_tab_id, @tab_id %>
 </form>
 
 <div class="page-header">
   <div class="pull-right" style="text-align: right">
     <div class="btn-group">
-      <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-        <i class="icon icon-align-justify"></i>
+      <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+        <i class="glyphicon glyphicon-align-justify"></i>
       </a>
-      <ul class="dropdown-menu">
+      <ul class="dropdown-menu dropdown-menu-right">
         <li><%= link_to 'Upload rubric', upload_exercise_rubric_path(@exercise) %></li>
         <li><%= link_to 'Download rubric', download_exercise_rubric_path(@exercise) %></li>
       </ul>
@@ -26,6 +27,9 @@
         Save
       <!-- /ko -->
     </button>
+    <% if @review %>
+      <%= link_to "Back to review", edit_review_path(@review, tab_id: @tab_id), class: "btn btn-primary"%>
+    <% end %>
     <p id="save-message" class="transient-message">Changes saved</p>
   </div>
   

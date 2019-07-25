@@ -1,5 +1,4 @@
 class ReviewsController < ApplicationController
-
   # TODO: perform group member validation using callback
 
   # GET /reviews/1
@@ -12,21 +11,43 @@ class ReviewsController < ApplicationController
     load_course
     I18n.locale = @course_instance.locale || I18n.locale
 
-    return access_denied unless group_membership_validated(@group) || @review.user == current_user || @course.has_teacher(current_user) || @course_instance.has_assistant(current_user) || (@exercise.collaborative_mode != '' && @course_instance.has_student(current_user))
+    return access_denied unless group_membership_validated(@group) || @review.user == current_user || @course.has_teacher(current_user) || (@exercise.collaborative_mode != '' && @course_instance.has_student(current_user)) || @exercise.show_all_submissions_to?(current_user)
 
     @can_view_review_raters = (@group.has_member? current_user) or (@review.user == current_user) or (@course.has_teacher current_user)
     @can_rate_review = @group.has_member? current_user
-    @rating_item = ReviewRating.where(user_id: current_user.id, review_id: @review.id).first_or_initialize
+    @rating_item = ReviewRating.where(user: current_user, review_id: @review.id).first_or_initialize
+    
+    payload = @review.payload ? JSON.parse(@review.payload) : nil
+    if payload && payload['editors']
+      editor_ids = payload['editors'].select { |editor| editor['show'] == '1'}.map{ |editor| editor['id'] }
+      @editors = User.where(id: editor_ids)
+    else
+      @editors = []
+    end 
 
     if @review.type == 'AnnotationAssessment'
       @submission = @review.submission
       @page_count = @submission.page_count
 
-      render action: 'show-annotation', layout: 'plain-new'
+      respond_to do |format|
+        format.html {
+          if params[:mode] and params[:mode] == 'modal'
+            render action: 'show-annotation', layout: 'annotation'
+          else
+            render action: 'show-annotation', layout: 'narrow-new'
+          end
+        }
+      end
       log "view_annotation #{@review.id},#{@exercise.id}"
     else
       respond_to do |format|
-        format.html { render action: 'show', layout: 'narrow-new' }
+        format.html {
+          if params[:mode] and params[:mode] == 'modal'
+            render action: 'show', layout: false
+          else
+            render action: 'show', layout: 'narrow-new'
+          end
+        }
         format.json { render json: @review.payload }
       end
 
@@ -39,6 +60,7 @@ class ReviewsController < ApplicationController
     @review = Review.find(params[:id])
     @exercise = @review.submission.exercise
     @submission = @review.submission
+    @tab_id = params[:tab_id]
     load_course
     I18n.locale = @course_instance.locale || I18n.locale
 
@@ -47,6 +69,11 @@ class ReviewsController < ApplicationController
         @course.has_teacher(current_user) ||
         is_admin?(current_user) ||
         (@exercise.collaborative_mode == 'review' && @course_instance.has_student(current_user))
+        
+    @current_user_json = nil
+    @reviewer_json = nil
+    @current_user_json = {id: current_user.id, name: "#{current_user.name}"}.to_json if current_user
+    @reviewer_json = {id: @review.user.id, name: "#{@review.user.name}"}.to_json     if @review.user
 
     if @review.type == 'AnnotationAssessment'
       render action: 'annotation', layout: 'annotation'
@@ -69,12 +96,14 @@ class ReviewsController < ApplicationController
 
     # Check that the review has not been mailed
     if @review.status == 'mailed' || @review.status == 'invalidated'
+      flash[:warning] = 'This review cannot be edited any more'
       respond_to do |format|
-        format.json { head :no_content } # TODO: error message
+        format.json {
+          render json: {status: "fail", message: "This review cannot be edited any more"} } # TODO: error message
         format.html {
-          flash[:error] = 'This review cannot be edited any more'
           redirect_to @exercise
         }
+        format.js { render js: "window.location='/exercises/#{@exercise.id}'" }
       end
 
       return
@@ -97,24 +126,34 @@ class ReviewsController < ApplicationController
     if @review.update_from_json(params[:id], review_params)
       Review.delay.deliver_reviews([@review.id]) if @deliver_immediately
 
-      respond_to do |format|
-        format.json { head :no_content } # TODO: ok
-        format.html {
-          if params[:save] == 'next'
-            next_review_id = @exercise.next_review(current_user, @review)
-            if next_review_id
-              redirect_to edit_review_path(:id => next_review_id)
+      # If review has been invalidated or mailed, redirect back to exercise
+      if params[:review][:status] == 'mailed' || params[:review][:status] == 'mailing' || params[:review][:status] == 'invalidated'
+        respond_to do |format|
+          format.html {
+            redirect_to @exercise
+          }
+          format.js { render js: "window.location='/exercises/#{@exercise.id}'" }
+        end
+      else
+        respond_to do |format|
+          format.json { render json: {status: "ok", message: "Changes saved"} } # TODO: ok
+          format.html {
+            if params[:save] == 'next'
+              next_review_id = @exercise.next_review(current_user, @review)
+              if next_review_id
+                redirect_to edit_review_path(:id => next_review_id)
+              else
+                redirect_to @exercise
+              end
             else
               redirect_to @exercise
             end
-          else
-            redirect_to @exercise
-          end
-        }
+          }
+        end
       end
     else
       respond_to do |format|
-        format.json { head :no_content } # TODO: error message
+        format.json { render json: {status: "fail", message: "Failed to update review" } } # TODO: error message
         format.html {
           flash[:error] = 'Failed to update review'
           redirect_to @exercise
@@ -226,7 +265,7 @@ class ReviewsController < ApplicationController
     load_course
 
     # Authorization
-    return access_denied unless @course.has_teacher(current_user)
+    return access_denied unless @course.has_teacher(current_user) || is_admin?(current_user) || @review.user == current_user
 
 
     @review.status = 'invalidated'
@@ -287,7 +326,7 @@ class ReviewsController < ApplicationController
     review = Review.find(params[:id])
     @exercise = review.submission.exercise
     load_course
-    
+
     rating = params[:rating]
 
     # only group member of submission can perform review rating
@@ -295,24 +334,24 @@ class ReviewsController < ApplicationController
 
     if @course.has_teacher(current_user) || group.has_member?(current_user)
       rating_item = ReviewRating.where(user_id: current_user.id, review_id: review.id).first_or_initialize
-      
+
       logger.info(rating_item)
-      
+
       rating_item.rating = rating
       rating_item.save
-      
+
       #ReviewRating.delay.deliver_ratings_lti(rating_item.id)
-      
-      render nothing: true, status: :ok
+
+      head :ok
     else
-      render nothing: true, status: :forbidden
+      head :forbidden
     end
   end
 
   private
 
   def review_params
-    params.require(:review).permit(:payload, :status, :grade)
-  end  
+    params.require(:review).permit(:payload, :status, :grade, :feedback, :language)
+  end
 
 end

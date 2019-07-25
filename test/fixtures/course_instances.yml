@@ -11,10 +11,30 @@ inactive:
   course: course
   name: Inactive instance
   active: false
-  assistants: assistant1
+
 
 somebody_elses_instance:
   course: somebody_elses_course
   name: Somebody else's instance
   active: true
   assistants: assistant2
+
+no_login_needed:
+  course: course
+  name: No need for login
+  active: true
+  submission_policy: unauthenticated
+
+lti_instance:
+  course: course
+  name: LTI instance
+  active: true
+  submission_policy: lti
+  lti_consumer: testi
+  lti_context_id: lti_testi
+
+with_many_assistants:
+  course: course_with_many_teachers
+  name: Many assistants
+  active: true
+  assistants: [assistant1, assistant2]

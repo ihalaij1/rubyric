@@ -55,24 +55,33 @@
                         <%= link_to t('exercises.create_comment'), edit_review_path(id: review.id, ref: 'exercises'), class: 'btn btn-primary' %>
                       </div>
                     <% else %>
-                      <div class="col-md-1">
-                        <%
-                          if review.preview_feedback.blank?
-                            tooltip = t('exercises.my_submissions.view_collaborative_feedback')
-                          else
-                            tooltip = truncate(review.preview_feedback || '', length: 256)
-                          end
-                        %>
-                        <% if review.status %>
-                          <h2>
-                            <%= link_to reviewer_name(review), review_path(id: review.id, ref: 'exercises'),
-                                      class: 'label label-default',
-                                      'data-toggle' => 'popover',
-                                      title: reviewer_name(review),
-                                      'data-content' => tooltip %>
-                          </h2>
-                        <% end %>
-                      </div>
+                      <% if review.status %>
+                        <div class="col-md-1">
+                          <%
+                            if review.preview_feedback.blank?
+                              tooltip = t('exercises.my_submissions.view_collaborative_feedback')
+                            else
+                              tooltip = truncate(review.preview_feedback || '', length: 256)
+                            end
+                          %>
+                            <h2>
+                              <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#review-<%= review.id %>"><%= reviewer_name(review) %></button>
+
+                              <%= link_to reviewer_name(review), review_path(id: review.id, ref: 'exercises'),
+                                  class: 'label label-default',
+                                  'data-toggle' => 'popover',
+                                  title: reviewer_name(review),
+                                  'data-content' => tooltip %>
+                            </h2>
+                            <div class="modal fade bs-example-modal-lg" id="review-<%= review.id %>" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" data-url="<%= review_path(id: review.id, ref: 'exercises', mode: 'modal') %>">
+                              <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                  Loading...
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                      <% end %>
                     <% end %>
                 <% end %>
               </div>

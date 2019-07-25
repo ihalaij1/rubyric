@@ -14,18 +14,18 @@
   
   <title><% if content_for?(:title)%><%= yield(:title) %><% elsif @exercise && !@exercise.new_record? %><%= @exercise.name %> - <%= @course.name %> - Rubyric<% else %><%=t :app_title %><% end %></title>
   <%= csrf_meta_tag %>
-  <%= stylesheet_link_tag "application-new", :media => "all" %>
+  <%= stylesheet_link_tag "application-new", media: "all" %>
   <%= yield(:stylesheets) %>
   <%= javascript_include_tag "application" %>
   <%= yield(:javascript) %>
-  <%= render :partial => 'shared/analytics' -%>
+  <%= render partial: 'shared/analytics' -%>
 </head>
 
 <body>
   <nav class="navbar navbar-default" role="navigation">
     <div class="container-fluid">
       <div class="navbar-header">
-        <%= link_to root_path, :class => 'navbar-brand' do image_tag 'logo.png', :alt => 'Rubyric' end %>
+        <%= link_to root_path, class: 'navbar-brand' do image_tag 'logo.png', alt: 'Rubyric' end %>
       </div>
     </div>
   </nav>

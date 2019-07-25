@@ -36,6 +36,7 @@ en:
 
   Language: 'Language'
   Reviewer: 'Reviewer'
+  Editor: 'Edited by'
   Grade: 'Grade'
   collaborative_review: 'Feedback'
   anonymous_review: 'Feedback'

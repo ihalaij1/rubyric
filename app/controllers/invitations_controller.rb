@@ -1,5 +1,5 @@
 class InvitationsController < ApplicationController
-  before_filter :login_required
+  before_action :login_required
 
   def show
     @invitation = Invitation.find_by_token(params[:id])

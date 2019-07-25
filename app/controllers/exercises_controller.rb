@@ -1,7 +1,7 @@
 require 'set.rb'
 
 class ExercisesController < ApplicationController
-  before_filter :login_required, except: [:lti]
+  before_action :login_required, except: [:lti, :aplus_exercise]
 
   def lti
     # Temporarily disable signature checking
@@ -33,14 +33,50 @@ class ExercisesController < ApplicationController
     if @course.has_teacher(current_user) || is_admin?(current_user)
       # Teacher's view
       @groups = @exercise.groups_with_submissions.order('groups.id, submissions.created_at DESC, reviews.id')
+      
+      # Count how many reviews everyone has done
+      @finished = []
+      @mailed = []
+      @started = []
+      @not_started =[]
+      @graders = []
+      # List graders (= teachers, assistants and all users who have done a review to submission on the exercise)
+      grader_ids = Review.where(submission_id: @exercise.submissions).map { |r| r.user_id } + @course.teacher_ids + @course_instance.assistant_ids
+      graders = User.where(id: grader_ids)
+      
+      i = 0
+      graders.each do |g|
+        all_reviews = g.reviews.where(submission_id: @exercise.submissions)
+        assigned_submissions = g.assigned_groups.where(id: @groups.ids).map{ |group| group.submissions.where(id: @exercise.submissions).ids}.flatten
+        f = 0; m = 0; s = 0; n = assigned_submissions.size
+        all_reviews.each do |review|
+          f = f + 1 if ["finished", "mailing"].include?(review.status)
+          m = m + 1 if review.status == "mailed"
+          s = s + 1 if review.status == "started" || review.status.blank?
+          if review.status != "invalidated" && assigned_submissions.include?(review.submission.id)
+            n = n - 1
+            assigned_submissions -= [review.submission.id]
+          end
+        end
+        all_review_group_ids = all_reviews.map{|review| review.submission.group.id}
+        grader_groups = @groups.select{|group| all_review_group_ids.include?(group.id) || group.reviewer_ids.include?(g.id) }
+        @finished << f
+        @mailed << m
+        @started << s
+        @not_started << n
+        @graders << {id: i, grader: g, groups: grader_groups}
+        i = i + 1
+      end
 
       # TODO: should we remove this?
       # Koodiaapinen hack. Remove after 2016.
-      sort_mode = if @exercise.id == 208 || @exercise.id == 289
-                    :name
-                  else
-                    :id
-                  end
+      #sort_mode = if @exercise.id == 208 || @exercise.id == 289
+      #              :name
+      #             else
+      #              :id
+      #            end
+
+      sort_mode = :id
 
       @groups = @groups.to_a
 
@@ -73,7 +109,7 @@ class ExercisesController < ApplicationController
       @viewable_peer_groups = Set.new
 
       @exercise.groups_with_submissions.order('submissions.created_at DESC, reviews.id').each do |group|
-        @assigned_groups << group if explicitly_assigned_groups.include?(group.id)
+        @assigned_groups << group if explicitly_assigned_groups.include?(group.id) || @exercise.show_all_submissions_to?(current_user)
 
         group.submissions.each do |submission|
           @viewable_peer_groups << group if @exercise.collaborative_mode != '' && !group.users.include?(current_user)
@@ -210,11 +246,13 @@ class ExercisesController < ApplicationController
       options[:include_peer_review_count] = @exercise.peer_review?
     end
 
-    groups = Group.where(course_instance_id: @exercise.course_instance_id).includes([{submissions: [reviews: [:user, :submission], group: :users]}, {group_members: :user}])
+    groups = Group.where(course_instance_id: @exercise.course_instance_id).includes([{submissions: [reviews: :user]}, {group_members: :user}])
     @results = @exercise.results(groups, options)
 
     # Sort the result
     case params[:sort]
+    when 'lti-user-id'
+      @results.sort! { |a, b| (a[:member].user ? a[:member].user.lti_user_id || '' : '').downcase <=> (b[:member].user ? b[:member].user.lti_user_id || '' : '').downcase }
     when 'student-id'
       @results.sort! { |a, b| (a[:member].studentnumber || '').downcase <=> (b[:member].studentnumber || '').downcase }
     when 'first-name'
@@ -305,7 +343,8 @@ class ExercisesController < ApplicationController
 
     # Collect selected review ids
     review_ids = (params[:reviews_checkboxes] || []).reject { |id, value| value != '1' }.keys
-    @exercise.deliver_reviews(review_ids)
+    send_grade_mode = ["best_grade", "average"].include?(params[:send_grade_mode]) ? params[:send_grade_mode] : nil
+    @exercise.deliver_reviews(review_ids, send_grade_mode)
 
     redirect_to @exercise
     log "send_reviews #{@exercise.id} #{review_ids.size}"
@@ -454,8 +493,18 @@ class ExercisesController < ApplicationController
     load_course
     authorize! :update, @course_instance
 
-    @course_instance.create_example_groups(10) if @course_instance.groups.empty?
-    @exercise.create_example_submissions
+    example_groups_count = 5
+    # Try to find existing example groups
+    groups = @course_instance.get_example_groups(example_groups_count)
+
+    if groups.count < example_groups_count
+      # Create new example groups
+      groups = @course_instance.create_example_groups(example_groups_count)
+      if groups.count == 0  # If no example group exists nor has been created
+        flash[:warning] = "Cannot generate example submissions."
+      end
+    end
+    @exercise.create_example_submissions_for(groups)
 
     redirect_to @exercise
 
@@ -518,12 +567,66 @@ class ExercisesController < ApplicationController
     redirect_to edit_review_path(review)
     log "create_peer_review #{submission.id},#{@exercise.id}"
   end
+  
+  # A+ calls this. Redirects to submit to exercise if exercise exists. Otherwise creates the exercise and then redirects to it.
+  def aplus_exercise
+    # Authorized IP?
+    remote_ip = (request.env['HTTP_X_FORWARDED_FOR'] || request.remote_ip).split(',').first
+    unless APLUS_IP_WHITELIST.include? remote_ip
+      @heading = 'LTI error: Requests only allowed from A+'
+      render template: 'shared/error'
+      return false
+    end
+    # Check that neccessary lti related params are included in the request
+    if params['oauth_consumer_key'].blank? || params[:context_id].blank? || params[:resource_link_id].blank?
+      @heading = 'Insufficient parameters'
+      render template: 'shared/error', layout: 'wide'
+      return false
+    end
+    # Find the course_instance
+    @course_instance = CourseInstance.where(lti_consumer: params['oauth_consumer_key'], lti_context_id: params[:context_id]).first
+    unless @course_instance
+      @heading = 'This LTI course is not configured'
+      logger.warn "LTI login failed. Could not find a course instance with lti_consumer=#{params['oauth_consumer_key']}, lti_context_id=#{params[:context_id]}"
+      render template: 'shared/error'
+      return false
+    end
+    # Find exercise and create one if it does not exist yet
+    @exercise = Exercise.where(course_instance_id: @course_instance.id, lti_resource_link_id: params[:resource_link_id]).first
+    unless @exercise
+      sub_url = params[:submission_url]
+      #sub_url = sub_url.sub('plus', remote_ip) # To be used when running Rubyric and aplus locally (change ip to fit your aplus)
+      exercise_name = JSON.load(RestClient.get(sub_url))
+      exercise_name = exercise_name.is_a?(Hash) ? exercise_name["exercise"] : nil
+      exercise_name = exercise_name.is_a?(Hash) ? exercise_name["display_name"] : nil
+      if !exercise_name
+        @heading = 'Failed to get exercise information from A+'
+        render template: 'shared/error', layout: 'wide'
+        return false
+      end
+      submit_type      = 'file'
+      review_mode      = 'annotation'
+      resource_link_id = params[:resource_link_id]
+      @exercise = Exercise.new(course_instance: @course_instance, name: exercise_name,
+                               submission_type: submit_type,      review_mode: review_mode,
+                               lti_resource_link_id: resource_link_id)
+      if !@exercise.save
+        @heading = 'Failed to configure exercise'
+        render template: 'shared/error', layout: 'wide'
+        return false
+      end
+    end
+    redirect_to aplus_get_path(@exercise, request.parameters)
+  end
 
   private
 
   def exercise_params
     # TODO: rename groupsizemin to group_size_min
     # TODO: rename groupsizemax to group_size_max
-    params.require(:exercise).permit(:course_instance_id, :name, :deadline, :groupsizemin, :groupsizemax, :submission_type, :allowed_extensions, :review_mode, :grader_can_email, :submit_pre_message, :peer_review_goal, :peer_review_timing, :collaborative_mode, :anonymous_graders, :anonymous_submissions)
+    params.require(:exercise).permit(:course_instance_id, :name, :deadline, :groupsizemin, :groupsizemax, :submission_type, :allowed_extensions, :review_mode,
+                                     :grader_can_email, :submit_pre_message, :peer_review_goal, :peer_review_timing, :collaborative_mode, :anonymous_graders,
+                                     :anonymous_submissions, :lti_resource_link_id, :lti_resource_link_id_review, :lti_resource_link_id_feedback,
+                                     :reviewers_see_all_submissions)
   end
 end

@@ -7,9 +7,10 @@ class AnnotationAssessment < Review
       review.grade = params['grade']
       review.feedback = params['feedback']
       review.status = params['status']
+      review.language = params['language']
       
       commands = JSON.parse(params['payload'])
-      assessment = JSON.parse(review.payload || '{"annotations": [], "pages": []}')
+      assessment = JSON.parse(review.payload || '{"annotations": [], "pages": [], "editors": []}')
       annotations = []
       pages_by_id = {}
       logger.debug "== Current review =="
@@ -21,9 +22,11 @@ class AnnotationAssessment < Review
       modified_content = {}       # id => 'content'
       modified_grade = {}         # id => grade
       modified_position = {}      # id => {x: , y:}
+      modified_editors = {}        # id => {id: , name: , show: }
       
       new_page_grades = {}        # page_id => grade
       new_phrase_selections = []  # [{page_id: , criterion_id: , phrase_id: }]
+      new_editors = []            # [{id: , name: , show: }]
       
       # Load commands
       commands.each do |command|
@@ -41,6 +44,10 @@ class AnnotationAssessment < Review
           new_page_grades[command['page_id']] = command['grade']
         when 'set_selected_phrase'
           new_phrase_selections << {'page_id' => command['page_id'], 'criterion_id' => command['criterion_id'], 'phrase_id' => command['phrase_id']}
+        when 'create_editor'
+          new_editors << {'id' => command['id'], 'name' => command['name'], 'show' => command['show']}
+        when 'modify_editor'
+          modified_editors[command['id']] = {'id' => command['id'], 'name' => command['name'], 'show' => command['show']}
         end
       end
       
@@ -118,6 +125,20 @@ class AnnotationAssessment < Review
       
       assessment['annotations'] = annotations
       #assessment['pages'] = pages.values
+      
+      editors = assessment['editors'] || []
+      editor_ids = editors.map {|e| e['id']}
+      new_editors.each do |editor|
+        editors << editor if !editor_ids.include?(editor['id'])
+      end
+      editors.each do |editor|
+        id = editor['id']
+        next if !modified_editors[id]
+        editor['name'] = modified_editors[id]['name']
+        editor['show'] = modified_editors[id]['show']
+      end
+        
+      assessment['editors'] = editors
       
       # Calculate grade
       # TODO: if grading_mode == 'sum'
