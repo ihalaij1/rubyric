@@ -377,7 +377,7 @@ class SubmissionsController < ApplicationController
     # Authorized IP?
     remote_ip = (request.env['HTTP_X_FORWARDED_FOR'] || request.remote_ip).split(',').first
     unless APLUS_IP_WHITELIST.include? remote_ip
-      @heading = 'LTI error: Requests only allowed from A+'
+      @heading = 'LTI error: Requests only allowed from whitelisted IPs. Use IPv6 format.'
       render template: 'shared/error'
       return false
     end
