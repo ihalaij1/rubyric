@@ -15,7 +15,8 @@ class SessionsController < ApplicationController
   end
 
   def create
-    @session = Session.new(session_params)
+    #@session = Session.new(session_params)
+    @session = Session.new(session_params.to_h)
 
     session[:logout_url] = nil
 
