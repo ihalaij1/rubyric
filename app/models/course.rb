@@ -3,7 +3,7 @@ class Course < ApplicationRecord
   has_many :active_instances, dependent: :destroy, class_name: 'CourseInstance'
   belongs_to :organization
 
-  has_and_belongs_to_many :teachers, {class_name: 'User', join_table: 'courses_teachers', order: :studentnumber}
+  has_and_belongs_to_many :teachers, **{class_name: 'User', join_table: 'courses_teachers', order: :studentnumber}
 
   validates_presence_of :name
 
