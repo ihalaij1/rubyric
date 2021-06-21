@@ -5,10 +5,12 @@ source 'https://rubygems.org'
 
 ruby '>=2.3.1'
 
-gem 'rails', '5.2.4.4'
+#gem 'rails', '5.2.4.4'
+gem 'rails', '5.2.6'
 
 gem 'puma', '~> 3.0'
 
+#gem 'pg'
 gem 'pg', '~> 0.18'
 
 # Gems used only for assets and not required in production environments by default.
@@ -18,7 +20,10 @@ gem 'sass-rails', '~> 5.0'
 gem 'coffee-rails', '~> 4.2.1'
 
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-gem 'therubyracer', '~> 0.12.3'
+#gem 'therubyracer', '~> 0.12.3'
+#gem 'therubyracer'
+gem 'execjs'
+gem 'mini_racer'
 
 gem 'uglifier', '>= 3.0'
 gem 'jquery-ui-rails', '~> 4.2.0'
