@@ -1,4 +1,4 @@
-class AddTypeToSubmission < ActiveRecord::Migration
+class AddTypeToSubmission < ActiveRecord::Migration[5.2]
   def change
     add_column :submissions, :type, :string
     add_column :submissions, :aplus_feedback_url, :string

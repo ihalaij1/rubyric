@@ -1,4 +1,4 @@
-class CreateReviewRatings < ActiveRecord::Migration
+class CreateReviewRatings < ActiveRecord::Migration[5.2]
   def change
     create_table :review_ratings do |t|
       t.references :review
@@ -7,8 +7,6 @@ class CreateReviewRatings < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :review_ratings, :review_id
-    add_index :review_ratings, :user_id
     add_index :review_ratings, [:review_id, :user_id], unique: true
   end
 end

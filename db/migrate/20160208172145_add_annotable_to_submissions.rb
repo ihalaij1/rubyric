@@ -1,4 +1,4 @@
-class AddAnnotableToSubmissions < ActiveRecord::Migration
+class AddAnnotableToSubmissions < ActiveRecord::Migration[5.2]
   def change
     add_column :submissions, :annotatable, :boolean, :nil => false, :default => false
     add_column :submissions, :conversion, :string

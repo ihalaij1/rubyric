@@ -1,4 +1,4 @@
-class AddLtiToCourseInstance < ActiveRecord::Migration
+class AddLtiToCourseInstance < ActiveRecord::Migration[5.2]
   def change
     add_column :course_instances, :lti_consumer, :string
     add_column :course_instances, :lti_context_id, :string

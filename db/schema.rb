@@ -277,8 +277,6 @@ ActiveRecord::Schema.define(version: 20190703065509) do
     t.datetime "created_at",           null: false
     t.datetime "updated_at",           null: false
     t.index ["review_id", "user_id"], name: "index_review_ratings_on_review_id_and_user_id", unique: true, using: :btree
-    t.index ["review_id"], name: "index_review_ratings_on_review_id", using: :btree
-    t.index ["user_id"], name: "index_review_ratings_on_user_id", using: :btree
   end
 
   create_table "reviews", force: :cascade do |t|
