@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Wait for the database to start.
+sleep 7
+
 # Run Rubyric database migrations.
 ./bin/rails db:migrate
 
