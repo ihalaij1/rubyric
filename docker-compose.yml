@@ -1,0 +1,31 @@
+version: '3'
+
+volumes:
+  rubyricdata:
+  rubyricdb:
+
+services:
+  rubyric:
+    image: apluslms/run-rubyric
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - rubyricdata:/data
+      # Mount the Rubyric source code.
+      #- .:/usr/src/app:ro
+    ports:
+      - "8091:8091"
+    depends_on:
+      - rubyricdb
+
+  rubyricdb:
+    image: postgres:13-bullseye
+    restart: always
+    environment:
+      POSTGRES_USER: rubyric
+      POSTGRES_PASSWORD: rubyric
+      POSTGRES_DB: rubyric
+    volumes:
+      - rubyricdb:/var/lib/postgresql/data
+
