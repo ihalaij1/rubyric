@@ -1,4 +1,5 @@
 #require "ftools"
+require 'mail'
 require 'open3.rb'
 require 'rest-client'
 
@@ -43,7 +44,7 @@ class Submission < ApplicationRecord
   def file=(file_data)
     @file_data = file_data
 
-    if file_data.is_a?(Mail::Part)
+    if file_data.is_a?(::Mail::Part)
       filename = @file_data.filename
     else
       filename = @file_data.original_filename
