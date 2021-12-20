@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Export LTI key for A+.
+mkdir -p /data/aplus/lti-services-in/
+echo '{"key": "rubyric", "secret": "rubyric", "label": "Rubyric", "url": "http://'$(hostname -i)':8091/session/lti", "icon": "save-file"}' \
+> /data/aplus/lti-services-in/rubyric.json
+
+
 # Wait for the database to start.
 sleep 7
 
